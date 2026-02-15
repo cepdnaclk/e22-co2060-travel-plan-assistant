@@ -3,8 +3,8 @@ layout: home
 permalink: index.html
 
 # Please update this with your repository name and project title
-repository-name: eYY-co2060-project-template
-title: Project Template
+repository-name: e22-co2060-travel-plan-assistant
+title: Travel Plan Assistant
 ---
 
 [comment]: # "This is the standard layout for the project, but you can clean this and use your own template, and add more information required for your own project"
@@ -19,14 +19,15 @@ If your followed all the given instructions correctly, your repository will be a
 
 A HTML template integrated with the given GitHub repository templates, based on github.com/cepdnaclk/eYY-project-theme . If you like to remove this default theme and make your own web page, you can remove the file, docs/_config.yml and create the site using HTML. -->
 
-# Project Title
+# Travel Plan Assistant
 
 ---
 
 ## Team
--  eNumber, Name, [email](mailto:name@email.com)
--  eNumber, Name, [email](mailto:name@email.com)
--  eNumber, Name, [email](mailto:name@email.com)
+-  E/22/061, D.L.S.K. Dasanayaka, [e22061@eng.pdn.ac.lk](mailto:e22061@eng.pdn.ac.lk)
+-  E/22/074, W.Y.N. Dewshan, [e22074@eng.pdn.ac.lk](mailto:e22074@eng.pdn.ac.lk)
+-  E/22/233, T.S.P. Matharaarachchi, [e22233@eng.pdn.ac.lk](mailto:e22233@eng.pdn.ac.lk)
+-  E/22/253, G.T. Nethmina, [e22253@eng.pdn.ac.lk](mailto:e22253@eng.pdn.ac.lk)
 
 <!-- Image (photo/drawing of the final hardware) should be here -->
 
@@ -44,20 +45,20 @@ A HTML template integrated with the given GitHub repository templates, based on 
 
 ## Introduction
 
-Description of the real world problem and solution, impact
+Travel planning is currently fragmented across multiple platforms, making structured itinerary creation a time-consuming process. Furthermore, optimizing time, cost, and routes is challenging without a unified system for automated travel planning. The Travel Plan Assistant is a web-based solution designed to automatically generate structured, optimized itineraries based on user inputs such as destination, time, and budget. By providing a personalized and intelligent solution, this application reduces manual effort and improves overall travel planning efficiency for tourists, business travelers, and budget-conscious individuals.
 
 
 ## Solution Architecture
 
-High level diagram + description
+The system follows a client-server architecture. The frontend is a React-based web application that handles user interactions and provides input flexibility. This frontend communicates via JSON REST APIs to a Node.js and Express backend server, which manages the core business logic and processes requests. Data is persistently stored and retrieved using a MySQL relational database. To enable algorithmic route optimization, the backend integrates with an External Routing API (such as Google Maps) to fetch real-time distance and travel time data via HTTP requests.
 
 ## Software Designs
 
-Detailed designs with many sub-sections
+The database design relies heavily on Graph-Based Data Modeling to facilitate automated route optimization. In the Entity-Relationship schema, destinations are mapped as nodes, while transport routes act as the edges connecting them. An `ITINERARY_DESTINATION` mapping table resolves the many-to-many relationship between users' travel plans and selected destinations, ensuring the exact visit order is maintained for each generated plan.
 
 ## Testing
 
-Testing done on software : detailed + summarized results
+The MVP successfully demonstrates the feasibility of automated travel planning using graph-based algorithms and real-world routing data. By streamlining complex travel decisions and optimizing routes, the system significantly enhances the user's travel experience. This scalable foundation validates the use of APIs to reduce manual planning and will be expanded in future developments to include more flexible transport choices and advanced optimization algorithms.
 
 ## Conclusion
 
