@@ -1,57 +1,30 @@
-___
-# DELETE THIS INSTRUCTIONS AND ADD AN INTRODUCTION ABOUT YOUR PROJECT
-___
+# Travel Plan Assistant (Team Phoenix)
 
-# eYY-co2060-project-template
+Welcome to the repository for the **Travel Plan Assistant**, an all-in-one digital companion designed to streamline trip planning. This project is being developed as part of the CO2060 Software Systems Design Project.
 
-This is a sample repository you can use for your Software Systems Design Project. Once you followed these instructions, remove the text and add a brief introduction to here.
+## 📌 About the Project
+Travel planning is currently fragmented across multiple platforms, making structured itinerary creation a time-consuming process. The Travel Plan Assistant solves this by providing a unified, automated system that generates structured, optimized itineraries based on user inputs such as destination, time, and budget. By utilizing graph-based data modeling and real-world routing data, this application reduces manual effort and improves travel decision-making.
 
-### Enable GitHub Pages
+### Key Features (MVP Scope)
+- Backend for destination management.
+- Automated travel itinerary generation based on user inputs.
+- Integration with external routing APIs (e.g., Google Maps) for time and distance metrics.
+- Multi-criteria travel plan filtering.
 
-You can put the things to be shown in GitHub pages into the _docs/_ folder. Both html and md file formats are supported. You need to go to settings and enable GitHub pages and select _main_ branch and _docs_ folder from the dropdowns, as shown in the below image.
+## 💻 Technology Stack & Deployment
+- **Frontend:** React.js (Deployed via Vercel with a custom `.me` domain)
+- **Backend:** Node.js / Express.js (Deployed on a DigitalOcean Ubuntu VPS)
+- **Database:** MySQL (Hosted on DigitalOcean VPS for a zero cold-start, high-performance environment)
+- **Architecture:** Client-server model with RESTful JSON APIs.
 
-![image](https://user-images.githubusercontent.com/11540782/98789936-028d3600-2429-11eb-84be-aaba665fdc75.png)
+## 👥 Team Phoenix Members
+- **D.L.S.K. Dasanayaka** (E/22/1235) - [e221235@eng.pdn.ac.lk](mailto:e221235@eng.pdn.ac.lk)
+- **W.Y.N. Dewshan** (E/22/0230) - [e220230@eng.pdn.ac.lk](mailto:e220230@eng.pdn.ac.lk)
+- **G.T. Nethmina** (E/22/0295) - [e220295@eng.pdn.ac.lk](mailto:e220295@eng.pdn.ac.lk)
+- **T.S.P. Matharaarachchi** (E/22/1452) - [e221452@eng.pdn.ac.lk](mailto:e221452@eng.pdn.ac.lk)
 
-### Special Configurations
-
-These projects will be automatically added into [https://projects.ce.pdn.ac.lk](). If you like to show more details about your project on this site, you can fill the parameters in the file, _/docs/index.json_
-
-```
-{
-  "title": "This is the title of the project",
-  "team": [
-    {
-      "name": "Team Member Name 1",
-      "email": "email@eng.pdn.ac.lk",
-      "eNumber": "E/yy/xxx"
-    },
-    {
-      "name": "Team Member Name 2",
-      "email": "email@eng.pdn.ac.lk",
-      "eNumber": "E/yy/xxx"
-    },
-    {
-      "name": "Team Member Name 3",
-      "email": "email@eng.pdn.ac.lk",
-      "eNumber": "E/yy/xxx"
-    }
-  ],
-  "supervisors": [
-    {
-      "name": "Dr. Supervisor 1",
-      "email": "email@eng.pdn.ac.lk"
-    },
-    {
-      "name": "Supervisor 2",
-      "email": "email@eng.pdn.ac.lk"
-    }
-  ],
-  "tags": ["Web", "Software Systems", "CO2060"]
-}
-```
-
-Once you filled this _index.json_ file, please verify the syntax is correct. (You can use [this](https://jsonlint.com/) tool).
-
-### Page Theme
-
-A custom theme integrated with this GitHub Page, which is based on [github.com/cepdnaclk/eYY-project-theme](https://github.com/cepdnaclk/eYY-project-theme). If you like to remove this default theme, you can remove the file, _docs/\_config.yml_ and use HTML based website.
+## 🔗 Links
+- [Project Repository](https://github.com/cepdnaclk/e22-co2060-travel-plan-assistant)
+- [Project Page](https://cepdnaclk.github.io/e22-co2060-travel-plan-assistant)
+- [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
+- [University of Peradeniya](https://eng.pdn.ac.lk/)
