@@ -58,11 +58,11 @@ The database design relies heavily on Graph-Based Data Modeling to facilitate au
 
 ## Testing
 
-The MVP successfully demonstrates the feasibility of automated travel planning using graph-based algorithms and real-world routing data. By streamlining complex travel decisions and optimizing routes, the system significantly enhances the user's travel experience. This scalable foundation validates the use of APIs to reduce manual planning and will be expanded in future developments to include more flexible transport choices and advanced optimization algorithms.
+Testing focuses on verifying end-to-end functionality and handling edge cases within the multi-criteria itinerary generation process. ]Key non-functional requirements such as performance, scalability, maintainability, and security are evaluated. Special emphasis is placed on validating API reliability and data accuracy when retrieving distance and pricing metrics from external services.
 
 ## Conclusion
 
-What was achieved, future developments, commercialization plans
+The MVP successfully demonstrates the feasibility of automated travel planning using graph-based algorithms and real-world routing data. By streamlining complex travel decisions and optimizing routes, the system significantly enhances the user's travel experience. This scalable foundation validates the use of APIs to reduce manual planning and will be expanded in future developments to include more flexible transport choices and advanced optimization algorithms.
 
 ## Links
 
