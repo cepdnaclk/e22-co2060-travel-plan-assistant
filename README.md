@@ -18,10 +18,10 @@ Travel planning is currently fragmented across multiple platforms, making struct
 - **Architecture:** Client-server model with RESTful JSON APIs.
 
 ## 👥 Team Phoenix Members
-- **D.L.S.K. Dasanayaka** (E/22/1235) - [e221235@eng.pdn.ac.lk](mailto:e221235@eng.pdn.ac.lk)
-- **W.Y.N. Dewshan** (E/22/0230) - [e220230@eng.pdn.ac.lk](mailto:e220230@eng.pdn.ac.lk)
-- **G.T. Nethmina** (E/22/0295) - [e220295@eng.pdn.ac.lk](mailto:e220295@eng.pdn.ac.lk)
-- **T.S.P. Matharaarachchi** (E/22/1452) - [e221452@eng.pdn.ac.lk](mailto:e221452@eng.pdn.ac.lk)
+- **D.L.S.K. Dasanayaka** (E/22/061) - [e22061@eng.pdn.ac.lk](mailto:e22061@eng.pdn.ac.lk)
+- **W.Y.N. Dewshan** (E/22/074) - [e22074@eng.pdn.ac.lk](mailto:e22074@eng.pdn.ac.lk)
+- **T.S.P. Matharaarachchi** (E/22/233) - [e22233@eng.pdn.ac.lk](mailto:e22233@eng.pdn.ac.lk)
+- **G.T. Nethmina** (E/22/253) - [e22253@eng.pdn.ac.lk](mailto:e22253@eng.pdn.ac.lk)
 
 ## 🔗 Links
 - [Project Repository](https://github.com/cepdnaclk/e22-co2060-travel-plan-assistant)
