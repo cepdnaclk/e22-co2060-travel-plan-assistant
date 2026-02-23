@@ -1,17 +1,23 @@
 const express = require("express");
 const cors = require("cors");
 
-const app = express();
-const port = 3000;
+const { getCoordinates } = require("./services/routeService");
+require("dotenv").config();
 
-app.use(cors({
-    origin: "http://localhost:5173",
-}));
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+const routeService = require("./routes/routeService");
+app.use("/api", routeService);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+    res.send("Travel Plan Assistant API is running...");
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+const PORT = 5000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
