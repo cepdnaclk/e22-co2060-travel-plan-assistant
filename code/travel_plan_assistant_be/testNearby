@@ -1,0 +1,42 @@
+require("dotenv").config();
+
+const { getNearbyDestinations } = require("./helpers/nearby");
+
+async function testNearby() {
+    try {
+        // 🔹 CHANGE THESE COORDINATES FOR TESTING
+        const lat = 7.2906;   // Example: Kandy
+        const lng = 80.6337;
+
+        console.log("Testing nearby search...");
+        console.log("Coordinates:", lat, lng);
+        console.log("----------------------------------");
+
+        const results = await getNearbyDestinations(lat, lng, 5, 0.1);
+
+        if (!results || results.length === 0) {
+            console.log("❌ No nearby destinations found within 5km.");
+            return;
+        }
+
+        console.log(`✅ Found ${results.length} nearby destinations:\n`);
+
+        results.forEach((row, index) => {
+            console.log(
+                `${index + 1}. ${row.destinationID} - ${row.name}`
+            );
+            console.log(
+                `   Distance: ${(row.distance / 1000).toFixed(3)} km`
+            );
+            console.log("----------------------------------");
+        });
+
+    } catch (err) {
+        console.error("❌ Error testing nearby function:");
+        console.error(err);
+    } finally {
+        process.exit();
+    }
+}
+
+testNearby();

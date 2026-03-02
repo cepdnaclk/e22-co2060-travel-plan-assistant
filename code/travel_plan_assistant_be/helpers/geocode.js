@@ -1,73 +1,89 @@
 const axios = require("axios");
-const db = require("../config/db"); // your MySQL connection
-const ORS_BASE_URL = "https://api.openrouteservice.org";
+const {findByName} = require("../services/destinationService");
+const { isInsideSriLanka} = require("./utils");
+const { getNearbyDestinations } = require("./nearby");
+const { geocodePlace } = require("../services/geocodeService");
+const { insertNearbyDestination, updateNearbyColumn } = require("../services/nearbyService");
+const { getDistanceAndDuration } = require("../services/routeService");
+
+
 
 /**
  * Get coordinates for a place
  * 1. Check the database first
  * 2. If not found, call ORS
- * @param {string} place
- * @returns {Promise<{lat: number, lng: number}>}
  */
+
 async function getCoordinates(place) {
     try {
-        //  Check DB first
-        const [rows] = await db.execute(
-            "SELECT lat, lng FROM destinations WHERE name = ? LIMIT 1",
-            [place]
-        );
-        if (rows.length > 0) {
-            return { lat: rows[0].lat, lng: rows[0].lng };
+        // Call destService to check the DB
+        const dbresult = await findByName(place);
+
+        if (dbresult) return dbresult;
+
+        // ORS API call 
+        const orsresult = await geocodePlace(place);
+        if (!orsresult) return null;
+
+        if (!isInsideSriLanka(orsresult.lat, orsresult.lng)){
+            console.warn(`ORS result outside Sri Lanka: ${orsresult.lat}, ${orsresult.lng}`);
+            return null;
         }
 
-        // Call ORS if not in DB
-        const response = await axios.get(`${ORS_BASE_URL}/geocode/search`, {
-            params: {
-                text: place,
-                boundary_country: "LK",
-                size: 1
-            },
-            headers: {
-                Authorization: process.env.ORS_API_KEY
-            }
-        });
+        return orsresult;
 
-        if (!response.data.features.length) {
-            throw new Error("Location not found in ORS");
-        }
-
-        const [lng, lat] = response.data.features[0].geometry.coordinates;
-
-        return { lat, lng };
     } catch (error) {
-        throw new Error(error.response?.data?.error || error.message || "Geocode failed");
+        console.error("Geocode error:", error.message);
+        return null;
     }
 }
 
 /**
- * Save a new destination to the destinations table
- * @param {Object} dest - { destinationID, district_code, district_name, name, lat, lng, rating }
+ * Populate nearby destinations for a given destination
+ * @param {string} destinationID - ID of the source destination
+ * @param {number} lat - Latitude of the source destination
+ * @param {number} lng - Longitude of the source destination
  */
-async function saveDestination(dest) {
-    const {
-        destinationID,
-        district_code,
-        district_name,
-        name,
-        lat,
-        lng,
-        rating = null
-    } = dest;
+async function populateNearby(destinationID, lat, lng) {
+    // Nearby Destination search upto 5km with 100m stepsize
+    const nearbyRows = await getNearbyDestinations(lat, lng, 5, 0.1);
 
-    await db.execute(
-        `INSERT INTO destinations 
-         (destinationID, district_code, district_name, name, lat, lng, rating)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [destinationID, district_code, district_name, name, lat, lng, rating]
-    );
+    if (!nearbyRows || nearbyRows.length === 0) return;
+
+    const nearbyIDs = [];
+
+    for (const target of nearbyRows) {
+        if (target.destinationID === destinationID) continue; // skip self
+
+        const nearbyID = `${destinationID}-${target.destinationID}`;
+
+        // Call ORS to get route data
+        const routeinfo = await getDistanceAndDuration(
+            lat, lng, target.lat, target.lng
+        );
+
+        if (!routeinfo) {
+            console.warn(`No route data found for ${nearbyID}, skipped`);;
+            continue;
+        }
+
+        nearbyIDs.push(nearbyID)
+
+        // Insert into nearby_destinations table
+        await insertNearbyDestination(
+            nearbyID,
+            routeinfo.distance,
+            routeinfo.duration
+        );
+        
+    }
+
+    // Update the nearby column in destination table
+    await updateNearbyColumn(destinationID, nearbyIDs)
 }
+
 
 module.exports = {
     getCoordinates,
-    saveDestination
+    populateNearby,
 };
