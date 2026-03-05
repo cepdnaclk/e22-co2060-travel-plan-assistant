@@ -1,5 +1,14 @@
 const db = require("../config/db");
 
+async function nearbyExists(nearbyID) {
+    const [rows] = await db.execute(
+        `SELECT nearbyID FROM nearby_destinations WHERE nearbyID = ? LIMIT 1`,
+        [nearbyID]
+    );
+
+    return rows.length > 0;
+}
+
 /**
  * Get nearby destinations within a given radius from a point
  * @param {number} lat - Latitude of center point
@@ -7,7 +16,7 @@ const db = require("../config/db");
  * @param {number} radius - Radius in meters
  * @returns {Promise<Array>} - Array of destination objects with distance
  */
-async function getDestinationWithinRadius(lat, lng, radius) {
+async function getDestinationWithinRadius(lat, lng, radius=5000) {
     const [rows] = await db.execute(
         `SELECT destinationID, name, lat, lng,
                 ST_Distance_Sphere(coords, POINT(?, ?)) AS distance
@@ -28,7 +37,7 @@ async function getDestinationWithinRadius(lat, lng, radius) {
  */
 async function insertNearbyDestination(nearbyID, distance, duration) {
     await db.execute(
-        `INSERT INTO nearby_destinations
+        `INSERT IGNORE INTO nearby_destinations
         (nearbyID, distance_km, duration_min)
         VALUES (?,?,?)`,
         [nearbyID, distance, duration]
@@ -41,17 +50,38 @@ async function insertNearbyDestination(nearbyID, distance, duration) {
  * @param {string[]} nearbyIDs - array of nearbyIDs to store
  */
 
-async function updateNearbyColumn(destinationID, nearbyIDs) {
-    if (!nearbyIDs || !destinationID) return;
+async function updateNearbyColumn(destinationID, targetID, nearbyID) {
+
+    const [[row1]] = await db.execute(
+        "SELECT nearby FROM destinations WHERE destinationID = ?",
+        [destinationID]
+    );
+
+    const [[row2]] = await db.execute(
+        "SELECT nearby FROM destinations WHERE destinationID = ?",
+        [targetID]
+    );
+
+    const list1 = row1?.nearby ? row1.nearby.split(",") : [];
+    const list2 = row2?.nearby ? row2.nearby.split(",") : [];
+
+    if (!list1.includes(nearbyID)) list1.push(nearbyID);
+    if (!list2.includes(nearbyID)) list2.push(nearbyID);
 
     await db.execute(
-        `UPDATE destinations SET nearby = ? WHERE destinationID = ?`,
-        [nearbyIDs.join(","), destinationID]
+        "UPDATE destinations SET nearby = ? WHERE destinationID = ?",
+        [list1.join(","), destinationID]
+    );
+
+    await db.execute(
+        "UPDATE destinations SET nearby = ? WHERE destinationID = ?",
+        [list2.join(","), targetID]
     );
 }
 
 module.exports = { 
     getDestinationWithinRadius,
     insertNearbyDestination,
-    updateNearbyColumn
+    updateNearbyColumn,
+    nearbyExists
 };

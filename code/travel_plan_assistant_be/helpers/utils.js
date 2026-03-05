@@ -35,7 +35,6 @@ function isInsideSriLanka(lat, lng) {
     return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
 }
 
-
 module.exports = {
     getDistance,
     areCoordsClose,

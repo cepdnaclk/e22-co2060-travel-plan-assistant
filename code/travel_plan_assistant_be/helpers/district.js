@@ -8,7 +8,7 @@ function findClosestDistrict(lat, lng, districts){
 
     for (let i=1; i < districts.length; i++){
         const d = districts[i];
-        const dist = getDistance(lat, lng, d.lng, d.lng);
+        const dist = getDistance(lat, lng, d.lat, d.lng);
 
         if (dist < minDistance){
             minDistance = dist;
