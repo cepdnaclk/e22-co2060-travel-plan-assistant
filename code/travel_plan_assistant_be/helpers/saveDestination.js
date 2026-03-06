@@ -5,6 +5,7 @@ const  { findByName, insertDestination } = require("../services/destinationServi
 const  { getNextDestinationNumber, formatDestinationID } = require("../services/idService");
 const { getAllDistricts } = require("../services/districtService");
 const { getCoordinates } = require("./geocode");
+const { areCoordsClose } = require("./utils");
 
 /**
  * Save destination (main orchestration)
