@@ -1,9 +1,7 @@
 // helpers/nearby.js
 const db = require("../config/db");
-const { formatNearbyID } = require("../services/idService");
 const { getDestinationWithinRadius, nearbyExists} = require("../services/nearbyService");
 const { insertNearbyDestination } = require("../services/nearbyService");
-const { updateNearbyColumn } = require("../services/nearbyService");
 const { getDistanceAndDuration} = require("../services/routeService");
 
 /**
@@ -41,8 +39,6 @@ async function populateNearby(destinationID, lat, lng) {
     for (const target of nearbyRows) {
 
         if (target.destinationID === destinationID) continue;
-
-        const nearbyID = formatNearbyID(destinationID, target.destinationID);
 
         // Skip duplicates
         if (await nearbyExists(nearbyID)) continue;

@@ -18,7 +18,7 @@ function findClosestDistrict(lat, lng, districts){
 
     return {
         district_name: closest.district_name,
-        district_tag: closest.district_tag
+        district_id: closest.district_id
     };
 }
 
