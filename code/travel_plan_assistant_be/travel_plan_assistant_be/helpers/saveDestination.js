@@ -2,7 +2,6 @@ const { getNearbyDestinations } = require("./nearby")
 const { findClosestDistrict } = require("./district")
 const  { populateNearby } = require("./nearby");
 const  { findByName, insertDestination } = require("../services/destinationService");
-const  { getNextDestinationNumber, formatDestinationID } = require("../services/idService");
 const { getAllDistricts } = require("../services/districtService");
 const { getCoordinates } = require("./geocode");
 const { areCoordsClose } = require("./utils");
@@ -40,19 +39,9 @@ async function saveDestination(placeName) {
         throw new Error("District or district_tag is undefined");
     }
 
-    // Generate next destination number
-    const nextNumber = await getNextDestinationNumber(district.district_tag);
-    if (nextNumber === undefined || nextNumber === null) {
-        throw new Error("Next destination number is undefined");
-    }
-
-    const destinationID = formatDestinationID(district.district_tag, nextNumber);
-
     // Insert destination
     await insertDestination({
-        destinationID,
-        district_name: district.district_name,
-        district_tag: district.district_tag,
+        district_id: district.district_id,
         name: placeName,
         lat,
         lng

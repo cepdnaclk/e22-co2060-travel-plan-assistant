@@ -19,9 +19,9 @@ async function findByName(place) {
 /**
  * Get district tag for a district name
  */
-async function getDistrictTag(district_name) {
+async function getDistrictID(district_name) {
     const [rows] = await db.execute(
-        "SELECT district_tag FROM districts WHERE district_name = ? LIMIT 1",
+        "SELECT district_id FROM districts WHERE district_name = ? LIMIT 1",
         [district_name]
     );
     return rows.length ? rows[0].district_tag : null;
@@ -30,17 +30,17 @@ async function getDistrictTag(district_name) {
 /**
  * Insert destination into the database
  */
-async function insertDestination({destinationID, district_name, district_tag, name, lat, lng, rating = null}) {
+async function insertDestination({districtID, name, lat, lng, rating = null}) {
     await db.execute(
         `INSERT INTO destinations
-        (destinationID, district_name, district_tag, name, lat, lng, rating, coords, created_at, nearby)
-        VALUES (?, ?, ?, ?, ?, ?, ?, POINT(?, ?), NOW(), '')`,
-        [destinationID, district_name, district_tag, name, lat, lng, rating, lng, lat]
+        (district_id, name, lat, lng, rating, coords, created_at)
+        VALUES (?, ?, ?, ?, ?, POINT(?, ?), NOW())`,
+        [districtID, name, lat, lng, rating, lng, lat]
     );
 }
 
 module.exports = { 
     findByName,
-    getDistrictTag,
+    getDistrictID,
     insertDestination
 };
