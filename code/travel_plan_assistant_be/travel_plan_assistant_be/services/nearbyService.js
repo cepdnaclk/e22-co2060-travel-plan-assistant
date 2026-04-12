@@ -1,9 +1,15 @@
 const db = require("../config/db");
 
-async function nearbyExists(nearbyID) {
+async function nearbyExists(sourceID, destinationID) {
+    const a = Math.min(sourceID, destinationID);
+    const b = Math.max(sourceID, destinationID);
+
     const [rows] = await db.execute(
-        `SELECT nearbyID FROM nearby_destinations WHERE nearbyID = ? LIMIT 1`,
-        [nearbyID]
+        `SELECT 1 
+         FROM nearby_destinations 
+         WHERE source_id = ? AND destination_id = ?
+         LIMIT 1`,
+        [a, b]
     );
 
     return rows.length > 0;
@@ -35,13 +41,14 @@ async function getDestinationWithinRadius(lat, lng, radius=5000) {
  * @param {number} distance - Distance in km
  * @param {number} duration - Duration in minutes
  */
-async function insertNearbyDestination(nearbyID, distance, duration) {
+async function insertNearbyDestination(source_id, destination_id, distance, duration) {
     await db.execute(
         `INSERT IGNORE INTO nearby_destinations
-        (nearbyID, distance_km, duration_min)
-        VALUES (?,?,?)`,
-        [nearbyID, distance, duration]
+        (source_id, destination_id, distance, duration)
+        VALUES (?,?,?,?)`,
+        [source_id, destination_id, distance, duration]
     );
+
 }
 
 module.exports = { 
