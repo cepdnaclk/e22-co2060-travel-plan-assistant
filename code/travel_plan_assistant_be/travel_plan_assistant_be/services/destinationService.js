@@ -4,13 +4,15 @@ const db = require("../config/db");
 async function findByName(place) {
 
     const [rows] = await db.execute(
-        "SELECT lat, lng FROM destinations WHERE name = ? LIMIT 1",
+        "SELECT destinationID, name, lat, lng FROM destinations WHERE name = ? LIMIT 1",
         [place]
     );
 
     if (!rows.length) return null;
     
     return {
+        id: rows[0].destinationID,
+        name: rows[0].name,
         lat: parseFloat(rows[0].lat),
         lng: parseFloat(rows[0].lng)
     };
