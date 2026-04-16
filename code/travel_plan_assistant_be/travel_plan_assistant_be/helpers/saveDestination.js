@@ -35,12 +35,12 @@ async function saveDestination(placeName) {
     }
 
     const district = findClosestDistrict(lat, lng, districts);
-    if (!district || !district.district_tag) {
-        throw new Error("District or district_tag is undefined");
+    if (!district || !district.district_id) {
+        throw new Error("District or district_id is undefined");
     }
 
     // Insert destination
-    await insertDestination({
+    const destinationID = await insertDestination({
         district_id: district.district_id,
         name: placeName,
         lat,

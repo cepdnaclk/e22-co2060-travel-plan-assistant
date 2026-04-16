@@ -1,5 +1,5 @@
 // helpers/nearby.js
-const db = require("../config/db");
+
 const { getDestinationWithinRadius, nearbyExists} = require("../services/nearbyService");
 const { insertNearbyDestination } = require("../services/nearbyService");
 const { getDistanceAndDuration} = require("../services/routeService");
@@ -41,7 +41,7 @@ async function populateNearby(destinationID, lat, lng) {
         if (target.destinationID === destinationID) continue;
 
         // Skip duplicates
-        if (await nearbyExists(nearbyID)) continue;
+        if (await nearbyExists(destinationID, target.destinationID)) continue;
 
         const routeinfo = await getDistanceAndDuration(
             lat,
@@ -51,22 +51,19 @@ async function populateNearby(destinationID, lat, lng) {
         );
 
         if (!routeinfo) {
-            console.warn(`No route data found for ${nearbyID}, skipped`);
+            console.warn(`No route data found for ${destinationID} → ${target.destinationID}, skipped`);
             continue;
         }
 
         // Insert route
+        const src = Math.min(destinationID, target.destinationID);
+        const dest = Math.max(destinationID, target.destinationID);
+
         await insertNearbyDestination(
-            nearbyID,
+            src,
+            dest,
             routeinfo.distance,
             routeinfo.duration
-        );
-
-        // Update BOTH destinations
-        await updateNearbyColumn(
-            destinationID,
-            target.destinationID,
-            nearbyID
         );
     }
 }

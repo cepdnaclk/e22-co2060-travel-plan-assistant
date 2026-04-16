@@ -1,10 +1,11 @@
 // testSaveDestination.js
-require("dotenv").config();
+require('dotenv').config();
 const { saveDestination } = require("../helpers/saveDestination");
 
 (async () => {
+    
     try {
-        const placeName = "Peradeniya Royal Botanic Gardens"; // Change this to test different places
+        const placeName = "Peradeniya"; // Change this to test different places
         const result = await saveDestination(placeName);
 
         if (!result) {
