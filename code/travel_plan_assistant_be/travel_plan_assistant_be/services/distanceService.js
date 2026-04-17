@@ -92,9 +92,128 @@ async function getRouteInfo(fromName, toName) {
     };
 }
 
+/**
+ * Validate if desired locations can be visited within time budget
+ * Uses greedy nearest-next strategy
+ *
+ * @param {string} startLocation
+ * @param {string[]} desiredLocations
+ * @param {number} availableTime   // minutes
+ *
+ * @returns {{
+ *   feasible: boolean,
+ *   path: string[],
+ *   totalTime: number,
+ *   totalDistance: number
+ * }}
+ */
+
+async function validateFeasibility(
+    startLocation,
+    desiredLocations = [],
+    availableTime,
+    endLocation = null
+    ) {
+
+    if (!endLocation && desiredLocations.length === 0) {
+        throw new Error("Need at least one desired location if no end location is given");
+    }
+
+    const tolerance = 120; // Tolerence WINDOW
+    const limit = availableTime + tolerance;
+
+    let current = startLocation;
+    let unvisited = [...desiredLocations];
+
+    // Duplicate removal
+    if (endLocation) {
+        unvisited = unvisited.filter(
+            p => p.toLowerCase() !== endLocation.toLowerCase()
+        );
+    }
+
+    let path = [startLocation];
+    let totalTime = 0;
+    let totalDistance = 0;
+
+    while (unvisited.length > 0) {
+
+        let bestIndex = -1;
+        let bestRoute = null;
+        let bestCandidateTime = Infinity;
+
+        for (let i = 0; i < unvisited.length; i++) {
+
+            const info = await getRouteInfo(current, unvisited[i]);
+
+            const predictedTime =
+                totalTime + info.duration + 45;
+
+            if (predictedTime <= limit && info.duration < bestCandidateTime) {
+                bestCandidateTime = info.duration;
+                bestIndex = i;
+                bestRoute = info;
+            }
+        }
+
+        // if no valid next step fits in budget → stop building
+        if (bestIndex === -1) break;
+
+        const nextPlace = unvisited.splice(bestIndex, 1)[0];
+
+        path.push(nextPlace);
+        totalTime += bestRoute.duration + 45;
+        totalDistance += bestRoute.distance;
+
+        current = nextPlace;
+    }
+
+    // handle end location
+    if (endLocation && current.toLowerCase() !== endLocation.toLowerCase()) {
+
+        const finalLeg = await getRouteInfo(current, endLocation);
+
+        totalTime += finalLeg.duration + 45;
+        totalDistance += finalLeg.distance;
+
+        path.push(endLocation);
+    }
+
+    let feasible = totalTime <= availableTime;
+
+    let warning = null;
+
+    if (!feasible && totalTime <= limit) {
+
+    if (unvisited.length > 0 || (endLocation && !path.includes(endLocation))) {
+            warning = "Trip exceeds budget and could not include all desired locations within tolerance";
+        } else {
+            warning = "Trip exceeds budget but is within 2 hour tolerance";
+        }
+
+    } else if (!feasible) {
+
+        if (unvisited.length > 0 || (endLocation && !path.includes(endLocation))) {
+            warning = "Trip significantly exceeds available time and cannot include all requested locations";
+        } else {
+            warning = "Trip significantly exceeds available time";
+        }
+    }
+
+    return {
+        feasible,
+        warning,
+        suggestedPath: path,
+        skippedLocations: unvisited,
+        totalTime: +totalTime.toFixed(2),
+        totalDistance: +totalDistance.toFixed(2)
+    };
+}
+
 
 module.exports = {
     getCachedRoute,
     resolveDestination,
-    getRouteInfo
+    getRouteInfo,
+    validateFeasibility
 };
