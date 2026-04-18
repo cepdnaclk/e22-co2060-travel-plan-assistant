@@ -42,11 +42,15 @@ async function getDestinationWithinRadius(lat, lng, radius=5000) {
  * @param {number} duration - Duration in minutes
  */
 async function insertNearbyDestination(source_id, destination_id, distance, duration) {
+
+    const a = Math.min(source_id, destination_id);
+    const b = Math.max(source_id, destination_id);
+
     await db.execute(
         `INSERT IGNORE INTO nearby_destinations
         (source_id, destination_id, distance, duration)
         VALUES (?,?,?,?)`,
-        [source_id, destination_id, distance, duration]
+        [a, b, distance, duration]
     );
 
 }

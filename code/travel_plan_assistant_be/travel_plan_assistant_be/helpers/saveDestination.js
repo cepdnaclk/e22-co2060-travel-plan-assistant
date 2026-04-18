@@ -50,7 +50,7 @@ async function saveDestination(placeName) {
     await populateNearby(destinationID, lat, lng);
 
     return {
-        destinationID,
+        id: destinationID,
         name: placeName,
         lat,
         lng
