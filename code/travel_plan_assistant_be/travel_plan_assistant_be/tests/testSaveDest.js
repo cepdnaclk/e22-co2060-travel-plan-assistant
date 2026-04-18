@@ -5,7 +5,7 @@ const { saveDestination } = require("../helpers/saveDestination");
 (async () => {
     
     try {
-        const placeName = "Colombo"; // Change this to test different places
+        const placeName = "Faculty of Engineering, University of Pearadeniya"; // Change this to test different places
         const result = await saveDestination(placeName);
 
         if (!result) {

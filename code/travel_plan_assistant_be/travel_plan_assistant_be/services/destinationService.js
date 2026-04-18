@@ -19,6 +19,29 @@ async function findByName(place) {
 }
 
 /**
+ * Returns destination data for the given ID
+ */
+async function findByID(id) {
+
+    const [rows] = await db.execute(
+        `SELECT destinationID, name, lat, lng
+         FROM destinations
+         WHERE destinationID = ?
+         LIMIT 1`,
+        [id]
+    );
+
+    if (!rows.length) return null;
+
+    return {
+        id: rows[0].destinationID,
+        name: rows[0].name,
+        lat: parseFloat(rows[0].lat),
+        lng: parseFloat(rows[0].lng)
+    };
+}
+
+/**
  * Get district tag for a district name
  */
 async function getDistrictID(district_name) {
@@ -45,6 +68,7 @@ async function insertDestination({district_id, name, lat, lng, rating = null}) {
 
 module.exports = { 
     findByName,
+    findByID,
     getDistrictID,
     insertDestination
 };
