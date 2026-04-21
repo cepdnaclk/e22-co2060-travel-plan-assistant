@@ -1,5 +1,6 @@
 const axios = require("axios");
 const ORS_BASE_URL = "https://api.openrouteservice.org/v2/directions/driving-car";
+const { safeORSCall } = require("../helpers/safeORS");
 
 /**
  * Get driving distance and duration between two coordinates
@@ -11,6 +12,7 @@ const ORS_BASE_URL = "https://api.openrouteservice.org/v2/directions/driving-car
  */
 async function getDistanceAndDuration(startLat, startLng, endLat, endLng) {
     try {
+        
         const response = await axios.post(
             `${ORS_BASE_URL}`,
             {

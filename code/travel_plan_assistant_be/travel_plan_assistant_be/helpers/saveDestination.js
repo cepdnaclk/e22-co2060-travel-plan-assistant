@@ -17,10 +17,14 @@ async function saveDestination(placeName) {
     }
 
     const coords = await getCoordinates(placeName);
-    if (!coords) return null;
+
+    if (!coords) {
+        throw new Error(`Geocode failed for ${placeName}`);
+    }
+    
     const { lat, lng } = coords;
 
-    const nearby = await getNearbyDestinations(lat, lng, 0.2, 0.1);
+    const nearby = await getNearbyDestinations(lat, lng);
     for (const row of nearby) {
         if (areCoordsClose(lat, lng, row.lat, row.lng)) {
             console.log("Duplicate destination detected");
@@ -39,6 +43,7 @@ async function saveDestination(placeName) {
         throw new Error("District or district_id is undefined");
     }
 
+    console.log("DEBUG COORDS:", { placeName, lat, lng });
     // Insert destination
     const destinationID = await insertDestination({
         district_id: district.district_id,
