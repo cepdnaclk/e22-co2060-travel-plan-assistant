@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { format, differenceInDays } from "date-fns";
-import type { DateRange } from "react-day-picker";
+import type { DateRange } from "../components/ui/calendar";
 import {
   CalendarDays,
   DollarSign,
@@ -153,7 +153,7 @@ export function Home() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="start" style={{ maxWidth: "none" }}>
                 <Calendar
                   mode="range"
                   selected={dateRange}
