@@ -22,7 +22,13 @@ async function saveDestination(placeName) {
         throw new Error(`Geocode failed for ${placeName}`);
     }
     
-    const { lat, lng } = coords;
+    const {
+        lat,
+        lng,
+        rating = null,
+        types = [],
+        name = placeName
+    } = coords;
 
     const nearby = await getNearbyDestinations(lat, lng);
     for (const row of nearby) {
@@ -43,13 +49,14 @@ async function saveDestination(placeName) {
         throw new Error("District or district_id is undefined");
     }
 
-    console.log("DEBUG COORDS:", { placeName, lat, lng });
     // Insert destination
     const destinationID = await insertDestination({
         district_id: district.district_id,
-        name: placeName,
+        name,
         lat,
-        lng
+        lng,
+        rating,
+        tag: types || []
     });
 
     await populateNearby(destinationID, lat, lng);

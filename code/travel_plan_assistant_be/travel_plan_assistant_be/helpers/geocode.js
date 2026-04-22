@@ -2,7 +2,7 @@ const axios = require("axios");
 const {findByName} = require("../services/destinationService");
 const { isInsideSriLanka} = require("./utils");
 const { geocodePlace } = require("../services/geocodeService");
-const { safeORSCall } = require("./safeORS");
+const { safeApiCall } = require("./safeAPI");
 
 /**
  * Get coordinates for a place
@@ -15,7 +15,7 @@ async function getCoordinates(place) {
         const dbresult = await findByName(place);
         if (dbresult) return dbresult;
 
-        const orsresult = await safeORSCall(() => geocodePlace(place));
+        const orsresult = await safeApiCall(() => geocodePlace(place));
 
         if (!orsresult) return null;
 

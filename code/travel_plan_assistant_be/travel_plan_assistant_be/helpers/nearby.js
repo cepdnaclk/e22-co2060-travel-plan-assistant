@@ -3,7 +3,7 @@
 const { getDestinationWithinRadius, nearbyExists} = require("../services/nearbyService");
 const { insertNearbyDestination } = require("../services/nearbyService");
 const { getDistanceAndDuration} = require("../services/routeService");
-const { safeORSCall, sleep } = require("./safeORS");
+const { safeApiCall, sleep } = require("./safeAPI");
 
 /**
  * Find nearby destinations.
@@ -70,7 +70,7 @@ async function populateNearby(destinationID, lat, lng) {
         // Skip duplicates
         if (await nearbyExists(destinationID, target.destinationID)) continue;
 
-        const routeinfo = await safeORSCall(() =>
+        const routeinfo = await safeApiCall(() =>
             getDistanceAndDuration(lat, lng, target.lat, target.lng)
         );
 
