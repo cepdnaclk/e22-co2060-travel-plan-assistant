@@ -69,8 +69,12 @@ function RootLayout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      {/* Header — fixed so it overlays the hero image on the dashboard */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        location.pathname === "/"
+          ? "bg-white/30 backdrop-blur-md border-b border-white/20"
+          : "bg-white/80 backdrop-blur-sm border-b border-gray-200"
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo → Plan Trip */}
@@ -200,8 +204,8 @@ function RootLayout() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Outlet />
+      <main className={location.pathname === "/" ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24"}>
+        {location.pathname === "/" ? <Outlet /> : <div className="pt-16"><Outlet /></div>}
       </main>
 
       {/* Login Modal */}
