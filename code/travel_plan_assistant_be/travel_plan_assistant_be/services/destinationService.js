@@ -56,15 +56,26 @@ async function getDistrictID(district_name) {
  * Insert destination into the database
  */
 async function insertDestination({district_id, name, lat, lng, rating = null}) {
+
     const [result] = await db.execute(
         `INSERT INTO destinations
-        (district_id, name, lat, lng, rating, coords, created_at)
-        VALUES (?, ?, ?, ?, ?, POINT(?, ?), NOW())`,
-        [district_id, name, lat, lng, rating, lng, lat]
+        (name, lat, lng, rating, created_at, coords, district_id)
+        VALUES (?, ?, ?, ?, NOW(), POINT(?, ?), ?)`,
+        [
+            name,
+            lat,
+            lng,
+            rating,
+            lng,
+            lat,
+            district_id
+        ]
     );
 
     return result.insertId;
 }
+
+
 
 module.exports = { 
     findByName,
