@@ -1,6 +1,8 @@
 const axios = require("axios");
-const ORS_BASE_URL = "https://api.openrouteservice.org/v2/directions/driving-car";
-const { safeORSCall } = require("../helpers/safeORS");
+
+const GOOGLE_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
+
+const { safeApiCall } = require("../helpers/safeApi");
 
 /**
  * Get driving distance and duration between two coordinates
@@ -10,54 +12,66 @@ const { safeORSCall } = require("../helpers/safeORS");
  * @param {number} endLng
  * @returns {Promise<{distance: number, duration: number} | null>}
  */
+
 async function getDistanceAndDuration(startLat, startLng, endLat, endLng) {
     try {
-        
-        const response = await axios.post(
-            `${ORS_BASE_URL}`,
-            {
-                coordinates: [
-                    [startLng, startLat],
-                    [endLng, endLat]
-                ]
-            },
-            {
-                headers: {
-                    Authorization: process.env.ORS_API_KEY,
-                    "Content-Type": "application/json"
+
+        const response = await safeApiCall(() =>
+            axios.post(
+                GOOGLE_URL,
+                {
+                    origin: {
+                        location: {
+                            latLng: {
+                                latitude: startLat,
+                                longitude: startLng
+                            }
+                        }
+                    },
+                    destination: {
+                        location: {
+                            latLng: {
+                                latitude: endLat,
+                                longitude: endLng
+                            }
+                        }
+                    },
+                    travelMode: "DRIVE",
+                    routingPreference: "TRAFFIC_UNAWARE"
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Goog-Api-Key": process.env.GOOGLE_API_KEY,
+                        "X-Goog-FieldMask":
+                            "routes.distanceMeters,routes.duration"
+                    }
                 }
-            }
+            )
         );
 
+        if (!response) {
+            console.log("NO RESPONSE RETURNED");
+            return null;
+        }
+        
         const routes = response.data.routes;
-        if (!routes || !routes.length) {
-            console.warn("ORS did not return any routes:", response.data);
-            return null;
-        }
 
-        const summary = routes[0].summary;
-        if (!summary) {
-            console.warn("ORS route missing summary:", routes[0]);
-            return null;
-        }
+        if (!routes || !routes.length) return null;
+
+        const route = routes[0];
 
         return {
-            distance: +(summary.distance / 1000).toFixed(2), // km
-            duration: +(summary.duration / 60).toFixed(2)    // min
+            distance: +(route.distanceMeters / 1000).toFixed(2),
+            duration: +(parseFloat(route.duration) / 60).toFixed(2)
         };
 
     } catch (err) {
-        if (err.response) {
-            console.error(
-                "ORS API error:",
-                err.response.status,
-                err.response.data
-            );
-        } else {
-            console.error("ORS request failed:", err.message);
-        }
+        console.error("Route error:", err.response?.data || err.message);
         return null;
     }
 }
 
-module.exports = { getDistanceAndDuration };
+module.exports = {
+    getDistanceAndDuration
+}

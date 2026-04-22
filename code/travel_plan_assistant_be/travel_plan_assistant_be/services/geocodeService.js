@@ -1,24 +1,43 @@
 const axios = require("axios");
-const ORS_BASE_URL = "https://api.openrouteservice.org";
+
+const GOOGLE_BASE_URL =
+    "https://maps.googleapis.com/maps/api/place/findplacefromtext/json";
 
 async function geocodePlace(place) {
     try {
-        const response = await axios.get(`${ORS_BASE_URL}/geocode/search`, {
-            params: { text: place, boundary_country: "LK", size: 1 },
-            headers: { Authorization: process.env.ORS_API_KEY }
+        const response = await axios.get(GOOGLE_BASE_URL, {
+            params: {
+                input: place,
+                inputtype: "textquery",
+                fields: "name,geometry/location,rating,types",
+                key: process.env.GOOGLE_API_KEY
+            }
         });
 
-        if (!response.data.features.length) return null;
+        const candidates = response.data.candidates;
 
-        const [lng, lat] = response.data.features[0].geometry.coordinates;
+        if (!candidates || !candidates.length) {
+            return null;
+        }
 
-        return { lat, lng };
-    
+        const result = candidates[0];
+
+        return {
+            name: result.name || place,
+            lat: result.geometry.location.lat,
+            lng: result.geometry.location.lng,
+            rating: result.rating || null,
+            types: result.types || []
+        };
+
     } catch (error) {
-        console.error("ORS geocode error:", error.message);
+        console.error(
+            "Google geocode error:",
+            error.response?.data || error.message
+        );
+
         return null;
     }
-
 }
 
 module.exports = { geocodePlace };

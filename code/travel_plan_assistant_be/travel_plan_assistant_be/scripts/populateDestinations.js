@@ -1,308 +1,8 @@
 const { saveDestination } = require("../helpers/saveDestination");
 require("dotenv").config();
-const { sleep } = require("../helpers/safeORS");
+const { sleep } = require("../helpers/safeAPI");
 
 const places = [
-    "Kumana National Park",
-    "Gal Oya National Park",
-    "Lahugala Kitulana National Park",
-    "Kudumbigala Monastery (Sanctuary)",
-    "Maduru Oya National Park (border region access)",
-    "Arugam Bay",
-    "Okanda Beach",
-    "Panama Beach",
-    "Oluvil Beach",
-    "Crocodile Rock",
-    "Nuwaragala Mountain",
-    "Deeghawapi Raja Maha Viharaya",
-    "Buddhangala Raja Maha Viharaya",
-    "Rajagala Archaeological Reserve",
-    "Muhudu Maha Viharaya",
-    "Jaya Sri Maha Bodhi",
-    "Ruwanwelisaya",
-    "Jetavanaramaya",
-    "Abhayagiri Monastery",
-    "Thuparamaya",
-    "Isurumuniya Temple",
-    "Mihintale",
-    "Samadhi Buddha Statue",
-    "Kuttam Pokuna",
-    "Lovamahapaya",
-    "Wilpattu National Park",
-    "Kala Wewa",
-    "Tissa Wewa",
-    "Nachchaduwa Wewa",
-    "Ritigala Forest Monastery",
-    "Isinbassagala Rajamaha viharaya",
-    "Ella Rock",
-    "Little Adam's Peak",
-    "Nine Arches Bridge",
-    "Diyaluma Falls",
-    "Dunhinda Falls",
-    "Ravana Falls",
-    "Ravana Cave",
-    "Lipton's Seat",
-    "Adisham Bungalow",
-    "Bogoda Wooden Bridge",
-    "Mahiyanganaya Temple",
-    "Dambatenne Tea Factory",
-    "Beragala View Point",
-    "Namunukula Mountain Range",
-    "Dhowa Rock Temple",
-    "Batticaloa Lagoon",
-    "Pasikuda Beach",
-    "Kalkudah Beach",
-    "Batticaloa Fort",
-    "Kallady Bridge",
-    "Thiruchendur Murugan Temple",
-    "Unnichchai Tank",
-    "Vakarai Beach",
-    "Kokkadicholai Thaanthonreeswarar Temple",
-    "Navalady Beach",
-    "Mandur Sri Kandaswamy Temple",
-    "Eravur Beach",
-    "Kiran Lagoon",
-    "Galle Face Green",
-    "Gangaramaya Temple",
-    "Viharamahadevi Park",
-    "Independence Square",
-    "Colombo National Museum",
-    "Dutch Hospital Shopping Precinct",
-    "Beira Lake",
-    "Mount Lavinia Beach",
-    "Lotus Tower",
-    "Pettah Market",
-    "Arcade Independence Square",
-    "Port City Colombo",
-    "Dehiwala Zoo",
-    "Marine Drive",
-    "Galle Fort",
-    "Unawatuna Beach",
-    "Jungle Beach",
-    "Hikkaduwa Beach",
-    "Hikkaduwa Coral Reef",
-    "Japanese Peace Pagoda (Rumassala)",
-    "Galle Lighthouse",
-    "Dutch Reformed Church",
-    "Koggala Lake",
-    "Martin Wickramasinghe Folk Museum",
-    "Sea Turtle Hatchery Hikkaduwa",
-    "Midigama Beach",
-    "Ahangama Beach",
-    "Kabalana Beach",
-    "Rumassala Hill",
-    "Negombo Beach",
-    "Negombo Lagoon",
-    "Muthurajawela Marsh",
-    "Dutch Canal Negombo",
-    "St. Mary's Church Negombo",
-    "Angurukaramulla Temple",
-    "Guruge Nature Park",
-    "Kelaniya Raja Maha Viharaya",
-    "Ja-Ela Wetlands",
-    "Attanagalla Raja Maha Viharaya",
-    "Negombo Dutch Fort Ruins",
-    "Aviation Museum Sri Lanka",
-    "Minuwangoda Rural Temple Circuit",
-    "Seeduwa Wetland Bird Watching Areas",
-    "Yala National Park",
-    "Bundala National Park",
-    "Mirijjawila Botanical Garden",
-    "Hambantota Salt Pans",
-    "Tangalle Beach",
-    "Rekawa Beach",
-    "Kalametiya Bird Sanctuary",
-    "Ridiyagama Safari Park",
-    "Mulkirigala Rock Temple",
-    "Ussangoda National Park",
-    "Hummanaya Blow Hole",
-    "Kudawella Harbour",
-    "Talalla Beach",
-    "Godawaya Beach",
-    "Jaffna Fort",
-    "Nallur Kandaswamy Kovil",
-    "Casuarina Beach",
-    "Delft Island",
-    "Nagadeepa Purana Viharaya",
-    "Keerimalai Hot Springs",
-    "Jaffna Public Library",
-    "Point Pedro Lighthouse",
-    "Kadurugoda Viharaya",
-    "Charty Beach",
-    "Kankesanthurai Beach",
-    "Kayts Island",
-    "Karainagar Beach",
-    "Maviddapuram Kandaswamy Temple",
-    "Jaffna Lighthouse",
-    "Kalutara Bodhiya",
-    "Kalutara Beach",
-    "Richmond Castle",
-    "Fa-Hien Cave",
-    "Bentota Beach",
-    "Bentota River Safari",
-    "Brief Garden",
-    "Lunuganga Estate",
-    "Thudugala Ella",
-    "Beruwala Lighthouse",
-    "Moragalla Beach",
-    "Panadura Beach",
-    "Kande Viharaya",
-    "Aluthgama Riverfront",
-    "Kalido Beach",
-    "Temple of the Sacred Tooth Relic",
-    "Kandy Lake",
-    "Royal Botanical Gardens Peradeniya",
-    "Udawattakele Forest Reserve",
-    "Knuckles Mountain Range",
-    "Hanthana Mountain Range",
-    "Victoria Dam",
-    "International Buddhist Museum",
-    "Sri Lanka Tea Museum",
-    "Degaldoruwa Cave Temple",
-    "Hunnasgiriya View Point",
-    "Bahirawakanda Vihara Buddha Statue",
-    "Ambuluwawa Tower",
-    "Galagedara Temple",
-    "Pinnawala Elephant Orphanage",
-    "Pinnawala Zoo",
-    "Kitulgala Adventure Area",
-    "Belilena Cave",
-    "Aberdeen Falls",
-    "Alagalla Mountain Range",
-    "Aranayake Forest Reserve",
-    "Bopath Ella Waterfall",
-    "Dedigama Kotavehera Temple",
-    "Deraniyagala Rainforest Area",
-    "Warakapola Rural Temple Circuit",
-    "Rambukkana Railway Scenic Route",
-    "Galigamuwa Temple Area",
-    "Iranamadu Tank",
-    "Kilinochchi War Memorial",
-    "Elephant Pass",
-    "Kanagambikai Amman Temple",
-    "Paranthan Junction War Memorial Area",
-    "Vattakachchi Lagoon",
-    "Chundikkulam National Park",
-    "Kilinochchi Town Park",
-    "Akkarayankulam Tank",
-    "Skandapuram Temple Area",
-    "Pooneryn Lagoon",
-    "Elephant Pass Lagoon",
-    "Karachchi Area Monuments",
-    "Kandawalai Rural Heritage Sites",
-    "Ridi Viharaya",
-    "Athugala Rock",
-    "Kurunegala Lake",
-    "Yapahuwa Rock Fortress",
-    "Panduwasnuwara Ancient City",
-    "Dambadeniya Kingdom Ruins",
-    "Arankele Monastery",
-    "Kokila Ella Waterfall",
-    "Ridee Viharaya Cave Temple",
-    "Kurunegala Buddha Statue",
-    "Deduruoya Reservoir Dam",
-    "Wariyapola Temple Circuit",
-    "Angilimala maha saya",
-    "Adam's Bridge (Ram Setu)",
-    "Mannar Island",
-    "Baobab Tree Mannar",
-    "Mannar Fort",
-    "Thiruketheeswaram Temple",
-    "Talaimannar Pier",
-    "Vankalai Sanctuary",
-    "Mannar Beach",
-    "Doric Bungalow Arippu",
-    "Giant's Tank",
-    "Pesalai Fishing Village",
-    "Murunkan Rural Area",
-    "Silavathurai Beach",
-    "Vidataltivu Nature Reserve",
-    "Arippu Beach",
-    "Dambulla Cave Temple",
-    "Sigiriya Rock Fortress",
-    "Pidurangala Rock",
-    "Nalanda Gedige",
-    "Riverston",
-    "Pitawala Pathana",
-    "Sera Ella Falls",
-    "Bambarakiri Ella",
-    "Thelgamu Oya",
-    "Knuckles Mountain Range (Matale side)",
-    "Wasgamuwa National Park",
-    "Aluvihare Rock Temple",
-    "Euphoria Spice and Herbal Garden",
-    "Sri Muthumariamman kovil Matale",
-    "Sudu Ganga",
-    "Lakegala Mountain",
-    "Manigala",
-    "Mini World’s End Riverston",
-    "Rathinda Falls",
-    "Dothalugala Nature Trail",
-    "Campbell’s Lane Forest Reserve",
-    "Hunasgiriya (Matale side access)",
-    "Elkaduwa Tea Estate",
-    "Corbett’s Gap",
-    "Mirissa Beach",
-    "Polhena Beach",
-    "Matara Fort",
-    "Star Fort Matara",
-    "Dondra Head Lighthouse",
-    "Weherahena Temple",
-    "Devinuwara Temple",
-    "Nilwala River",
-    "Parrot Rock Mirissa",
-    "Coconut Tree Hill Mirissa",
-    "Madiha Beach",
-    "Lakshawaththa Beach",
-    "Weligama Beach",
-    "Taprobane Island",
-    "Kushtarajagala Statue",
-    "Secret Beach Mirissa",
-    "Turtle Bay Weligama",
-    "Midigama Beach",
-    "Ahangama Beach",
-    "Parey Dewa Temple",
-    "Dickwella Beach",
-    "Hiriketiya Beach",
-    "Blue Beach Island",
-    "Gandara Beach",
-    "Maduru Oya National Park",
-    "Gal Oya National Park (border access)",
-    "Nilgala Forest Reserve",
-    "Dambana Veddha Village",
-    "Buduruwagala Temple",
-    "Maligawila Buddha Statue",
-    "Yudaganawa Archaeological Site",
-    "Kebiliththa Sacred Area",
-    "Handapanagala Lake",
-    "Ethimale Temple",
-    "Huluganga Falls",
-    "Wedikumbura Temple",
-    "Lunugamvehera National Park (border access)",
-    "Diyaluma Falls (border access)",
-    "Kataragama (border proximity region)",
-    "Kataragama kiri wehera",
-    "Bibile Forest Area",
-    "Siyambalanduwa Region",
-    "Wellawaya Scenic Area",
-    "Hambegamuwa Tank",
-    "Mullaitivu Beach",
-    "Mullivaikkal Beach",
-    "Nanthikadal Lagoon",
-    "Nayaru Lagoon",
-    "Kokkilai Lagoon",
-    "Kokkilai Bird Sanctuary",
-    "Alampil Beach",
-    "Chalai Beach",
-    "Vattappalai Kannaki kovil",
-    "Thannimurippu Kulam",
-    "Oddusuddan Area",
-    "Puthukkudiyiruppu Area",
-    "Mullaitivu War Memorial Area",
-    "Iranapalai Lagoon",
-    "Kokuthoduvai Coast",
-    "Ampalavanpokkanai",
-    "Udaiyarkaddu Lagoon",
     "Nayaru Beach",
     "Mullaitivu Town Beach Park",
     "Alampil Mangrove Area",
@@ -441,8 +141,24 @@ const places = [
     "Archeological Museum of Vavuniya",
     "Grand Jumma Mosques, Vavuniya",
     "Kalvari Church, Vavuniya"
-    ];
+]
 
+
+const placesApiBudget = 9000;
+const routesApiBudget = 9000;
+
+let placesUsed = 0;
+let routesUsed = 0;
+
+function checkBudget(placesCost = 1, routesCost = 5) {
+    if (placesUsed + placesCost > placesApiBudget) {
+        throw new Error("Places API budget exceeded. Stopping population.");
+    }
+
+    if (routesUsed + routesCost > routesApiBudget) {
+        throw new Error("Routes API budget exceeded. Stopping population.");
+    }
+}
 
 async function populateDestinations(places = []) {
 
@@ -452,8 +168,13 @@ async function populateDestinations(places = []) {
     for (const place of places) {
 
         try {
+            // 🔴 estimate cost BEFORE execution
+            checkBudget(1, 5);
+
+            placesUsed += 1;
+            routesUsed += 5;
+
             const result = await saveDestination(place);
-            await sleep(1500);
 
             successful.push({
                 input: place,
@@ -461,6 +182,9 @@ async function populateDestinations(places = []) {
             });
 
             console.log(`✓ Inserted: ${place}`);
+
+            // throttle (important for rate limits)
+            await sleep(1200);
 
         } catch (error) {
 
@@ -470,12 +194,24 @@ async function populateDestinations(places = []) {
             });
 
             console.log(`✗ Failed: ${place} -> ${error.message}`);
+
+            // optional: stop on budget error
+            if (
+                error.message.includes("budget exceeded")
+            ) {
+                console.log("🛑 Stopping population due to budget limit");
+                break;
+            }
         }
     }
 
     console.log("\n===== POPULATION SUMMARY =====");
     console.log(`Successful: ${successful.length}`);
     console.log(`Failed: ${failed.length}`);
+
+    console.log("\n===== API USAGE =====");
+    console.log(`Places used: ${placesUsed}/${placesApiBudget}`);
+    console.log(`Routes used: ${routesUsed}/${routesApiBudget}`);
 
     console.log("\n===== SUCCESSFUL PLACES =====");
     successful.forEach(item => console.log(item.input));
@@ -488,9 +224,12 @@ async function populateDestinations(places = []) {
         failedCount: failed.length,
         successful,
         failed,
+        placesUsed,
+        routesUsed,
         unsuccessfulList: failed.map(item => item.input)
     };
 }
+
 
 if (require.main === module) {
     populateDestinations(places)
