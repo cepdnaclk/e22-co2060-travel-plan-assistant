@@ -17,7 +17,7 @@ interface Expense {
 }
 
 export function Budget() {
-  const [totalBudget, setTotalBudget] = useState(5000);
+  const totalBudget = 5000;
   const [expenses, setExpenses] = useState<Expense[]>([
     { id: 1, category: "Accommodation", description: "Hotel booking", amount: 1200, date: "2026-03-15" },
     { id: 2, category: "Transportation", description: "Flight tickets", amount: 800, date: "2026-03-10" },
