@@ -29,11 +29,11 @@ import sigiriyaImg from "../assets/destinations/sigiriya.png";
 import kandyImg from "../assets/destinations/kandy.png";
 import mirissaImg from "../assets/destinations/mirissa.png";
 import nuwaraEliyaImg from "../assets/destinations/nuwara-eliya.png";
+*/
 
 // Hero background
 import heroBg from "../assets/hero-bg.png";
 
-*/
 /* ───────────── Mock Data ───────────── */
 
 const stats = [
@@ -435,8 +435,9 @@ export function Dashboard() {
                         </h2>
                         <div className="flex md:grid md:grid-cols-3 gap-5 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none scrollbar-hide">
                             {trendingPlaces.map((place) => (
-                                <div
-                                    key={place.name}
+                                <Link
+                                    key={place.id}
+                                    to={`/destinations/${place.id}`}
                                     className="flex-shrink-0 w-[280px] md:w-auto snap-start"
                                 >
                                     <Card className="group relative h-72 overflow-hidden border-0 shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-1">
@@ -447,11 +448,9 @@ export function Dashboard() {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                                         <div className="absolute top-4 left-4">
-                                            <Badge
-                                                className={`${place.tagColor} text-white border-0 text-xs font-semibold px-3 py-1 shadow-lg`}
-                                            >
-                                                <Sparkles className="w-3 h-3 mr-1" />
-                                                {place.tag}
+                                            <Badge className="bg-amber-500 text-white border-0 text-xs font-semibold px-3 py-1 shadow-lg">
+                                                <Star className="w-3 h-3 mr-1 fill-white" />
+                                                {place.rating}
                                             </Badge>
                                         </div>
                                         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -460,65 +459,17 @@ export function Dashboard() {
                                             </h3>
                                             <p className="text-white/70 text-sm mt-1 flex items-center gap-1">
                                                 <MapPin className="w-3.5 h-3.5" />
-                                                Sri Lanka
+                                                {place.country}
                                             </p>
                                         </div>
                                     </Card>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </section>
 
                 </div>
             </div>
-            {/* ── Trending Places (always visible) ── */}
-            <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-amber-500" />
-                Trending Destinations
-            </h2>
-
-            <div className="flex md:grid md:grid-cols-3 gap-5 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory md:snap-none scrollbar-hide">
-                {trendingPlaces.map((place) => (
-                <Link
-                    key={place.id}
-                    to={`/destinations/${place.id}`}
-                    className="flex-shrink-0 w-[280px] md:w-auto snap-start"
-                >
-                    <Card className="group relative h-72 overflow-hidden border-0 shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-1">
-
-                    <img
-                        src={place.image}
-                        alt={place.name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                    {/* 🔥 FIXED BADGE */}
-                    <div className="absolute top-4 left-4">
-                        <Badge className="bg-amber-500 text-white border-0 text-xs font-semibold px-3 py-1 shadow-lg">
-                        <Star className="w-3 h-3 mr-1 fill-white" />
-                        {place.rating}
-                        </Badge>
-                    </div>
-
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                        <h3 className="text-xl font-bold text-white drop-shadow-lg">
-                        {place.name}
-                        </h3>
-
-                        <p className="text-white/70 text-sm mt-1 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" />
-                        {place.country}
-                        </p>
-                    </div>
-
-                    </Card>
-                </Link>
-                ))}
-            </div>
-            </section>
         </div>
     );
 }
