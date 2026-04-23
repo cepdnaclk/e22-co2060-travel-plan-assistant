@@ -31,7 +31,7 @@ function areCoordsClose(lat1, lng1, lat2, lng2, toleranceKm = 0.1) {
  */
 function isInsideSriLanka(lat, lng) {
     const minLat = 5.9, maxLat = 9.9;
-    const minLng = 79.8, maxLng = 81.9;
+    const minLng = 79.5, maxLng = 81.9;
     return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
 }
 

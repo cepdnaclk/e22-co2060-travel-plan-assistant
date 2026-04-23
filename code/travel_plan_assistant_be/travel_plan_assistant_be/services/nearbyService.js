@@ -22,19 +22,19 @@ async function nearbyExists(sourceID, destinationID) {
  * @param {number} radius - Radius in meters
  * @returns {Promise<Array>} - Array of destination objects with distance
  */
-async function getDestinationWithinRadius(lat, lng, radius=5000) {
+async function getDestinationWithinRadius(lat, lng, radius = 5000) {
+
     const [rows] = await db.execute(
         `SELECT destinationID, district_id, name, lat, lng,
                 ST_Distance_Sphere(coords, POINT(?, ?)) AS distance
-        FROM destinations
-        WHERE ST_Distance_Sphere(coords, POINT(?, ?)) <= ?
-        ORDER BY distance ASC`,
-        [lng, lat, lng, lat, radius]
+         FROM destinations
+         HAVING distance <= ? AND distance > 0
+         ORDER BY distance ASC`,
+        [lng, lat, radius]
     );
 
-    return rows
+    return rows;
 }
-
 /**
  * Insert a nearby destination relationship into the DB
  * @param {string} nearbyID - Unique ID for this nearby relation (source-target)

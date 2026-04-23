@@ -3,25 +3,52 @@
 const { getDestinationWithinRadius, nearbyExists} = require("../services/nearbyService");
 const { insertNearbyDestination } = require("../services/nearbyService");
 const { getDistanceAndDuration} = require("../services/routeService");
+const { safeApiCall, sleep } = require("./safeAPI");
 
 /**
- * Get nearby destinations within 100m increments up to maxKm
+ * Find nearby destinations.
+ * Expands radius until at least targetCount found,
+ * or maxKm reached.
  */
-async function getNearbyDestinations(lat, lng, maxKm = 5, stepKm = 0.1) {
+async function getNearbyDestinations(
+    lat,
+    lng,
+    maxKm = 25,
+    stepKm = 1,
+    targetCount = 5
+) {
+
     const allRows = [];
 
     for (let radius = stepKm; radius <= maxKm; radius += stepKm) {
+
         const radiusMeters = radius * 1000;
-        const rows = await getDestinationWithinRadius(lat, lng, radiusMeters);
+
+        const rows = await getDestinationWithinRadius(
+            lat,
+            lng,
+            radiusMeters
+        );
 
         for (const row of rows) {
-            if (!allRows.find(r => r.destinationID === row.destinationID)) {
+
+            const exists = allRows.find(
+                r => r.destinationID === row.destinationID
+            );
+
+            if (!exists) {
                 allRows.push(row);
             }
         }
+
+        if (allRows.length >= targetCount) {
+            break;
+        }
     }
 
-    return allRows;
+    return allRows
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, targetCount);
 }
 
 /**
@@ -32,7 +59,7 @@ async function getNearbyDestinations(lat, lng, maxKm = 5, stepKm = 0.1) {
  */
 async function populateNearby(destinationID, lat, lng) {
 
-    const nearbyRows = await getNearbyDestinations(lat, lng, 5, 0.1);
+    const nearbyRows = await getNearbyDestinations(lat, lng);
 
     if (!nearbyRows || nearbyRows.length === 0) return;
 
@@ -43,12 +70,11 @@ async function populateNearby(destinationID, lat, lng) {
         // Skip duplicates
         if (await nearbyExists(destinationID, target.destinationID)) continue;
 
-        const routeinfo = await getDistanceAndDuration(
-            lat,
-            lng,
-            target.lat,
-            target.lng
+        const routeinfo = await safeApiCall(() =>
+            getDistanceAndDuration(lat, lng, target.lat, target.lng)
         );
+
+        await sleep(300); // IMPORTANT: throttle even on success
 
         if (!routeinfo) {
             console.warn(`No route data found for ${destinationID} → ${target.destinationID}, skipped`);

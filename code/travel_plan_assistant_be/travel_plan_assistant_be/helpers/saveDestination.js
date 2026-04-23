@@ -17,10 +17,20 @@ async function saveDestination(placeName) {
     }
 
     const coords = await getCoordinates(placeName);
-    if (!coords) return null;
-    const { lat, lng } = coords;
 
-    const nearby = await getNearbyDestinations(lat, lng, 0.2, 0.1);
+    if (!coords) {
+        throw new Error(`Geocode failed for ${placeName}`);
+    }
+    
+    const {
+        lat,
+        lng,
+        rating = null,
+        types = [],
+        name = placeName
+    } = coords;
+
+    const nearby = await getNearbyDestinations(lat, lng);
     for (const row of nearby) {
         if (areCoordsClose(lat, lng, row.lat, row.lng)) {
             console.log("Duplicate destination detected");
@@ -42,9 +52,11 @@ async function saveDestination(placeName) {
     // Insert destination
     const destinationID = await insertDestination({
         district_id: district.district_id,
-        name: placeName,
+        name,
         lat,
-        lng
+        lng,
+        rating,
+        tag: types || []
     });
 
     await populateNearby(destinationID, lat, lng);

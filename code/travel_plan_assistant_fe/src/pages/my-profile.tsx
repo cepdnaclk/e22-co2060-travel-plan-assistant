@@ -1,12 +1,61 @@
+import { useState } from "react";
 import { User, Mail, Calendar, MapPin, Edit3 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { useAuth } from "../context/AuthContext";
 
+type FormKey = "name" | "email" | "phone" | "location";
+
 export function MyProfile() {
     const { user } = useAuth();
 
+    const [isEditing, setIsEditing] = useState(false);
+
+    const [formData, setFormData] = useState({
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: "+94 77 123 4567",
+        location: "Colombo, Sri Lanka",
+    });
+
+    const fields: { label: string; name: FormKey }[] = [
+        { label: "Full Name", name: "name" },
+        { label: "Email", name: "email" },
+        { label: "Phone", name: "phone" },
+        { label: "Location", name: "location" },
+    ];
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+            if (file) {
+                setProfileImage(URL.createObjectURL(file));
+            }
+        };
+
+    const handleSave = async () => {
+        try {
+            await fetch("http://localhost:5000/api/profile/update", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            console.log("Saved locally:", formData);
+        } catch (err) {
+            console.log("Backend not ready, saving locally only");
+        }
+
+        setIsEditing(false);
+    };
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
             {/* Profile Header */}
@@ -18,8 +67,20 @@ export function MyProfile() {
 
                 {/* Avatar */}
                 <div className="absolute -bottom-14 left-8 flex items-end gap-5">
-                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white">
-                        {user?.initials || "U"}
+                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white overflow-hidden relative">
+    
+                        {profileImage ? (
+                            <img src={profileImage} className="w-full h-full object-cover" />
+                        ) : (
+                            user?.initials || "U"
+                        )}
+
+                        {isEditing && (
+                            <label className="absolute bottom-0 bg-black/60 text-white text-xs w-full text-center cursor-pointer py-1">
+                                Change
+                                <input type="file" className="hidden" onChange={handleImageChange} />
+                            </label>
+                        )}
                     </div>
                     <div className="pb-2">
                         <h1 className="text-2xl font-bold text-gray-900">{user?.name || "Traveler"}</h1>
@@ -40,20 +101,40 @@ export function MyProfile() {
                             <User className="w-5 h-5 text-indigo-500" />
                             Personal Information
                         </h2>
-                        <Button variant="ghost" size="sm" className="text-indigo-600 hover:bg-indigo-50 cursor-pointer">
-                            <Edit3 className="w-3.5 h-3.5 mr-1" /> Edit
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                if (isEditing) {
+                                    handleSave();
+                                } else {
+                                    setIsEditing(true);
+                                }
+                            }}
+                            className="text-indigo-600 hover:bg-indigo-50 cursor-pointer"
+                        >
+                            <Edit3 className="w-3.5 h-3.5 mr-1" />
+                            {isEditing ? "Save" : "Edit"}
                         </Button>
                     </div>
                     <div className="space-y-4">
-                        {[
-                            { label: "Full Name", value: user?.name || "Traveler" },
-                            { label: "Email", value: user?.email || "user@example.com" },
-                            { label: "Phone", value: "+94 77 123 4567" },
-                            { label: "Location", value: "Colombo, Sri Lanka" },
-                        ].map((item) => (
+                        {fields.map((item) => (
                             <div key={item.label} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                                
                                 <span className="text-sm text-gray-500">{item.label}</span>
-                                <span className="text-sm font-medium text-gray-800">{item.value}</span>
+
+                                {isEditing ? (
+                                    <input
+                                        name={item.name}
+                                        value={formData[item.name]}
+                                        onChange={handleChange}
+                                        className="text-sm font-medium text-gray-800 border rounded px-2 py-1"
+                                    />
+                                ) : (
+                                    <span className="text-sm font-medium text-gray-800">
+                                        {formData[item.name]}
+                                    </span>
+                                )}
                             </div>
                         ))}
                     </div>
