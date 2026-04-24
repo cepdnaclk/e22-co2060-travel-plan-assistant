@@ -35,8 +35,28 @@ function isInsideSriLanka(lat, lng) {
     return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
 }
 
+function isInDirectionBox(curr, next, target) {
+
+    const vx1 = target.lng - curr.lng;
+    const vy1 = target.lat - curr.lat;
+
+    const vx2 = next.lng - curr.lng;
+    const vy2 = next.lat - curr.lat;
+
+    const mag1 = Math.sqrt(vx1 * vx1 + vy1 * vy1);
+    const mag2 = Math.sqrt(vx2 * vx2 + vy2 * vy2);
+
+    const dot = vx1 * vx2 + vy1 * vy2;
+
+    const cosTheta = dot / (mag1 * mag2 + 1e-9);
+
+    // This controls the filter window
+    return cosTheta > 0.4;
+}
+
 module.exports = {
     getDistance,
     areCoordsClose,
-    isInsideSriLanka
+    isInsideSriLanka,
+    isInDirectionBox
 };

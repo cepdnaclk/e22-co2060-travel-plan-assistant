@@ -58,6 +58,7 @@ async function getRouteInfo(fromName, toName) {
     const cached = await getCachedRoute(from.id, to.id);
 
     if (cached) {
+        // console.log("Route Cached from database");
         return {
             distance: Number(cached.distance),
             duration: Number(cached.duration),
