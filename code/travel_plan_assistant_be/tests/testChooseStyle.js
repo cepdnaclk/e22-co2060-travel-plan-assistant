@@ -1,4 +1,5 @@
-const { getNeighbors, chooseNeighborByStyle } = require("../services/plannerService");
+const { chooseNeighborByStyle } = require("../services/plannerService");
+const { getNeighbors } = require("../services/plannerService");
 
 require("dotenv").config();
 
@@ -6,7 +7,7 @@ async function runTest() {
 
     try {
 
-        const destinationID = 1; // change to a valid ID in your DB
+        const destinationID = 431; // change to a valid ID in your DB
 
         const neighbors = await getNeighbors(destinationID);
 

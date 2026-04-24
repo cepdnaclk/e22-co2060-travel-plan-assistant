@@ -7,7 +7,7 @@ async function runTest() {
 
         console.log("TEST 1: Neighbors of destination ID 1");
 
-        const result = await getNeighbors(7);
+        const result = await getNeighbors(430);
 
         console.log(result);
 

@@ -3,6 +3,7 @@ const axios = require("axios");
 const GOOGLE_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
 const { safeApiCall } = require("../helpers/safeApi");
+const { findByID } = require("../services/destinationService");
 
 /**
  * Get driving distance and duration between two coordinates
@@ -72,6 +73,23 @@ async function getDistanceAndDuration(startLat, startLng, endLat, endLng) {
     }
 }
 
+async function getDistanceAndDurationByID(startID, endID) {
+
+    const start = await findByID(startID);
+    const end = await findByID(endID);
+
+    if (!start || !end) return null;
+
+    return await getDistanceAndDuration(
+        parseFloat(start.lat),
+        parseFloat(start.lng),
+        parseFloat(end.lat),
+        parseFloat(end.lng)
+    );
+}
+
+
 module.exports = {
-    getDistanceAndDuration
+    getDistanceAndDuration,
+    getDistanceAndDurationByID
 }

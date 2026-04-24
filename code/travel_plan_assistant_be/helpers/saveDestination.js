@@ -10,6 +10,15 @@ const { areCoordsClose } = require("./utils");
  * Save destination (main orchestration)
  */
 async function saveDestination(placeName) {
+
+    console.log(placeName);
+    
+    if (typeof placeName !== "string") {
+        throw new Error(
+            `Geocode failed: expected string, got ${typeof placeName}`
+        );
+    }
+
     const existing = await findByName(placeName);
     if (existing) {
         console.log("Destination already exists");

@@ -1,5 +1,5 @@
 const { resolveDestination, validateFeasibility } = require("./distanceService");
-const { buildThreeStyledSegmentPaths } = require("./plannerService");
+const { expandFrontierUntilTarget } = require("./plannerService");
 
 /**
  * Remove duplicate nodes while preserving first appearance order
@@ -60,10 +60,10 @@ async function createTravelPlan(
         throw new Error("Need at least one desired location or end location");
     }
 
+    // STEP 1: resolve all inputs
     const start = await resolveDestination(startPlace);
 
     const desired = [];
-
     for (const place of desiredPlaces) {
         desired.push(await resolveDestination(place));
     }
@@ -76,12 +76,9 @@ async function createTravelPlan(
         end = desired.pop();
     }
 
-    const checkpoints = [
-        start,
-        ...desired,
-        end
-    ];
+    const checkpoints = [start, ...desired, end];
 
+    // STEP 2: feasibility check (unchanged)
     const feasibility = await validateFeasibility(
         startPlace,
         desiredPlaces,
@@ -89,82 +86,82 @@ async function createTravelPlan(
         endPlace
     );
 
-    const styles = {
-        shortest: [],
-        average: [],
-        longest: []
-    };
+    // STEP 3: final merged route
+    const fullPath = [];
+    const visited = new Set();
 
-    const totals = {
-        shortest: { time: 0, distance: 0 },
-        average: { time: 0, distance: 0 },
-        longest: { time: 0, distance: 0 }
-    };
+    let totalTime = 0;
+    let totalDistance = 0;
 
-    const visited = {
-        shortest: new Set(),
-        average: new Set(),
-        longest: new Set()
-    };
+    const trace = [];
 
+    // STEP 4: build segment-by-segment path
     for (let i = 0; i < checkpoints.length - 1; i++) {
 
         const from = checkpoints[i];
         const to = checkpoints[i + 1];
 
-        const segment = await buildThreeStyledSegmentPaths(
+        console.log(`\n===== SEGMENT ${from.name} -> ${to.name} =====`);
+
+        const segment = await expandFrontierUntilTarget(
             from.id,
             to.id,
             visited
         );
 
-        for (const style of ["shortest", "average", "longest"]) {
+        if (!segment || !segment.path) {
+            throw new Error(`Failed to build segment ${from.name} -> ${to.name}`);
+        }
 
-            const part = segment[style];
+        // STEP 5: merge path
+        const cleanPath = sanitizePath(segment.path);
 
-            if (!part || !part.path) continue;
+        fullPath.push(...cleanPath);
 
-            const cleanPath = sanitizePath(part.path);
+        // STEP 6: accumulate stats
+        totalTime += segment.totalTime || 0;
+        totalDistance += segment.totalDistance || 0;
 
-            styles[style] = mergePaths(
-                styles[style],
-                cleanPath
-            );
+        // STEP 7: mark visited
+        for (const node of cleanPath) {
+            visited.add(node.id);
+        }
 
-            totals[style].time += part.totalTime || 0;
-            totals[style].distance += part.totalDistance || 0;
-
-            for (const node of cleanPath) {
-                visited[style].add(node.id);
-            }
+        // STEP 8: trace logging (optional debug)
+        if (segment.trace) {
+            trace.push({
+                from: from.id,
+                to: to.id,
+                path: cleanPath.map(n => n.id),
+                candidates: segment.trace
+            });
         }
     }
 
+    // STEP 9: remove duplicates in final path
+    const uniquePath = [];
+    const seen = new Set();
+
+    for (const node of fullPath) {
+        if (seen.has(node.id)) continue;
+        seen.add(node.id);
+        uniquePath.push(node);
+    }
+
+    // STEP 10: return final result
     return {
         feasible: feasibility.feasible,
         warning: feasibility.warning || null,
         suggestedPath: feasibility.suggestedPath || null,
 
-        shortest: {
-            path: styles.shortest.map(n => n.name),
-            totalTime: totals.shortest.time.toFixed(2),
-            totalDistance: totals.shortest.distance.toFixed(2),
-            destinations: styles.shortest.length
-        },
+        path: uniquePath.map(n => n.name),
 
-        average: {
-            path: styles.average.map(n => n.name),
-            totalTime: totals.average.time.toFixed(2),
-            totalDistance: totals.average.distance.toFixed(2),
-            destinations: styles.average.length
-        },
+        totalTime: totalTime.toFixed(2),
+        totalDistance: totalDistance.toFixed(2),
 
-        longest: {
-            path: styles.longest.map(n => n.name),
-            totalTime: totals.longest.time.toFixed(2),
-            totalDistance: totals.longest.distance.toFixed(2),
-            destinations: styles.longest.length
-        }
+        checkpoints: checkpoints.map(c => c.name),
+
+        trace
     };
 }
 
