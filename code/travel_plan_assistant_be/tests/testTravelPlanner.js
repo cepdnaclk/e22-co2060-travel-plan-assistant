@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { createTravelPlan } = require("../services/travelPlanner");
+const { createTravelPlan } = require("../services/travelService");
 
 async function runTest() {
 
@@ -8,7 +8,7 @@ async function runTest() {
 
     const result = await createTravelPlan(
         "Colombo",
-        ["Kandy"],
+        [],
         1000,
         "Ella"
     );
