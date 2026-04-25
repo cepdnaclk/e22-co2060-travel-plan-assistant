@@ -1,5 +1,6 @@
 const { resolveDestination, validateFeasibility } = require("./distanceService");
 const { expandFrontierUntilTarget } = require("./plannerService");
+const { getDestinationIdList, saveTravelSession } = require("./sessionService");
 
 /**
  * Remove duplicate nodes while preserving first appearance order
@@ -60,7 +61,6 @@ async function createTravelPlan(
         throw new Error("Need at least one desired location or end location");
     }
 
-    // STEP 1: resolve all inputs
     const start = await resolveDestination(startPlace);
 
     const desired = [];
@@ -78,7 +78,6 @@ async function createTravelPlan(
 
     const checkpoints = [start, ...desired, end];
 
-    // STEP 2: feasibility check (unchanged)
     const feasibility = await validateFeasibility(
         startPlace,
         desiredPlaces,
@@ -86,7 +85,6 @@ async function createTravelPlan(
         endPlace
     );
 
-    // STEP 3: final merged route
     const fullPath = [];
     const visited = new Set();
 
@@ -95,7 +93,6 @@ async function createTravelPlan(
 
     const trace = [];
 
-    // STEP 4: build segment-by-segment path
     for (let i = 0; i < checkpoints.length - 1; i++) {
 
         const from = checkpoints[i];
@@ -113,21 +110,17 @@ async function createTravelPlan(
             throw new Error(`Failed to build segment ${from.name} -> ${to.name}`);
         }
 
-        // STEP 5: merge path
         const cleanPath = sanitizePath(segment.path);
 
         fullPath.push(...cleanPath);
 
-        // STEP 6: accumulate stats
         totalTime += segment.totalTime || 0;
         totalDistance += segment.totalDistance || 0;
 
-        // STEP 7: mark visited
         for (const node of cleanPath) {
             visited.add(node.id);
         }
 
-        // STEP 8: trace logging (optional debug)
         if (segment.trace) {
             trace.push({
                 from: from.id,
@@ -138,7 +131,6 @@ async function createTravelPlan(
         }
     }
 
-    // STEP 9: remove duplicates in final path
     const uniquePath = [];
     const seen = new Set();
 
@@ -148,13 +140,20 @@ async function createTravelPlan(
         uniquePath.push(node);
     }
 
-    // STEP 10: return final result
+    const finalPath = uniquePath.map(n => n.name);
+
+    const destinationIdList = await getDestinationIdList(finalPath);
+
+    const sessionId = await saveTravelSession(1, destinationIdList);
+
     return {
+        sessionId,
+
         feasible: feasibility.feasible,
         warning: feasibility.warning || null,
         suggestedPath: feasibility.suggestedPath || null,
 
-        path: uniquePath.map(n => n.name),
+        path: finalPath,
 
         totalTime: totalTime.toFixed(2),
         totalDistance: totalDistance.toFixed(2),
