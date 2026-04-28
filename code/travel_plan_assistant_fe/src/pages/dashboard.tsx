@@ -1,5 +1,6 @@
 import { destinations } from "../data/destinations";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { mockTrips } from "../data/trips-data";
 import {
     Map,
     CalendarDays,
@@ -47,7 +48,7 @@ const stats = [
     },
     {
         label: "Ongoing / Upcoming",
-        value: "1",
+        value: String(mockTrips.length),
         icon: CalendarDays,
         color: "text-emerald-500",
         bg: "bg-emerald-50",
@@ -63,12 +64,7 @@ const stats = [
     },
 ];
 
-const upcomingTrip = {
-    destination: "Ella & Hill Country",
-    dates: "Feb 27 – Mar 2, 2026",
-    daysUntil: 3,
-    highlights: ["Nine Arches Bridge", "Little Adam's Peak", "Tea Plantations"],
-};
+// upcomingTrip data is now sourced from mockTrips (trips-data.ts)
 
 /*const trendingPlaces = [
     { name: "Ella", tag: "Trending", tagColor: "bg-amber-500", image: ellaImg },
@@ -139,12 +135,13 @@ const features = [
 
 export function Dashboard() {
     const { isAuthenticated, user } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div>
             {/* ── Hero Section with Background Image ── */}
             <section
-                className="relative flex items-end justify-center bg-cover bg-center bg-no-repeat w-full"
+                className="relative flex items-center justify-center bg-cover bg-center bg-no-repeat w-full"
                 style={{ backgroundImage: `url(${heroBg})`, minHeight: "100vh" }}
             >
                 {/* Dark gradient overlay for text readability */}
@@ -152,13 +149,13 @@ export function Dashboard() {
                     className="absolute inset-0"
                     style={{
                         background:
-                            "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.05) 100%)",
+                            "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%)",
                     }}
                 />
 
                 {/* Hero Content — directly on the image, no box */}
                 <div
-                    className="relative z-10 flex flex-col items-center text-center px-6 pb-16 pt-24 sm:pb-20 md:pb-24 w-full max-w-3xl mx-auto"
+                    className="relative z-10 flex flex-col items-center text-center px-6 py-24 w-full max-w-3xl mx-auto"
                 >
                     {/* Praying hands emoji */}
                     <p
@@ -274,55 +271,82 @@ export function Dashboard() {
                                 })}
                             </section>
 
-                            {/* Upcoming Trip */}
+                            {/* Upcoming Trips */}
                             <section>
                                 <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                     <CalendarDays className="w-5 h-5 text-indigo-500" />
-                                    Your Upcoming Trip
+                                    Your Upcoming Trips
                                 </h2>
-                                <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white">
-                                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-sm" />
-                                    <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-sm" />
-                                    <div className="relative p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <MapPin className="w-5 h-5 text-pink-200" />
-                                                <h3 className="text-2xl md:text-3xl font-bold">
-                                                    {upcomingTrip.destination}
-                                                </h3>
+                                <div className="flex gap-5 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+                                    {mockTrips.map((trip) => (
+                                        <Card
+                                            key={trip.id}
+                                            className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white flex-shrink-0 w-[340px] snap-start group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                                            onClick={() => navigate(`/itinerary/${trip.id}`)}
+                                        >
+                                            {/* Decorative circles */}
+                                            <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full blur-sm" />
+                                            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-sm" />
+
+                                            {/* Cover image strip */}
+                                            <div className="h-32 w-full overflow-hidden">
+                                                <img
+                                                    src={trip.image}
+                                                    alt={trip.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute inset-0 h-32 bg-gradient-to-t from-indigo-700/60 to-transparent" />
                                             </div>
-                                            <div className="flex flex-wrap items-center gap-4 text-white/90">
-                                                <span className="flex items-center gap-1.5 text-sm">
-                                                    <CalendarDays className="w-4 h-4" />
-                                                    {upcomingTrip.dates}
-                                                </span>
-                                                <span className="flex items-center gap-1.5 text-sm font-semibold bg-white/20 px-3 py-1 rounded-full">
-                                                    <Clock className="w-4 h-4" />
-                                                    Starts in {upcomingTrip.daysUntil} days
-                                                </span>
+
+                                            <div className="relative p-5 space-y-3">
+                                                {/* Title */}
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="w-4 h-4 text-pink-200 flex-shrink-0" />
+                                                    <h3 className="text-lg font-bold truncate">
+                                                        {trip.title}
+                                                    </h3>
+                                                </div>
+
+                                                {/* Dates + countdown */}
+                                                <div className="flex flex-wrap items-center gap-2 text-white/90">
+                                                    <span className="flex items-center gap-1.5 text-xs">
+                                                        <CalendarDays className="w-3.5 h-3.5" />
+                                                        {trip.dates}
+                                                    </span>
+                                                    <span className="flex items-center gap-1.5 text-xs font-semibold bg-white/20 px-2.5 py-0.5 rounded-full">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        {trip.daysUntil} days
+                                                    </span>
+                                                </div>
+
+                                                {/* Tags */}
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {trip.tags.map((tag) => (
+                                                        <Badge
+                                                            key={tag}
+                                                            className="bg-white/20 hover:bg-white/30 text-white border-0 text-[10px] px-2.5 py-0.5"
+                                                        >
+                                                            {tag}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+
+                                                {/* CTA */}
+                                                <Button
+                                                    size="sm"
+                                                    className="w-full mt-1 bg-white text-indigo-700 hover:bg-white/90 shadow-lg font-semibold gap-2 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/itinerary/${trip.id}`);
+                                                    }}
+                                                >
+                                                    View Itinerary
+                                                    <ArrowRight className="w-3.5 h-3.5" />
+                                                </Button>
                                             </div>
-                                            <div className="flex flex-wrap gap-2 pt-1">
-                                                {upcomingTrip.highlights.map((h) => (
-                                                    <Badge
-                                                        key={h}
-                                                        className="bg-white/20 hover:bg-white/30 text-white border-0 text-xs px-3 py-1"
-                                                    >
-                                                        {h}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <Link to="/itinerary">
-                                            <Button
-                                                size="lg"
-                                                className="bg-white text-indigo-700 hover:bg-white/90 shadow-lg font-semibold gap-2 cursor-pointer whitespace-nowrap"
-                                            >
-                                                View Itinerary
-                                                <ArrowRight className="w-4 h-4" />
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </Card>
+                                        </Card>
+                                    ))}
+                                </div>
                             </section>
                         </>
                     )}

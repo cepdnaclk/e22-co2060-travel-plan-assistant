@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import {
   Plane,
@@ -52,10 +52,25 @@ function RootLayout() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout, setShowLoginModal } = useAuth();
 
+  const isDashboard = location.pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
+
+  // Track scroll position — show navbar after scrolling past 100px on dashboard
+  useEffect(() => {
+    if (!isDashboard) {
+      setScrolled(true);
+      return;
+    }
+    setScrolled(false);
+    const handleScroll = () => setScrolled(window.scrollY > 100);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isDashboard]);
 
   const handleNavClick = (
     e: React.MouseEvent,
@@ -64,16 +79,24 @@ function RootLayout() {
     if (item.protected && !isAuthenticated) {
       e.preventDefault();
       setShowLoginModal(true);
+      return;
+    }
+    // If already on this page, smooth-scroll to top
+    if (location.pathname === item.path) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header — fixed so it overlays the hero image on the dashboard */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        location.pathname === "/"
-          ? "bg-white/30 backdrop-blur-md border-b border-white/20"
-          : "bg-white/80 backdrop-blur-sm border-b border-gray-200"
+      {/* Header — hidden on dashboard until user scrolls, always visible on other pages */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? isDashboard
+            ? "translate-y-0 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm"
+            : "translate-y-0 bg-white/80 backdrop-blur-sm border-b border-gray-200"
+          : "-translate-y-full"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">

@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .join("");
 
             setUser({ name, email, initials: initials || "U" });
+            window.scrollTo({ top: 0, behavior: "smooth" });
         },
         [],
     );
@@ -71,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = useCallback(() => {
         setUser(null);
         setPendingAction(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
     return (
