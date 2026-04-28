@@ -27,6 +27,7 @@ export const router = createBrowserRouter([
         Component: ProtectedRoute,
         children: [
           { path: "itinerary", Component: Itinerary },
+          { path: "itinerary/:tripId", Component: Itinerary },
           { path: "budget", Component: Budget },
           { path: "profile", Component: MyProfile },
           { path: "my-trips", Component: MyTrips },
