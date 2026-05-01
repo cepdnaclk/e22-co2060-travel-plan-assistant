@@ -9,7 +9,7 @@ async function geocodePlace(place) {
             params: {
                 input: place,
                 inputtype: "textquery",
-                fields: "name,geometry/location,rating,types",
+                fields: "place_id,name,geometry/location,rating,types",
                 key: process.env.GOOGLE_API_KEY
             }
         });
@@ -23,9 +23,10 @@ async function geocodePlace(place) {
         const result = candidates[0];
 
         return {
+            place_id: result.place_id || null,
             name: result.name || place,
-            lat: result.geometry.location.lat,
-            lng: result.geometry.location.lng,
+            lat: result.geometry?.location?.lat,
+            lng: result.geometry?.location?.lng,
             rating: result.rating || null,
             types: result.types || []
         };
