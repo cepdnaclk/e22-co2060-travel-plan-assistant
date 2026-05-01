@@ -6,6 +6,7 @@ import {
     routeSegments,
     categoryColors,
     type ItineraryDestination,
+    type RouteSegment,
 } from "../data/itinerary-data";
 
 // Sri Lanka center & zoom
@@ -15,30 +16,48 @@ const DEFAULT_ZOOM = 8;
 interface SriLankaMapProps {
     activeId?: string;
     onDestinationClick?: (dest: ItineraryDestination) => void;
+    destinations?: ItineraryDestination[];
+    routeSegments?: RouteSegment[];
 }
 
 /** Smoothly fly to active destination */
-function FlyToActive({ activeId }: { activeId?: string }) {
+function FlyToActive({
+    activeId,
+    destinations,
+}: {
+    activeId?: string;
+    destinations: ItineraryDestination[];
+}) {
     const map = useMap();
     useEffect(() => {
         if (activeId) {
-            const dest = itineraryDestinations.find((d) => d.id === activeId);
+            const dest = destinations.find((d) => d.id === activeId);
             if (dest) {
                 map.flyTo([dest.lat, dest.lng], 10, { duration: 0.8 });
             }
         } else {
             map.flyTo(SRI_LANKA_CENTER, DEFAULT_ZOOM, { duration: 0.8 });
         }
-    }, [activeId, map]);
+    }, [activeId, destinations, map]);
     return null;
 }
 
-export function SriLankaMap({ activeId, onDestinationClick }: SriLankaMapProps) {
+export function SriLankaMap({
+    activeId,
+    onDestinationClick,
+    destinations,
+    routeSegments: segments,
+}: SriLankaMapProps) {
+    const selectedDestinations =
+        destinations && destinations.length > 0 ? destinations : itineraryDestinations;
+    const selectedSegments =
+        segments && segments.length > 0 ? segments : routeSegments;
+
     const getDestById = (id: string) =>
-        itineraryDestinations.find((d) => d.id === id);
+        selectedDestinations.find((d) => d.id === id);
 
     // Build polyline positions from route segments
-    const routeLines = routeSegments.map((seg) => {
+    const routeLines = selectedSegments.map((seg) => {
         const from = getDestById(seg.from);
         const to = getDestById(seg.to);
         if (!from || !to) return null;
@@ -68,8 +87,8 @@ export function SriLankaMap({ activeId, onDestinationClick }: SriLankaMapProps) 
                             Your Route
                         </h3>
                         <p className="text-white/50 text-xs mt-0.5">
-                            {itineraryDestinations.length} destinations ·{" "}
-                            {routeSegments.length} routes
+                            {selectedDestinations.length} destinations ·{" "}
+                            {selectedSegments.length} routes
                         </p>
                     </div>
                 </div>
@@ -102,7 +121,7 @@ export function SriLankaMap({ activeId, onDestinationClick }: SriLankaMapProps) 
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
-                    <FlyToActive activeId={activeId} />
+                    <FlyToActive activeId={activeId} destinations={selectedDestinations} />
 
                     {/* Route lines */}
                     {routeLines.map((line, i) => {
@@ -132,7 +151,7 @@ export function SriLankaMap({ activeId, onDestinationClick }: SriLankaMapProps) 
                     })}
 
                     {/* Destination markers */}
-                    {itineraryDestinations.map((dest) => {
+                    {selectedDestinations.map((dest) => {
                         const isActive = activeId === dest.id;
                         const color = categoryColors[dest.category]?.dot ?? "#6366f1";
 

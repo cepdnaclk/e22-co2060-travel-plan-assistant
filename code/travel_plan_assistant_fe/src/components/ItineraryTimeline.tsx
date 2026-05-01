@@ -6,30 +6,40 @@ import {
     routeSegments,
     categoryColors,
     type ItineraryDestination,
+    type RouteSegment,
 } from "../data/itinerary-data";
 
 interface ItineraryTimelineProps {
     activeId?: string;
     onDestinationClick?: (dest: ItineraryDestination) => void;
+    destinations?: ItineraryDestination[];
+    routeSegments?: RouteSegment[];
 }
 
 export function ItineraryTimeline({
     activeId,
     onDestinationClick,
+    destinations,
+    routeSegments: segments,
 }: ItineraryTimelineProps) {
+    const selectedDestinations =
+        destinations && destinations.length > 0 ? destinations : itineraryDestinations;
+    const selectedSegments =
+        segments && segments.length > 0 ? segments : routeSegments;
+
     const getRouteFromPrev = (destId: string) =>
-        routeSegments.find((r) => r.to === destId);
+        selectedSegments.find((r) => r.to === destId);
 
     /** Check if this is the first destination for its day */
     const isFirstOfDay = (index: number) => {
         if (index === 0) return true;
-        return itineraryDestinations[index].day !== itineraryDestinations[index - 1].day;
+        return selectedDestinations[index].day !== selectedDestinations[index - 1].day;
     };
 
     /** Check if the next destination is on the same day */
     const isSameDayAsNext = (index: number) => {
-        if (index >= itineraryDestinations.length - 1) return false;
-        return itineraryDestinations[index].day === itineraryDestinations[index + 1].day;
+        if (index >= selectedDestinations.length - 1) return false;
+        return selectedDestinations[index].day === selectedDestinations[index + 1].day;
     };
 
     return (
@@ -51,9 +61,9 @@ export function ItineraryTimeline({
 
             {/* Timeline */}
             <div className="relative">
-                {itineraryDestinations.map((dest, index) => {
+                {selectedDestinations.map((dest, index) => {
                     const isActive = activeId === dest.id;
-                    const isLast = index === itineraryDestinations.length - 1;
+                    const isLast = index === selectedDestinations.length - 1;
                     const colors = categoryColors[dest.category] ?? {
                         bg: "bg-gray-50",
                         text: "text-gray-700",
