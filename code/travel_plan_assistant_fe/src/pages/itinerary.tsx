@@ -1,10 +1,44 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
 import { MapPin, Navigation, Sparkles } from "lucide-react";
 import { SriLankaMap } from "../components/SriLankaMap";
 import { ItineraryTimeline } from "../components/ItineraryTimeline";
-import type { ItineraryDestination } from "../data/itinerary-data";
+import {
+  itineraryDestinations,
+  routeSegments,
+  type ItineraryDestination,
+  type RouteSegment,
+} from "../data/itinerary-data";
+
+interface GeneratedTripState {
+  generatedTrip?: {
+    destinations?: ItineraryDestination[];
+    routeSegments?: RouteSegment[];
+    metadata?: {
+      backend?: {
+        totalDistance?: string;
+        totalTime?: string;
+      };
+    };
+  };
+}
 
 export function Itinerary() {
+  const location = useLocation();
+  const state = location.state as GeneratedTripState | null;
+
+  const selectedDestinations =
+    state?.generatedTrip?.destinations && state.generatedTrip.destinations.length > 0
+      ? state.generatedTrip.destinations
+      : itineraryDestinations;
+
+  const selectedRouteSegments =
+    state?.generatedTrip?.routeSegments && state.generatedTrip.routeSegments.length > 0
+      ? state.generatedTrip.routeSegments
+      : routeSegments;
+
+  const tripStats = state?.generatedTrip?.metadata?.backend;
+
   const [activeDestination, setActiveDestination] = useState<string | undefined>(undefined);
 
   const handleDestinationClick = (dest: ItineraryDestination) => {
@@ -19,12 +53,17 @@ export function Itinerary() {
           <Navigation className="w-4 h-4" />
           Interactive Route Map
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+        <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
           Your Sri Lanka Itinerary
         </h1>
         <p className="text-gray-500 max-w-xl mx-auto">
           Explore your personalized travel route across the island. Click on any destination to highlight it on both the map and timeline.
         </p>
+        {tripStats && (
+          <p className="text-sm text-indigo-600 font-medium">
+            Total Distance: {tripStats.totalDistance ?? "N/A"} km · Total Time: {tripStats.totalTime ?? "N/A"} hours
+          </p>
+        )}
       </div>
 
       {/* Interactive Map Section */}
@@ -36,6 +75,8 @@ export function Itinerary() {
         <SriLankaMap
           activeId={activeDestination}
           onDestinationClick={handleDestinationClick}
+          destinations={selectedDestinations}
+          routeSegments={selectedRouteSegments}
         />
       </section>
 
@@ -56,6 +97,8 @@ export function Itinerary() {
         <ItineraryTimeline
           activeId={activeDestination}
           onDestinationClick={handleDestinationClick}
+          destinations={selectedDestinations}
+          routeSegments={selectedRouteSegments}
         />
       </section>
     </div>

@@ -16,6 +16,7 @@ import {
   Check,
   ChevronsUpDown,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 import { Card } from "../components/ui/card";
@@ -36,6 +37,11 @@ import {
 } from "../components/ui/command";
 import { cn } from "../components/ui/utils";
 import { sriLankaDistricts } from "../data/districts";
+import {
+  itineraryDestinations as fallbackDestinations,
+  type ItineraryDestination,
+  type RouteSegment,
+} from "../data/itinerary-data";
 
 const transportModes = [
   { id: "flight", label: "Flight", icon: Plane },
@@ -48,6 +54,11 @@ const transportModes = [
 export function Home() {
   const navigate = useNavigate();
   const { isAuthenticated, setShowLoginModal, setPendingAction } = useAuth();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000";
   // Date range
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const tripDays =
@@ -88,19 +99,160 @@ export function Home() {
     }
   };
 
+  const buildGeneratedDestinations = useCallback(
+    (path: string[]): ItineraryDestination[] => {
+      const byName = new Map(
+        fallbackDestinations.map((d) => [d.name.toLowerCase(), d])
+      );
+
+      return path.map((name, index) => {
+        const matched = byName.get(name.toLowerCase());
+        const generatedId = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${index + 1}`;
+
+        if (matched) {
+          return {
+            ...matched,
+            id: generatedId,
+            day: index + 1,
+          };
+        }
+
+        return {
+          id: generatedId,
+          name,
+          district: "Sri Lanka",
+          lat: 7.8731,
+          lng: 80.7718,
+          day: index + 1,
+          description: "AI generated stop for your custom route.",
+          category: "Custom",
+          highlights: ["Generated itinerary stop"],
+          image:
+            "https://images.unsplash.com/photo-1573225935973-40799471a5e0?auto=format&fit=crop&q=80&w=600",
+        };
+      });
+    },
+    []
+  );
+
+  const buildGeneratedSegments = useCallback(
+    (destinations: ItineraryDestination[]): RouteSegment[] => {
+      if (destinations.length < 2) return [];
+
+      return destinations.slice(1).map((destination, index) => ({
+        from: destinations[index].id,
+        to: destination.id,
+        duration: "Calculated",
+        distance: "Calculated",
+        transport: transport || "Car",
+      }));
+    },
+    [transport]
+  );
+
   const handlePlanTrip = useCallback(() => {
-    const submitTrip = () => {
-      // Form data is preserved in component state via closure
-      navigate("/itinerary");
+    const submitTrip = async () => {
+      setGenerationError(null);
+
+      const startPlace = districts[0] || places[0];
+      const desiredPlaces = [
+        ...districts.slice(1),
+        ...places.filter((p) => p !== startPlace),
+      ];
+
+      if (!startPlace) {
+        setGenerationError("Select at least one district or add a place to start planning.");
+        return;
+      }
+
+      if (tripDays <= 0) {
+        setGenerationError("Please select your travel dates before generating the itinerary.");
+        return;
+      }
+
+      if (desiredPlaces.length === 0) {
+        setGenerationError("Add at least one additional stop to generate a route.");
+        return;
+      }
+
+      try {
+        setIsGenerating(true);
+
+        const response = await fetch(`${apiBaseUrl}/api/trips/generate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            startPlace,
+            desiredPlaces,
+            availableTime: tripDays,
+          }),
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Failed to generate itinerary.");
+        }
+
+        const generatedPath = payload?.data?.path;
+
+        if (!Array.isArray(generatedPath) || generatedPath.length === 0) {
+          throw new Error("Trip generation returned an empty route.");
+        }
+
+        const generatedDestinations = buildGeneratedDestinations(generatedPath);
+        const generatedRouteSegments = buildGeneratedSegments(generatedDestinations);
+
+        navigate("/itinerary", {
+          state: {
+            generatedTrip: {
+              destinations: generatedDestinations,
+              routeSegments: generatedRouteSegments,
+              metadata: {
+                budget: budget[0],
+                transport,
+                dateRange,
+                backend: payload.data,
+              },
+            },
+          },
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Could not generate itinerary right now.";
+        setGenerationError(message);
+      } finally {
+        setIsGenerating(false);
+      }
     };
 
     if (isAuthenticated) {
-      submitTrip();
+      void submitTrip();
     } else {
-      setPendingAction(() => submitTrip);
+      setPendingAction(() => {
+        void submitTrip();
+      });
       setShowLoginModal(true);
     }
-  }, [isAuthenticated, navigate, setPendingAction, setShowLoginModal]);
+  }, [
+    apiBaseUrl,
+    budget,
+    buildGeneratedDestinations,
+    buildGeneratedSegments,
+    dateRange,
+    districts,
+    isAuthenticated,
+    navigate,
+    places,
+    setPendingAction,
+    setShowLoginModal,
+    transport,
+    tripDays,
+  ]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-12">
@@ -371,11 +523,27 @@ export function Home() {
           type="button"
           size="lg"
           onClick={handlePlanTrip}
+          disabled={isGenerating}
           className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-600 text-white shadow-lg shadow-indigo-200 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-300 hover:scale-[1.01] cursor-pointer"
         >
-          <Sparkles className="w-5 h-5 mr-2" />
-          Plan Trip
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Generating Itinerary...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5 mr-2" />
+              Plan Trip
+            </>
+          )}
         </Button>
+
+        {generationError && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+            {generationError}
+          </p>
+        )}
       </Card>
     </div>
   );

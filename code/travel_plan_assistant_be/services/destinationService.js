@@ -82,11 +82,18 @@ async function insertDestination({
         return result.insertId;
     }
 
+async function getAllDestinations() {
+    const [rows] = await db.execute(
+        "SELECT destinationID, name, rating, tag FROM destinations"
+    );
 
+    return rows;
+}
 
 module.exports = { 
     findByName,
     findByID,
     getDistrictID,
-    insertDestination
+    insertDestination,
+    getAllDestinations
 };

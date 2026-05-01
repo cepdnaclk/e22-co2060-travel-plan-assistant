@@ -68,7 +68,7 @@ function RootLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header — fixed so it overlays the hero image on the dashboard */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
         location.pathname === "/"
@@ -113,7 +113,7 @@ function RootLayout() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer outline-none">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+                      <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
                         {user.initials}
                       </div>
                       <span className="hidden sm:inline text-sm font-medium text-gray-700">
