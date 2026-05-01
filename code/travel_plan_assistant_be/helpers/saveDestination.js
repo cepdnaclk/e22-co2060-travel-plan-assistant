@@ -1,7 +1,7 @@
 const { getNearbyDestinations } = require("./nearby")
 const { findClosestDistrict } = require("./district")
 const  { populateNearby } = require("./nearby");
-const  { findByName, insertDestination } = require("../services/destinationService");
+const  { findByName, insertDestination,getPlaceDetails, downloadPlacePhoto } = require("../services/destinationService");
 const { getAllDistricts } = require("../services/districtService");
 const { getCoordinates } = require("./geocode");
 const { areCoordsClose } = require("./utils");
@@ -32,12 +32,20 @@ async function saveDestination(placeName) {
     }
     
     const {
+        place_id = null,
         lat,
         lng,
         rating = null,
         types = [],
         name = placeName
     } = coords;
+
+    // Get photo refs, description and user reviews
+    const placeDetails = await getPlaceDetails(place_id);
+
+    if (!placeDetails) {
+        throw new Error(`Failed to fetch place details for ${placeName}`);
+    }
 
     const nearby = await getNearbyDestinations(lat, lng);
     for (const row of nearby) {
@@ -58,6 +66,21 @@ async function saveDestination(placeName) {
         throw new Error("District or district_id is undefined");
     }
 
+    // Download display picture using FIRST photo reference
+    let displayPicture = null;
+
+    if (placeDetails.photos && placeDetails.photos.length > 0) {
+        const firstRef = placeDetails.photos[0];
+
+        const fileName = `${place_id || name}.jpg`;
+
+        const savedPath = await downloadPlacePhoto(firstRef, fileName);
+
+        if (savedPath) {
+            displayPicture = fileName;
+        }
+    }
+
     // Insert destination
     const destinationID = await insertDestination({
         district_id: district.district_id,
@@ -65,7 +88,12 @@ async function saveDestination(placeName) {
         lat,
         lng,
         rating,
-        tag: types || []
+        tag: types || [],
+        place_id,
+        description: placeDetails.description,
+        photos: placeDetails.photos,
+        user_reviews: placeDetails.reviews,
+        display_picture: displayPicture
     });
 
     await populateNearby(destinationID, lat, lng);
@@ -77,6 +105,8 @@ async function saveDestination(placeName) {
         lng
     };
 }
+
+
 module.exports ={
     saveDestination
 }
