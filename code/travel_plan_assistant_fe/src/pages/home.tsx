@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { format, differenceInDays } from "date-fns";
@@ -13,10 +13,10 @@ import {
   Car,
   Plus,
   X,
-  Check,
-  ChevronsUpDown,
   Sparkles,
   Loader2,
+  AlertCircle,
+  Navigation,
 } from "lucide-react";
 
 import { Card } from "../components/ui/card";
@@ -27,14 +27,6 @@ import { Slider } from "../components/ui/slider";
 import { Badge } from "../components/ui/badge";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "../components/ui/command";
 import { cn } from "../components/ui/utils";
 import { sriLankaDistricts } from "../data/districts";
 import {
@@ -72,9 +64,20 @@ export function Home() {
   // Transport
   const [transport, setTransport] = useState<string>("");
 
-  // District combobox
-  const [districtOpen, setDistrictOpen] = useState(false);
-  const [districts, setDistricts] = useState<string[]>([]);
+  // Location inputs
+  const [startLocation, setStartLocation] = useState("");
+  const [endLocation, setEndLocation] = useState("");
+
+  // Validation
+  const [validationError, setValidationError] = useState("");
+
+  // Auto-dismiss validation error after 5 seconds
+  useEffect(() => {
+    if (validationError) {
+      const timer = setTimeout(() => setValidationError(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [validationError]);
 
   // Must-visit places
   const [placeInput, setPlaceInput] = useState("");
@@ -151,17 +154,30 @@ export function Home() {
   );
 
   const handlePlanTrip = useCallback(() => {
+    // Validation: at least one condition must be met
+    const hasLocations = startLocation.trim() !== "" && endLocation.trim() !== "";
+    const hasPlaces = places.length > 0;
+
+    if (!hasLocations && !hasPlaces) {
+      setValidationError(
+        "Please provide either a Starting and End Location, or add at least one Must-Visit Place."
+      );
+      return;
+    }
+
+    setValidationError("");
+
     const submitTrip = async () => {
       setGenerationError(null);
 
-      const startPlace = districts[0] || places[0];
+      const startPlace = startLocation || places[0];
       const desiredPlaces = [
-        ...districts.slice(1),
         ...places.filter((p) => p !== startPlace),
+        ...(endLocation ? [endLocation] : []),
       ];
 
       if (!startPlace) {
-        setGenerationError("Select at least one district or add a place to start planning.");
+        setGenerationError("Select a starting location or add a place to start planning.");
         return;
       }
 
@@ -244,7 +260,6 @@ export function Home() {
     buildGeneratedDestinations,
     buildGeneratedSegments,
     dateRange,
-    districts,
     isAuthenticated,
     navigate,
     places,
@@ -252,6 +267,8 @@ export function Home() {
     setShowLoginModal,
     transport,
     tripDays,
+    startLocation,
+    endLocation,
   ]);
 
   return (
@@ -392,81 +409,44 @@ export function Home() {
           </div>
         </section>
 
-        {/* ── 4. Districts (multi-select) ── */}
+        {/* ── 4. Starting & End Location ── */}
         <section className="space-y-3">
           <Label className="text-base font-semibold text-gray-800 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-rose-500" />
-            Districts
+            <Navigation className="w-5 h-5 text-rose-500" />
+            Route
           </Label>
-          <Popover open={districtOpen} onOpenChange={setDistrictOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                id="district-selector"
-                variant="outline"
-                role="combobox"
-                aria-expanded={districtOpen}
-                className="w-full sm:w-[320px] justify-between h-11 font-normal"
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="start-location"
+                className="text-sm font-medium text-gray-600"
               >
-                {districts.length > 0
-                  ? `${districts.length} district${districts.length > 1 ? "s" : ""} selected`
-                  : "Search and select districts…"}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[320px] p-0">
-              <Command>
-                <CommandInput placeholder="Search districts…" />
-                <CommandList>
-                  <CommandEmpty>No district found.</CommandEmpty>
-                  <CommandGroup>
-                    {sriLankaDistricts.map((d) => (
-                      <CommandItem
-                        key={d}
-                        value={d}
-                        onSelect={(val) => {
-                          setDistricts((prev) =>
-                            prev.includes(val)
-                              ? prev.filter((item) => item !== val)
-                              : [...prev, val]
-                          );
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            districts.includes(d) ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {d}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {districts.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {districts.map((d) => (
-                <Badge
-                  key={d}
-                  variant="secondary"
-                  className="px-3 py-1.5 text-sm gap-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors"
-                >
-                  {d}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDistricts((prev) => prev.filter((item) => item !== d))
-                    }
-                    className="ml-0.5 rounded-full hover:bg-rose-200 p-0.5 transition-colors cursor-pointer"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
+                Starting Location
+              </label>
+              <Input
+                id="start-location"
+                placeholder="e.g. Colombo"
+                value={startLocation}
+                onChange={(e) => setStartLocation(e.target.value)}
+                className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
+              />
             </div>
-          )}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="end-location"
+                className="text-sm font-medium text-gray-600"
+              >
+                End Location
+              </label>
+              <Input
+                id="end-location"
+                placeholder="e.g. Kandy"
+                value={endLocation}
+                onChange={(e) => setEndLocation(e.target.value)}
+                className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
+              />
+            </div>
+          </div>
         </section>
 
         {/* ── 5. Must-Visit Places ── */}
@@ -516,6 +496,27 @@ export function Home() {
             </div>
           )}
         </section>
+
+        {/* ── Validation Error Toast ── */}
+        {validationError && (
+          <div
+            className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 animate-in fade-in slide-in-from-top-2 duration-300"
+            role="alert"
+          >
+            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">{validationError}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setValidationError("")}
+              className="shrink-0 rounded-full p-1 hover:bg-red-100 transition-colors cursor-pointer"
+              aria-label="Dismiss error"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* ── Plan Trip Button ── */}
         <Button
