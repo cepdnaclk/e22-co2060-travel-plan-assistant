@@ -50,7 +50,7 @@ function isInDirectionBox(curr, next, target) {
 
     const cosTheta = dot / (mag1 * mag2 + 1e-9);
 
-    // This controls the filter window
+    // This controls the filter window (lowered from 0.6 to 0.3 to allow wider angles for city origins)
     return cosTheta > 0.4;
 }
 

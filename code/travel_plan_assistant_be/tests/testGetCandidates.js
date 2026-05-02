@@ -17,7 +17,7 @@ async function runTest() {
 
         console.log("\n===== SPATIAL + FILTER TEST =====");
 
-        const currentName = "Royal Botanic Gardens, Peradeniya";
+        const currentName = "Kandy";
         const targetName = "Colombo";
 
         const current = await findByName(currentName);

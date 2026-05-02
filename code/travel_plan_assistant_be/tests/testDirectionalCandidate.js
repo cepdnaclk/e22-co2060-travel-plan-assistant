@@ -33,7 +33,7 @@ async function runTest() {
 
     console.log("\n===== DIRECTIONAL CANDIDATE TEST =====\n");
 
-    const current = "Royal Botanic Gardens, Peradeniya";
+    const current = "Kandy";
     const target = "Colombo";
 
     const currentID = await resolveID(current);

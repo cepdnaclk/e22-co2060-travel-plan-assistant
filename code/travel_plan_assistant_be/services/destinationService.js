@@ -28,6 +28,13 @@ async function findByName(place) {
  * Returns destination data for the given ID
  */
 async function findByID(id) {
+<<<<<<< Updated upstream
+=======
+  const [rows] = await db.execute(
+    "SELECT destinationID, name, lat, lng, rating, tag, description, user_reviews, display_picture FROM destinations WHERE destinationID = ? LIMIT 1",
+    [id],
+  );
+>>>>>>> Stashed changes
 
     const [rows] = await db.execute(
         `SELECT destinationID, name, lat, lng
@@ -37,6 +44,7 @@ async function findByID(id) {
         [id]
     );
 
+<<<<<<< Updated upstream
     if (!rows.length) return null;
 
     return {
@@ -45,6 +53,19 @@ async function findByID(id) {
         lat: parseFloat(rows[0].lat),
         lng: parseFloat(rows[0].lng)
     };
+=======
+  return {
+    id: rows[0].destinationID,
+    name: rows[0].name,
+    lat: parseFloat(rows[0].lat),
+    lng: parseFloat(rows[0].lng),
+    rating: rows[0].rating,
+    tag: rows[0].tag,
+    description: rows[0].description,
+    user_reviews: rows[0].user_reviews,
+    display_picture: rows[0].display_picture
+  };
+>>>>>>> Stashed changes
 }
 
 /**
