@@ -1,9 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { Star, MapPin, DollarSign, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import axios from "axios";
+import {
+  Star,
+  MapPin,
+  DollarSign,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+
+type UserReview = {
+  text: string;
+  author: string;
+  rating: number;
+};
 
 type ApiDestination = {
   destinationID?: number | string;
@@ -11,6 +25,9 @@ type ApiDestination = {
   name?: string;
   rating?: number | string | null;
   tag?: string[] | string | null;
+  description?: string;
+  user_reviews?: UserReview[];
+  display_picture?: string;
 };
 
 type DestinationCardItem = {
@@ -18,6 +35,8 @@ type DestinationCardItem = {
   name: string;
   country: string;
   description: string;
+  fullDescription?: string;
+  userReviews?: UserReview[];
   category: string;
   image: string;
   rating: number;
@@ -42,46 +61,60 @@ export function Destinations() {
         setIsLoading(true);
         setFetchError(null);
 
-        const response = await fetch(`${apiBaseUrl}/api/destinations`);
-        const payload: ApiDestination[] = await response.json();
+        const response = await axios.get<ApiDestination[]>(
+          `${apiBaseUrl}/api/destinations`
+        );
+        const payload = response.data;
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch destinations");
-        }
+        const mappedDestinations = (Array.isArray(payload) ? payload : []).map(
+          (item) => {
+            const destinationId = item.destinationID ?? item.id;
+            const rating = Number(item.rating);
+            const tags = Array.isArray(item.tag)
+              ? item.tag.filter(
+                  (value): value is string => typeof value === "string",
+                )
+              : typeof item.tag === "string"
+                ? [item.tag]
+                : [];
+            const primaryTag =
+              tags.find((tag) => tag.toLowerCase() !== "establishment") ||
+              tags[0] ||
+              "General";
 
-        const mappedDestinations = (Array.isArray(payload) ? payload : []).map((item) => {
-          const destinationId = item.destinationID ?? item.id;
-          const rating = Number(item.rating);
-          const tags = Array.isArray(item.tag)
-            ? item.tag.filter((value): value is string => typeof value === "string")
-            : typeof item.tag === "string"
-              ? [item.tag]
-              : [];
-          const primaryTag =
-            tags.find((tag) => tag.toLowerCase() !== "establishment") ||
-            tags[0] ||
-            "General";
+            // Use display_picture if available, otherwise fall back to unsplash
+            const imageUrl = item.display_picture
+              ? `${apiBaseUrl}/public/destinations/${item.display_picture}`
+              : "https://images.unsplash.com/photo-1572451479139-6a308211d8be?auto=format&fit=crop&q=80&w=1200";
 
-          return {
-            id: String(destinationId ?? ""),
-            name: item.name?.trim() || "Unknown Destination",
-            country: "Sri Lanka",
-            description: "Discover this destination in Sri Lanka.",
-            category: primaryTag
-              .split("_")
-              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-              .join(" "),
-            image:
-              "https://images.unsplash.com/photo-1572451479139-6a308211d8be?auto=format&fit=crop&q=80&w=1200",
-            rating: Number.isFinite(rating) ? rating : 0,
-            price: "N/A",
-          } as DestinationCardItem;
-        });
+            return {
+              id: String(destinationId ?? ""),
+              name: item.name?.trim() || "Unknown Destination",
+              country: "Sri Lanka",
+              description: item.description?.trim() || "Discover this destination in Sri Lanka.",
+              fullDescription: item.description?.trim(),
+              userReviews: item.user_reviews || [],
+              category: primaryTag
+                .split("_")
+                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(" "),
+              image: imageUrl,
+              rating: Number.isFinite(rating) ? rating : 0,
+              // price: "N/A",
+            } as DestinationCardItem;
+          },
+        );
 
         setDestinations(mappedDestinations.filter((item) => item.id));
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Could not load destinations.";
+          axios.isAxiosError(error)
+            ? error.response?.data?.message ||
+              error.message ||
+              "Failed to fetch destinations"
+            : error instanceof Error
+              ? error.message
+              : "Could not load destinations.";
         setFetchError(message);
       } finally {
         setIsLoading(false);
@@ -97,9 +130,11 @@ export function Destinations() {
   }, [destinations]);
 
   const filteredDestinations = destinations.filter((dest) => {
-    const matchesSearch = dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dest.country.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || dest.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "All" || dest.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -107,15 +142,22 @@ export function Destinations() {
     setCurrentPage(1);
   }, [searchQuery, selectedCategory, destinations]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredDestinations.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDestinations.length / ITEMS_PER_PAGE),
+  );
   const paginatedDestinations = filteredDestinations.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
-  const startResult = filteredDestinations.length === 0
-    ? 0
-    : (currentPage - 1) * ITEMS_PER_PAGE + 1;
-  const endResult = Math.min(currentPage * ITEMS_PER_PAGE, filteredDestinations.length);
+  const startResult =
+    filteredDestinations.length === 0
+      ? 0
+      : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endResult = Math.min(
+    currentPage * ITEMS_PER_PAGE,
+    filteredDestinations.length,
+  );
 
   const pageItems = useMemo(() => {
     if (totalPages <= 7) {
@@ -146,8 +188,12 @@ export function Destinations() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Explore Destinations</h1>
-        <p className="text-gray-600">Discover amazing places for your next adventure</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Explore Destinations
+        </h1>
+        <p className="text-gray-600">
+          Discover amazing places for your next adventure
+        </p>
       </div>
 
       {/* Search and Filters */}
@@ -179,7 +225,11 @@ export function Destinations() {
       {/* Destinations Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedDestinations.map((destination) => (
-          <Link to={`/destinations/${destination.id}`} key={destination.id} className="block group">
+          <Link
+            to={`/destinations/${destination.id}`}
+            key={destination.id}
+            className="block group"
+          >
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -189,7 +239,9 @@ export function Destinations() {
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="text-sm font-medium">{destination.rating}</span>
+                  <span className="text-sm font-medium">
+                    {destination.rating}
+                  </span>
                 </div>
               </div>
               <div className="p-5 space-y-3">
@@ -202,15 +254,19 @@ export function Destinations() {
                     <span>{destination.country}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 line-clamp-2">{destination.description}</p>
+                <p className="text-sm text-gray-600 line-clamp-3">
+                  {destination.fullDescription || destination.description}
+                </p>
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{destination.category}</Badge>
                   </div>
-                  <div className="flex items-center text-gray-700">
+                  {/* <div className="flex items-center text-gray-700">
                     <DollarSign className="w-4 h-4" />
-                    <span className="text-sm font-medium">{destination.price}</span>
-                  </div>
+                    <span className="text-sm font-medium">
+                      {destination.price}
+                    </span>
+                  </div> */}
                 </div>
               </div>
             </Card>
@@ -219,66 +275,69 @@ export function Destinations() {
       </div>
 
       {!isLoading && !fetchError && filteredDestinations.length > 0 && (
-        <div className="mt-2 rounded-xl border border-gray-200 bg-gray-100 px-8 py-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm font-medium text-slate-700">
-              Showing {startResult} to {endResult} of {filteredDestinations.length} results
-            </p>
+        // <div className="mt-2 rounded-xl border border-gray-200 bg-gray-100 px-8 py-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm font-medium text-slate-700">
+            Showing {startResult} to {endResult} of{" "}
+            {filteredDestinations.length} results
+          </p>
 
-            <div className="inline-flex w-fit items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
-              <button
-                type="button"
-                aria-label="Go to previous page"
-                className="h-10 w-10 border-r border-gray-300 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="mx-auto h-4 w-4" />
-              </button>
+          <div className="inline-flex w-fit items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
+            <button
+              type="button"
+              aria-label="Go to previous page"
+              className="h-10 w-10 border-r border-gray-300 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="mx-auto h-4 w-4" />
+            </button>
 
-              {pageItems.map((item, index) => {
-                if (typeof item !== "number") {
-                  return (
-                    <span
-                      key={`${item}-${index}`}
-                      className="flex h-10 w-10 items-center justify-center border-r border-gray-300 text-slate-500"
-                    >
-                      ...
-                    </span>
-                  );
-                }
-
-                const page = item;
-                const isActive = page === currentPage;
-
+            {pageItems.map((item, index) => {
+              if (typeof item !== "number") {
                 return (
-                  <button
-                    key={page}
-                    type="button"
-                    className={`h-10 min-w-12 border-r border-gray-300 px-3 text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-indigo-600 text-white"
-                        : "text-slate-800 hover:bg-gray-50"
-                    }`}
-                    onClick={() => setCurrentPage(page)}
+                  <span
+                    key={`${item}-${index}`}
+                    className="flex h-10 w-10 items-center justify-center border-r border-gray-300 text-slate-500"
                   >
-                    {page}
-                  </button>
+                    ...
+                  </span>
                 );
-              })}
+              }
 
-              <button
-                type="button"
-                aria-label="Go to next page"
-                className="h-10 w-10 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="mx-auto h-4 w-4" />
-              </button>
-            </div>
+              const page = item;
+              const isActive = page === currentPage;
+
+              return (
+                <button
+                  key={page}
+                  type="button"
+                  className={`h-10 min-w-12 border-r border-gray-300 px-3 text-sm font-semibold transition ${
+                    isActive
+                      ? "bg-indigo-600 text-white"
+                      : "text-slate-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              aria-label="Go to next page"
+              className="h-10 w-10 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="mx-auto h-4 w-4" />
+            </button>
           </div>
         </div>
+        // </div>
       )}
 
       {isLoading && (
@@ -295,7 +354,9 @@ export function Destinations() {
 
       {!isLoading && !fetchError && filteredDestinations.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No destinations found matching your criteria.</p>
+          <p className="text-gray-500">
+            No destinations found matching your criteria.
+          </p>
         </div>
       )}
     </div>
