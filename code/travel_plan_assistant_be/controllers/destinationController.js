@@ -9,3 +9,20 @@ exports.getDestinations = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch destinations" });
   }
 };
+
+exports.getDestinationById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const destination = await destinationService.findByID(id);
+
+    if (!destination) {
+      return res.status(404).json({ error: "Destination not found" });
+    }
+
+    res.json(destination);
+  } catch (error) {
+    console.error("Error fetching destination:", error);
+    res.status(500).json({ error: "Failed to fetch destination" });
+  }
+};

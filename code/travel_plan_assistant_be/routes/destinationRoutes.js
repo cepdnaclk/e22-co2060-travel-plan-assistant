@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { getDestinations } = require("../controllers/destinationController");
+const {
+  getDestinations,
+  getDestinationById,
+} = require("../controllers/destinationController");
 
 router.get("/", getDestinations);
+router.get("/:id", getDestinationById);
 
 module.exports = router;

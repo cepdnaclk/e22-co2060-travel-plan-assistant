@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { User, Mail, Calendar, MapPin, Edit3 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -41,17 +42,14 @@ export function MyProfile() {
 
     const handleSave = async () => {
         try {
-            await fetch("http://localhost:5000/api/profile/update", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            });
-
-            console.log("Saved locally:", formData);
+            await axios.put("http://localhost:5000/api/profile/update", formData);
+            console.log("Saved successfully:", formData);
         } catch (err) {
-            console.log("Backend not ready, saving locally only");
+            if (axios.isAxiosError(err)) {
+                console.error("API error:", err.response?.data || err.message);
+            } else {
+                console.log("Backend not ready, saving locally only");
+            }
         }
 
         setIsEditing(false);
