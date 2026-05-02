@@ -27,12 +27,10 @@ async function findByName(place) {
  * Returns destination data for the given ID
  */
 async function findByID(id) {
-
   const [rows] = await db.execute(
     "SELECT destinationID, name, lat, lng, rating, tag, description, user_reviews, display_picture FROM destinations WHERE destinationID = ? LIMIT 1",
     [id],
   );
-
 
   if (!rows.length) return null;
 
@@ -45,9 +43,8 @@ async function findByID(id) {
     tag: rows[0].tag,
     description: rows[0].description,
     user_reviews: rows[0].user_reviews,
-    display_picture: rows[0].display_picture
+    display_picture: rows[0].display_picture,
   };
-
 }
 /**
  * Get district tag for a district name
@@ -142,6 +139,14 @@ async function getPlaceDetails(placeId) {
   }
 }
 
+async function getTrendingDestinations() {
+  const [rows] = await db.execute(
+    "SELECT destinationID, name, rating, display_picture FROM destinations ORDER BY rating DESC LIMIT 6",
+  );
+
+  return rows;
+}
+
 /**
  * Downloads a Google Places photo and saves it locally
  * @param {string} photoReference - Google photo_reference
@@ -193,4 +198,5 @@ module.exports = {
   getAllDestinations,
   getPlaceDetails,
   downloadPlacePhoto,
+  getTrendingDestinations,
 };

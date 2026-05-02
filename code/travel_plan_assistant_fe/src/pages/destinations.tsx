@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { api } from "../axios";
 import axios from "axios";
-import {
-  Star,
-  MapPin,
-  DollarSign,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Star, MapPin, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
@@ -61,15 +55,15 @@ export function Destinations() {
         setIsLoading(true);
         setFetchError(null);
 
-        const response = await axios.get<ApiDestination[]>(
-          `${apiBaseUrl}/api/destinations`
-        );
+        const response = await api.get<ApiDestination[]>("/api/destinations");
+
         const payload = response.data;
 
         const mappedDestinations = (Array.isArray(payload) ? payload : []).map(
           (item) => {
             const destinationId = item.destinationID ?? item.id;
             const rating = Number(item.rating);
+
             const tags = Array.isArray(item.tag)
               ? item.tag.filter(
                   (value): value is string => typeof value === "string",
@@ -77,12 +71,12 @@ export function Destinations() {
               : typeof item.tag === "string"
                 ? [item.tag]
                 : [];
+
             const primaryTag =
               tags.find((tag) => tag.toLowerCase() !== "establishment") ||
               tags[0] ||
               "General";
 
-            // Use display_picture if available, otherwise fall back to unsplash
             const imageUrl = item.display_picture
               ? `${apiBaseUrl}/public/destinations/${item.display_picture}`
               : "https://images.unsplash.com/photo-1572451479139-6a308211d8be?auto=format&fit=crop&q=80&w=1200";
@@ -91,7 +85,9 @@ export function Destinations() {
               id: String(destinationId ?? ""),
               name: item.name?.trim() || "Unknown Destination",
               country: "Sri Lanka",
-              description: item.description?.trim() || "Discover this destination in Sri Lanka.",
+              description:
+                item.description?.trim() ||
+                "Discover this destination in Sri Lanka.",
               fullDescription: item.description?.trim(),
               userReviews: item.user_reviews || [],
               category: primaryTag
@@ -100,21 +96,20 @@ export function Destinations() {
                 .join(" "),
               image: imageUrl,
               rating: Number.isFinite(rating) ? rating : 0,
-              // price: "N/A",
             } as DestinationCardItem;
           },
         );
 
         setDestinations(mappedDestinations.filter((item) => item.id));
       } catch (error) {
-        const message =
-          axios.isAxiosError(error)
-            ? error.response?.data?.message ||
-              error.message ||
-              "Failed to fetch destinations"
-            : error instanceof Error
-              ? error.message
-              : "Could not load destinations.";
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch destinations"
+          : error instanceof Error
+            ? error.message
+            : "Could not load destinations.";
+
         setFetchError(message);
       } finally {
         setIsLoading(false);
@@ -122,7 +117,7 @@ export function Destinations() {
     };
 
     void loadDestinations();
-  }, [apiBaseUrl]);
+  }, []);
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(destinations.map((d) => d.category)));
