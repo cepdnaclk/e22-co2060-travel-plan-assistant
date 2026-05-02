@@ -26,7 +26,7 @@ async function runTest() {
 
     console.log("\n===== EXPAND FRONTIER TEST =====\n");
 
-    const start = "Ella";
+    const start = "Kandy";
     const target = "Colombo";
 
     const startID = await resolveID(start);

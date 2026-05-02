@@ -7,10 +7,10 @@ async function runTest() {
     console.log("\n===== TRAVEL PLANNER BASIC TEST =====\n");
 
     const result = await createTravelPlan(
-        "Colombo",
+        "Kandy",
         [],
-        1000,
-        "Ella"
+        400,
+        "Colombo"
     );
 
     console.log("\n===== RESULT =====\n");
@@ -24,8 +24,8 @@ async function runTest() {
     console.log("\nCHECKPOINTS:");
     console.log(result.checkpoints);
 
-    console.log("\nTRACE:");
-    console.log(result.trace || "No trace");
+    // console.log("\nTRACE:");
+    // console.log(result.trace || "No trace");
 }
 
 runTest().catch(console.error);

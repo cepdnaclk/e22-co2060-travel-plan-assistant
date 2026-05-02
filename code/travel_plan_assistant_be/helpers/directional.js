@@ -29,7 +29,8 @@ async function findDirectionalCandidate(
             limit
         );
 
-        // console.log("Raw candidates found:", rawCandidates.length);
+
+        console.log("Raw candidates found:", rawCandidates.length);
 
         // STEP 2: remove duplicates
         const freshCandidates = rawCandidates.filter(
@@ -38,7 +39,7 @@ async function findDirectionalCandidate(
 
         freshCandidates.forEach(c => tested.add(c.id));
 
-        // console.log("Fresh candidates:", freshCandidates.length);
+        console.log("Fresh candidates:", freshCandidates.length);
 
         if (freshCandidates.length === 0) {
             radius += stepKm;
@@ -52,7 +53,7 @@ async function findDirectionalCandidate(
             freshCandidates
         );
 
-        // console.log("Directional candidates:", directional);
+        console.log("Directional candidates:", directional);
 
         if (!directional || directional.length === 0) {
             radius += stepKm;

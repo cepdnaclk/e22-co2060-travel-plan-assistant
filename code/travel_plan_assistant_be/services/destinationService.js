@@ -27,14 +27,27 @@ async function findByName(place) {
  * Returns destination data for the given ID
  */
 async function findByID(id) {
+
   const [rows] = await db.execute(
-    "SELECT destinationID, name, rating, tag, description, user_reviews, display_picture FROM destinations WHERE destinationID = ? LIMIT 1",
+    "SELECT destinationID, name, lat, lng, rating, tag, description, user_reviews, display_picture FROM destinations WHERE destinationID = ? LIMIT 1",
     [id],
   );
 
+
   if (!rows.length) return null;
 
-  return rows[0];
+  return {
+    id: rows[0].destinationID,
+    name: rows[0].name,
+    lat: parseFloat(rows[0].lat),
+    lng: parseFloat(rows[0].lng),
+    rating: rows[0].rating,
+    tag: rows[0].tag,
+    description: rows[0].description,
+    user_reviews: rows[0].user_reviews,
+    display_picture: rows[0].display_picture
+  };
+
 }
 /**
  * Get district tag for a district name
