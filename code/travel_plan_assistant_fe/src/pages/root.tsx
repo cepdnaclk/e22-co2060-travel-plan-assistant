@@ -54,6 +54,7 @@ function RootLayout() {
 
   const isDashboard = location.pathname === "/";
   const [scrolled, setScrolled] = useState(false);
+  const isTransparent = isDashboard && !scrolled;
 
   // Scroll to top on route change
   useEffect(() => {
@@ -90,20 +91,20 @@ function RootLayout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header — hidden on dashboard until user scrolls, always visible on other pages */}
+      {/* Header — transparent on dashboard until user scrolls, always styled on other pages */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? isDashboard
-            ? "translate-y-0 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm"
-            : "translate-y-0 bg-white/80 backdrop-blur-sm border-b border-gray-200"
-          : "-translate-y-full"
+            ? "bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm"
+            : "bg-white/80 backdrop-blur-sm border-b border-gray-200"
+          : "bg-transparent"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo → Plan Trip */}
             <Link to="/" className="flex items-center gap-2">
-              <Plane className="w-8 h-8 text-indigo-600" />
-              <span className="text-xl font-semibold text-gray-900">
+              <Plane className={`w-8 h-8 transition-colors duration-500 ${isTransparent ? "text-white" : "text-indigo-600"}`} />
+              <span className={`text-xl font-semibold transition-colors duration-500 ${isTransparent ? "text-white" : "text-gray-900"}`}>
                 TravelPlan
               </span>
             </Link>
@@ -118,9 +119,13 @@ function RootLayout() {
                     key={item.path}
                     to={item.path}
                     onClick={(e) => handleNavClick(e, item)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isActive
-                      ? "bg-indigo-100 text-indigo-700"
-                      : "text-gray-600 hover:bg-gray-100"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-500 ${isTransparent
+                      ? isActive
+                        ? "bg-white/20 text-white"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                      : isActive
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "text-gray-600 hover:bg-gray-100"
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -135,14 +140,14 @@ function RootLayout() {
               {isAuthenticated && user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer outline-none">
+                    <button className={`flex items-center gap-2 px-2 py-1.5 rounded-xl transition-colors cursor-pointer outline-none ${isTransparent ? "hover:bg-white/10" : "hover:bg-gray-100"}`}>
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
                         {user.initials}
                       </div>
-                      <span className="hidden sm:inline text-sm font-medium text-gray-700">
+                      <span className={`hidden sm:inline text-sm font-medium transition-colors duration-500 ${isTransparent ? "text-white" : "text-gray-700"}`}>
                         {user.name}
                       </span>
-                      <ChevronDown className="w-3.5 h-3.5 text-gray-400 hidden sm:block" />
+                      <ChevronDown className={`w-3.5 h-3.5 hidden sm:block transition-colors duration-500 ${isTransparent ? "text-white/60" : "text-gray-400"}`} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 mt-1">
@@ -193,7 +198,7 @@ function RootLayout() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowLoginModal(true)}
-                  className="gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer"
+                  className={`gap-2 cursor-pointer transition-colors duration-500 ${isTransparent ? "border-white/40 text-white hover:bg-white/10 hover:text-white" : "border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"}`}
                 >
                   <LogIn className="w-4 h-4" />
                   Login

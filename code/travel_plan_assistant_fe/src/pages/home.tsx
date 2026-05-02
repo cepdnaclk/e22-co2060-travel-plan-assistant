@@ -24,7 +24,7 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Slider } from "../components/ui/slider";
+// import { Slider } from "../components/ui/slider";
 import { Badge } from "../components/ui/badge";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
@@ -96,12 +96,12 @@ export function Home() {
         setIsLoadingDestinations(true);
         const response = await axios.get(`${apiBaseUrl}/api/destinations`);
         const destinationList = Array.isArray(response.data) ? response.data : [];
-        
+
         const mappedDestinations: DestinationOption[] = destinationList.map((dest: any) => ({
           id: dest.destinationID || dest.id,
           name: dest.name || "Unknown Destination",
         }));
-        
+
         setDestinations(mappedDestinations);
       } catch (error) {
         console.error("Failed to load destinations:", error);
@@ -317,8 +317,8 @@ export function Home() {
         const message =
           axios.isAxiosError(error)
             ? error.response?.data?.error ||
-              error.message ||
-              "Failed to generate itinerary."
+            error.message ||
+            "Failed to generate itinerary."
             : error instanceof Error
               ? error.message
               : "Could not generate itinerary right now.";
