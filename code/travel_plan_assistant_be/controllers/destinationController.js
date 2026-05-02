@@ -26,3 +26,13 @@ exports.getDestinationById = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch destination" });
   }
 };
+
+exports.getTrendingDestinations = async (req, res) => {
+  try {
+    const destinations = await destinationService.getTrendingDestinations();
+    res.json(destinations);
+  } catch (error) {
+    console.error("Error fetching trending destinations:", error);
+    res.status(500).json({ error: "Failed to fetch trending destinations" });
+  }
+};

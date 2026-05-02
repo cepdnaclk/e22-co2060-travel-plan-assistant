@@ -90,7 +90,7 @@ function RootLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header — transparent on dashboard until user scrolls, always styled on other pages */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
@@ -141,7 +141,7 @@ function RootLayout() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className={`flex items-center gap-2 px-2 py-1.5 rounded-xl transition-colors cursor-pointer outline-none ${isTransparent ? "hover:bg-white/10" : "hover:bg-gray-100"}`}>
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+                      <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
                         {user.initials}
                       </div>
                       <span className={`hidden sm:inline text-sm font-medium transition-colors duration-500 ${isTransparent ? "text-white" : "text-gray-700"}`}>
@@ -198,7 +198,7 @@ function RootLayout() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowLoginModal(true)}
-                  className={`gap-2 cursor-pointer transition-colors duration-500 ${isTransparent ? "border-white/40 text-white hover:bg-white/10 hover:text-white" : "border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"}`}
+                  className={`gap-2 cursor-pointer transition-colors duration-500 ${isTransparent ? "bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white" : "border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"}`}
                 >
                   <LogIn className="w-4 h-4" />
                   Login
