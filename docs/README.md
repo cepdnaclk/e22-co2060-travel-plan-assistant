@@ -45,7 +45,7 @@ A HTML template integrated with the given GitHub repository templates, based on 
 
 ## Introduction
 
-Travel planning is currently fragmented across multiple platforms, making structured itinerary creation a time-consuming process. Furthermore, optimizing time, cost, and routes is challenging without a unified system for automated travel planning. The Travel Plan Assistant is a web-based solution designed to automatically generate structured, optimized itineraries based on user inputs such as destination, time, and budget. By providing a personalized and intelligent solution, this application reduces manual effort and improves overall travel planning efficiency for tourists, business travelers, and budget-conscious individuals.
+Travel planning is currently fragmented across multiple platforms, making structured itinerary creation a time-consuming process. Furthermore, optimizing time, cost and routes is challenging without a unified system for automated travel planning. The Travel Plan Assistant is a web-based solution designed to automatically generate structured, optimized itineraries based on user inputs such as destination, time and budget. By providing a personalized and intelligent solution, this application reduces manual effort and improves overall travel planning efficiency for tourists, business travelers and budget-conscious individuals.
 
 
 ## Solution Architecture
@@ -58,7 +58,7 @@ The database design relies heavily on Graph-Based Data Modeling to facilitate au
 
 ## Testing
 
-Testing focuses on verifying end-to-end functionality and handling edge cases within the multi-criteria itinerary generation process. ]Key non-functional requirements such as performance, scalability, maintainability, and security are evaluated. Special emphasis is placed on validating API reliability and data accuracy when retrieving distance and pricing metrics from external services.
+Testing focuses on verifying end-to-end functionality and handling edge cases within the multi-criteria itinerary generation process. ]Key non-functional requirements such as performance, scalability, maintainability and security are evaluated. Special emphasis is placed on validating API reliability and data accuracy when retrieving distance and pricing metrics from external services.
 
 ## Conclusion
 
