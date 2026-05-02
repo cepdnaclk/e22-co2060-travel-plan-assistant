@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const { getCoordinates } = require("./services/routeService");
 require("dotenv").config();
@@ -16,6 +17,7 @@ const tripRoutes = require("./routes/tripRoutes");
 
 app.use("/api/destinations", destinationRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/public", express.static(path.join(process.cwd(), "public")));
 
 // app.use("/api", routeService);
 

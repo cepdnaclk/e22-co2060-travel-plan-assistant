@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
+import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { format, differenceInDays } from "date-fns";
 import type { DateRange } from "../components/ui/calendar";
@@ -28,7 +29,6 @@ import { Badge } from "../components/ui/badge";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { cn } from "../components/ui/utils";
-import { sriLankaDistricts } from "../data/districts";
 import {
   itineraryDestinations as fallbackDestinations,
   type ItineraryDestination,
@@ -43,11 +43,21 @@ const transportModes = [
   { id: "tuktuk", label: "Tuk-Tuk", icon: Car },
 ] as const;
 
+type DestinationOption = {
+  id: string | number;
+  name: string;
+};
+
 export function Home() {
   const navigate = useNavigate();
   const { isAuthenticated, setShowLoginModal, setPendingAction } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [destinations, setDestinations] = useState<DestinationOption[]>([]);
+  const [isLoadingDestinations, setIsLoadingDestinations] = useState(false);
+  const [showStartLocationDropdown, setShowStartLocationDropdown] = useState(false);
+  const [showEndLocationDropdown, setShowEndLocationDropdown] = useState(false);
+  const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
 
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000";
@@ -58,11 +68,11 @@ export function Home() {
       ? differenceInDays(dateRange.to, dateRange.from) + 1
       : 0;
 
-  // Budget
-  const [budget, setBudget] = useState([1500]);
+  // Budget - disabled for now
+  const [budget] = useState([1500]);
 
-  // Transport
-  const [transport, setTransport] = useState<string>("");
+  // Transport - default to car
+  const [transport, setTransport] = useState<string>("car");
 
   // Location inputs
   const [startLocation, setStartLocation] = useState("");
@@ -79,15 +89,58 @@ export function Home() {
     }
   }, [validationError]);
 
+  // Load destinations from API
+  useEffect(() => {
+    const loadDestinations = async () => {
+      try {
+        setIsLoadingDestinations(true);
+        const response = await axios.get(`${apiBaseUrl}/api/destinations`);
+        const destinationList = Array.isArray(response.data) ? response.data : [];
+        
+        const mappedDestinations: DestinationOption[] = destinationList.map((dest: any) => ({
+          id: dest.destinationID || dest.id,
+          name: dest.name || "Unknown Destination",
+        }));
+        
+        setDestinations(mappedDestinations);
+      } catch (error) {
+        console.error("Failed to load destinations:", error);
+        setDestinations([]);
+      } finally {
+        setIsLoadingDestinations(false);
+      }
+    };
+
+    void loadDestinations();
+  }, [apiBaseUrl]);
+
   // Must-visit places
   const [placeInput, setPlaceInput] = useState("");
   const [places, setPlaces] = useState<string[]>([]);
 
+  // Filter destinations based on input
+  const getFilteredDestinations = (input: string): DestinationOption[] => {
+    if (!input.trim()) return destinations;
+    return destinations.filter((dest) =>
+      dest.name.toLowerCase().includes(input.toLowerCase())
+    );
+  };
+
   const addPlace = () => {
     const trimmed = placeInput.trim();
+    const destinationExists = destinations.some(
+      (dest) => dest.name.toLowerCase() === trimmed.toLowerCase()
+    );
+
+    if (!destinationExists) {
+      setValidationError(`"${trimmed}" is not in our available destinations. Please select from the list.`);
+      return;
+    }
+
     if (trimmed && !places.includes(trimmed)) {
       setPlaces((prev) => [...prev, trimmed]);
       setPlaceInput("");
+      setShowPlaceDropdown(false);
     }
   };
 
@@ -100,6 +153,21 @@ export function Home() {
       e.preventDefault();
       addPlace();
     }
+  };
+
+  const handleSelectStartLocation = (destName: string) => {
+    setStartLocation(destName);
+    setShowStartLocationDropdown(false);
+  };
+
+  const handleSelectEndLocation = (destName: string) => {
+    setEndLocation(destName);
+    setShowEndLocationDropdown(false);
+  };
+
+  const handleSelectPlace = (destName: string) => {
+    setPlaceInput(destName);
+    setShowPlaceDropdown(false);
   };
 
   const buildGeneratedDestinations = useCallback(
@@ -165,6 +233,27 @@ export function Home() {
       return;
     }
 
+    // Validate that locations are from available destinations
+    if (startLocation.trim() !== "") {
+      const isValidStart = destinations.some(
+        (d) => d.name.toLowerCase() === startLocation.toLowerCase()
+      );
+      if (!isValidStart) {
+        setValidationError("Starting location must be from available destinations.");
+        return;
+      }
+    }
+
+    if (endLocation.trim() !== "") {
+      const isValidEnd = destinations.some(
+        (d) => d.name.toLowerCase() === endLocation.toLowerCase()
+      );
+      if (!isValidEnd) {
+        setValidationError("End location must be from available destinations.");
+        return;
+      }
+    }
+
     setValidationError("");
 
     const submitTrip = async () => {
@@ -194,24 +283,13 @@ export function Home() {
       try {
         setIsGenerating(true);
 
-        const response = await fetch(`${apiBaseUrl}/api/trips/generate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            startPlace,
-            desiredPlaces,
-            availableTime: tripDays,
-          }),
+        const response = await axios.post(`${apiBaseUrl}/api/trips/generate`, {
+          startPlace,
+          desiredPlaces,
+          availableTime: tripDays * 24 * 60, // Convert days to minutes
         });
 
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error || "Failed to generate itinerary.");
-        }
-
+        const payload = response.data;
         const generatedPath = payload?.data?.path;
 
         if (!Array.isArray(generatedPath) || generatedPath.length === 0) {
@@ -237,9 +315,13 @@ export function Home() {
         });
       } catch (error) {
         const message =
-          error instanceof Error
-            ? error.message
-            : "Could not generate itinerary right now.";
+          axios.isAxiosError(error)
+            ? error.response?.data?.error ||
+              error.message ||
+              "Failed to generate itinerary."
+            : error instanceof Error
+              ? error.message
+              : "Could not generate itinerary right now.";
         setGenerationError(message);
       } finally {
         setIsGenerating(false);
@@ -269,8 +351,10 @@ export function Home() {
     tripDays,
     startLocation,
     endLocation,
+    destinations,
   ]);
 
+  console.log(tripDays)
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-12">
       {/* Hero */}
@@ -341,7 +425,7 @@ export function Home() {
         </section>
 
         {/* ── 2. Planned Budget ── */}
-        <section className="space-y-4">
+        <section className="space-y-4 opacity-60 pointer-events-none">
           <div className="flex items-center justify-between">
             <Label className="text-base font-semibold text-gray-800 flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-emerald-500" />
@@ -351,18 +435,8 @@ export function Home() {
               ${budget[0].toLocaleString()}
             </span>
           </div>
-          <Slider
-            id="budget-slider"
-            value={budget}
-            onValueChange={setBudget}
-            min={100}
-            max={10000}
-            step={50}
-            className="[&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-range]]:bg-gradient-to-r [&_[data-slot=slider-range]]:from-emerald-400 [&_[data-slot=slider-range]]:to-teal-500 [&_[data-slot=slider-thumb]]:size-5 [&_[data-slot=slider-thumb]]:border-emerald-500"
-          />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>$100</span>
-            <span>$10,000</span>
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">Budget planning will be implemented soon</p>
           </div>
         </section>
 
@@ -376,18 +450,26 @@ export function Home() {
             {transportModes.map((mode) => {
               const Icon = mode.icon;
               const isSelected = transport === mode.id;
+              const isCarMode = mode.id === "car";
               return (
                 <button
                   key={mode.id}
                   type="button"
                   id={`transport-${mode.id}`}
-                  onClick={() => setTransport(mode.id)}
+                  disabled={!isCarMode}
+                  onClick={() => {
+                    if (isCarMode) setTransport(mode.id);
+                  }}
                   className={cn(
-                    "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer",
+                    "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200",
+                    isCarMode ? "cursor-pointer" : "cursor-not-allowed opacity-50",
                     isSelected
                       ? "border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100 scale-[1.03]"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                      : isCarMode
+                        ? "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                        : "border-gray-200 bg-gray-100"
                   )}
+                  title={!isCarMode ? "Only Car mode is available currently" : ""}
                 >
                   <Icon
                     className={cn(
@@ -416,7 +498,7 @@ export function Home() {
             Route
           </Label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 relative">
               <label
                 htmlFor="start-location"
                 className="text-sm font-medium text-gray-600"
@@ -425,13 +507,30 @@ export function Home() {
               </label>
               <Input
                 id="start-location"
-                placeholder="e.g. Colombo"
+                placeholder="Search destinations..."
                 value={startLocation}
                 onChange={(e) => setStartLocation(e.target.value)}
+                onFocus={() => setShowStartLocationDropdown(true)}
+                onBlur={() => setTimeout(() => setShowStartLocationDropdown(false), 200)}
                 className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
+                autoComplete="off"
               />
+              {showStartLocationDropdown && startLocation && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {getFilteredDestinations(startLocation).map((dest) => (
+                    <button
+                      key={dest.id}
+                      type="button"
+                      onClick={() => handleSelectStartLocation(dest.name)}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors text-sm"
+                    >
+                      {dest.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 relative">
               <label
                 htmlFor="end-location"
                 className="text-sm font-medium text-gray-600"
@@ -440,11 +539,28 @@ export function Home() {
               </label>
               <Input
                 id="end-location"
-                placeholder="e.g. Kandy"
+                placeholder="Search destinations..."
                 value={endLocation}
                 onChange={(e) => setEndLocation(e.target.value)}
+                onFocus={() => setShowEndLocationDropdown(true)}
+                onBlur={() => setTimeout(() => setShowEndLocationDropdown(false), 200)}
                 className="h-11 bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"
+                autoComplete="off"
               />
+              {showEndLocationDropdown && endLocation && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {getFilteredDestinations(endLocation).map((dest) => (
+                    <button
+                      key={dest.id}
+                      type="button"
+                      onClick={() => handleSelectEndLocation(dest.name)}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors text-sm"
+                    >
+                      {dest.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -455,20 +571,39 @@ export function Home() {
             <Sparkles className="w-5 h-5 text-amber-500" />
             Must-Visit Places
           </Label>
-          <div className="flex gap-2">
-            <Input
-              id="place-input"
-              placeholder="e.g. Sigiriya Rock Fortress"
-              value={placeInput}
-              onChange={(e) => setPlaceInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1 h-11"
-            />
+          <div className="flex gap-2 relative">
+            <div className="flex-1 relative">
+              <Input
+                id="place-input"
+                placeholder="Search destinations..."
+                value={placeInput}
+                onChange={(e) => setPlaceInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setShowPlaceDropdown(true)}
+                onBlur={() => setTimeout(() => setShowPlaceDropdown(false), 200)}
+                className="h-11 flex-1"
+                autoComplete="off"
+              />
+              {showPlaceDropdown && placeInput && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {getFilteredDestinations(placeInput).map((dest) => (
+                    <button
+                      key={dest.id}
+                      type="button"
+                      onClick={() => handleSelectPlace(dest.name)}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors text-sm"
+                    >
+                      {dest.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button
               id="add-place-btn"
               type="button"
               onClick={addPlace}
-              disabled={!placeInput.trim()}
+              disabled={!placeInput.trim() || isLoadingDestinations}
               className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 text-white"
             >
               <Plus className="w-4 h-4 mr-1" />
