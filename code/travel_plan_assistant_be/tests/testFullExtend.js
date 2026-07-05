@@ -20,7 +20,7 @@ async function runTest() {
 
     console.log("\n===== FULL FRONTIER EXPANSION TEST =====\n");
 
-    const start = "Kandy";
+    const start = "Kumana National Park";
     const target = "Colombo";
 
     const startID = await resolveID(start);

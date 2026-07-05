@@ -43,6 +43,7 @@ function mergePaths(existing = [], incoming = []) {
 
     return existing;
 }
+
 /**
  * Main orchestration function
  */
@@ -86,7 +87,7 @@ async function createTravelPlan(
     );
 
     const fullPath = [];
-    const visited = new Set();
+    const globalVisited = new Set();
 
     let totalTime = 0;
     let totalDistance = 0;
@@ -100,13 +101,17 @@ async function createTravelPlan(
 
         console.log(`\n===== SEGMENT ${from.name} -> ${to.name} =====`);
 
+        const segmentVisited = new Set();
+
         const segment = await expandFrontierUntilTarget(
             from.id,
             to.id,
-            visited
+            segmentVisited
         );
 
+        // ❌ FIX: prevent crash BEFORE accessing segment.path
         if (!segment || !segment.path) {
+            console.log(`❌ Failed segment ${from.name} -> ${to.name}`);
             throw new Error(`Failed to build segment ${from.name} -> ${to.name}`);
         }
 
@@ -118,7 +123,7 @@ async function createTravelPlan(
         totalDistance += segment.totalDistance || 0;
 
         for (const node of cleanPath) {
-            visited.add(node.id);
+            globalVisited.add(node.id);
         }
 
         if (segment.trace) {
