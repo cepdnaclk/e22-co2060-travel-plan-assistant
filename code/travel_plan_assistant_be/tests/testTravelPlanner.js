@@ -8,7 +8,7 @@ async function runTest() {
 
     const result = await createTravelPlan(
         "Kandy",
-        [],
+        ["Kumana National Park"],
         400,
         "Colombo"
     );

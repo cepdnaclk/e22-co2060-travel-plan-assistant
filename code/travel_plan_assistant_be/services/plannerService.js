@@ -178,7 +178,10 @@ async function expandFrontier(frontier, targetID, visited) {
     const nextFrontier = new Set();
     const added = [];
 
-    for (const nodeID of frontier) {
+    const currentLevel = [...frontier];
+    frontier.clear();
+
+    for (const nodeID of currentLevel) {
 
         // STEP 1: get normal neighbors
         const neighbors = await getNeighbors(nodeID);
@@ -226,9 +229,27 @@ async function expandFrontier(frontier, targetID, visited) {
             continue;
         }
 
-        // STEP 6: commit
+        // STEP 6: commit the chosen node after frontier expansion so
+        // it can still be added as the next frontier node when it is
+        // the candidate that was selected.
+        for (const c of candidates) {
+
+            if (!visited.has(c.id)) {
+
+                const node = await findByID(c.id);
+                if (!node) continue;
+
+                visited.add(node.id);
+                nextFrontier.add(node.id);
+
+                added.push({
+                    ...node,
+                    parentID: nodeID
+                });
+            }
+        }
+
         visited.add(fullNode.id);
-        nextFrontier.add(fullNode.id);
 
         added.push({
             ...fullNode,
@@ -281,10 +302,9 @@ async function expandFrontierUntilTarget(
 
         for (const node of added) {
 
-            parentMap.set(
-                node.id,
-                node.parentID
-            );
+             if (!parentMap.has(node.id)) {
+                parentMap.set(node.id, node.parentID);
+            }
 
             nodeMap.set(node.id, {
                 id: node.id,
@@ -294,7 +314,7 @@ async function expandFrontierUntilTarget(
             });
         }
 
-        if (nextFrontier.has(targetID)) {
+        if (nextFrontier.has(targetID) || frontier.has(targetID)) {
 
             console.log("🎯 TARGET REACHED:", targetID);
 
@@ -306,7 +326,7 @@ async function expandFrontierUntilTarget(
             );
         }
 
-        frontier = nextFrontier;
+        frontier = new Set(nextFrontier);
     }
 
     console.log("❌ Target not reached");
