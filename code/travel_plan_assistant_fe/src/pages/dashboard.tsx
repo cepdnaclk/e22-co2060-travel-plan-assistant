@@ -158,7 +158,7 @@ export function Dashboard() {
               </>
             ) : (
               <span
-                className="bg-linear-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent font-amsHiru text-9xl"
+                className="bg-linear-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent font-amsHiru md:text-9xl text-6xl"
                 style={{
                   filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
                 }}
