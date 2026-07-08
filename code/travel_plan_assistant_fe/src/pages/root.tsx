@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Heart,
   Map as MapIcon,
+  Shield,
 } from "lucide-react";
 
 import { AuthProvider, useAuth } from "../context/AuthContext";
@@ -30,7 +31,7 @@ import {
 
 const navItems = [
   { path: "/", label: "Home", icon: LayoutDashboard, protected: false },
-  { path: "/plan", label: "Plan Trip", icon: Sparkles, protected: false },
+  { path: "/plan", label: "Plan Trip", icon: Sparkles, protected: true },
   {
     path: "/destinations",
     label: "Destinations",
@@ -56,6 +57,13 @@ function RootLayout() {
   const [scrolled, setScrolled] = useState(false);
   const isTransparent = isDashboard && !scrolled;
 
+  const activeNavItems = [
+    ...navItems,
+    ...(user?.role === "admin"
+      ? [{ path: "/admin", label: "Admin", icon: Shield, protected: true }]
+      : []),
+  ];
+
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -75,7 +83,7 @@ function RootLayout() {
 
   const handleNavClick = (
     e: React.MouseEvent,
-    item: (typeof navItems)[number],
+    item: { path: string; label: string; icon: React.ComponentType<any>; protected: boolean },
   ) => {
     if (item.protected && !isAuthenticated) {
       e.preventDefault();
@@ -111,7 +119,7 @@ function RootLayout() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex gap-1">
-              {navItems.map((item) => {
+              {activeNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
@@ -159,6 +167,15 @@ function RootLayout() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
+                      {user.role === "admin" && (
+                        <DropdownMenuItem
+                          className="cursor-pointer px-3 py-2 font-semibold text-indigo-600 focus:text-indigo-750 focus:bg-indigo-50"
+                          onClick={() => navigate("/admin")}
+                        >
+                          <Shield className="w-4 h-4 mr-2.5 text-indigo-500" />
+                          Admin Dashboard
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         className="cursor-pointer px-3 py-2"
                         onClick={() => navigate("/profile")}
@@ -212,7 +229,7 @@ function RootLayout() {
       {/* Mobile Navigation */}
       <nav className="md:hidden bg-white border-b border-gray-200">
         <div className="flex justify-around py-2">
-          {navItems.map((item) => {
+          {activeNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
