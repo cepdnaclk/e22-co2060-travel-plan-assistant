@@ -17,7 +17,6 @@ export interface GeneratedTripSession {
 }
 
 export function Itinerary() {
-  const user_id = 1;
   const [trips, setTrips] = useState<GeneratedTripSession[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<GeneratedTripSession | null>(
     null,
@@ -30,9 +29,7 @@ export function Itinerary() {
   useEffect(() => {
     async function fetchGeneratedTrip() {
       try {
-        const res = await api.post<GeneratedTripSession[]>("/api/itinerary", {
-          user_id,
-        });
+        const res = await api.post<GeneratedTripSession[]>("/api/itinerary");
         const tripList = Array.isArray(res.data) ? res.data : [];
         setTrips(tripList);
         if (tripList.length > 0) setSelectedTrip(tripList[0]);

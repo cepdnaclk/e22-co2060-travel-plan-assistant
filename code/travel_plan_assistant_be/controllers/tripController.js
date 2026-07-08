@@ -43,7 +43,8 @@ async function generateTripPlan(req, res) {
             startPlace,
             desiredPlaces,
             availableTime,
-            endPlace
+            endPlace,
+            req.user.userId
         );
 
         res.status(200).json({

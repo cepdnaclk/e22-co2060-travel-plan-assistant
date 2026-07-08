@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { mockTrips } from "../data/trips-data";
 import { useState, useEffect } from "react";
 import { api } from "../axios";
 import {
@@ -23,32 +22,7 @@ import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import heroBg from "../assets/hero-bg.png";
 
-const stats = [
-  {
-    label: "Total Trips Planned",
-    value: "12",
-    icon: Map,
-    color: "text-indigo-500",
-    bg: "bg-indigo-50",
-    accent: "from-indigo-500 to-indigo-600",
-  },
-  {
-    label: "Ongoing / Upcoming",
-    value: String(mockTrips.length),
-    icon: CalendarDays,
-    color: "text-emerald-500",
-    bg: "bg-emerald-50",
-    accent: "from-emerald-500 to-teal-500",
-  },
-  {
-    label: "Districts Explored",
-    value: "5 / 25",
-    icon: MapPin,
-    color: "text-rose-500",
-    bg: "bg-rose-50",
-    accent: "from-rose-500 to-pink-500",
-  },
-];
+
 
 const features = [
   {
@@ -86,6 +60,13 @@ export function Dashboard() {
   const [trendingDestinations, setTrendingDestinations] = useState<any[]>([]);
   const [loadingTrending, setLoadingTrending] = useState(true);
 
+  const [userStats, setUserStats] = useState({
+    totalTrips: 0,
+    upcomingTrips: 0,
+    districtsExplored: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(false);
+
   useEffect(() => {
     const fetchTrendingDestinations = async () => {
       try {
@@ -105,6 +86,51 @@ export function Dashboard() {
 
     fetchTrendingDestinations();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchUserStats = async () => {
+      try {
+        setLoadingStats(true);
+        const res = await api.get<{ success: boolean; stats: typeof userStats }>("/api/auth/stats");
+        if (res.data.success) {
+          setUserStats(res.data.stats);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user stats:", err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchUserStats();
+  }, [isAuthenticated]);
+
+  const activeStats = [
+    {
+      label: "Total Trips Planned",
+      value: String(userStats.totalTrips),
+      icon: Map,
+      color: "text-indigo-500",
+      bg: "bg-indigo-50",
+      accent: "from-indigo-500 to-indigo-600",
+    },
+    {
+      label: "Ongoing / Upcoming",
+      value: String(userStats.upcomingTrips),
+      icon: CalendarDays,
+      color: "text-emerald-500",
+      bg: "bg-emerald-50",
+      accent: "from-emerald-500 to-teal-500",
+    },
+    {
+      label: "Districts Explored",
+      value: `${userStats.districtsExplored} / 25`,
+      icon: MapPin,
+      color: "text-rose-500",
+      bg: "bg-rose-50",
+      accent: "from-rose-500 to-pink-500",
+    },
+  ];
 
   return (
     <div>
@@ -208,8 +234,8 @@ export function Dashboard() {
           {isAuthenticated && (
             <>
               {/* Quick Stats Row */}
-              {/* <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                {stats.map((stat) => {
+              <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                {activeStats.map((stat) => {
                   const Icon = stat.icon;
                   return (
                     <Card
@@ -224,9 +250,13 @@ export function Dashboard() {
                           <p className="text-sm font-medium text-gray-500">
                             {stat.label}
                           </p>
-                          <p className="text-3xl font-bold text-gray-900">
-                            {stat.value}
-                          </p>
+                          {loadingStats ? (
+                            <div className="h-9 w-20 bg-slate-200 animate-pulse rounded-md mt-1" />
+                          ) : (
+                            <p className="text-3xl font-bold text-gray-900">
+                              {stat.value}
+                            </p>
+                          )}
                         </div>
                         <div
                           className={`${stat.bg} p-3 rounded-xl group-hover:scale-110 transition-transform duration-300`}
@@ -237,7 +267,7 @@ export function Dashboard() {
                     </Card>
                   );
                 })}
-              </section> */}
+              </section>
             </>
           )}
 

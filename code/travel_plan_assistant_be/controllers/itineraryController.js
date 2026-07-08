@@ -1,7 +1,7 @@
 const destinationService = require("../services/itineraryService");
 
 exports.getItinerary = async (req, res) => {
-  const user_id = req.body.user_id;
+  const user_id = req.user.userId;
 
   try {
     const itinerary = await destinationService.getAllItinerary(user_id);

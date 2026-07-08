@@ -10,6 +10,8 @@ import { MyTrips } from "./pages/my-trips";
 import { Wishlist } from "./pages/wishlist";
 import { DestinationDetails } from "./pages/destination-details";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AdminRoute } from "./components/AdminRoute";
+import { AdminDashboard } from "./pages/admin-dashboard";
 
 export const router = createBrowserRouter([
   {
@@ -18,7 +20,6 @@ export const router = createBrowserRouter([
     children: [
       // Public routes
       { index: true, Component: Dashboard },
-      { path: "plan", Component: Home },
       { path: "destinations", Component: Destinations },
       { path: "destinations/:id", Component: DestinationDetails },
 
@@ -26,12 +27,20 @@ export const router = createBrowserRouter([
       {
         Component: ProtectedRoute,
         children: [
-          { path: "itinerary", Component: Itinerary },
+          { path: "plan", Component: Home },
           { path: "itinerary", Component: Itinerary },
           { path: "budget", Component: Budget },
           { path: "profile", Component: MyProfile },
           { path: "my-trips", Component: MyTrips },
           { path: "wishlist", Component: Wishlist },
+        ],
+      },
+
+      // Admin routes
+      {
+        Component: AdminRoute,
+        children: [
+          { path: "admin", Component: AdminDashboard },
         ],
       },
     ],

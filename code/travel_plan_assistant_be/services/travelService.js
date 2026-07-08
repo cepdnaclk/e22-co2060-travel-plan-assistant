@@ -51,7 +51,8 @@ async function createTravelPlan(
     startPlace,
     desiredPlaces = [],
     availableTime,
-    endPlace = null
+    endPlace = null,
+    userId
 ) {
 
     if (!startPlace) {
@@ -149,7 +150,7 @@ async function createTravelPlan(
 
     const destinationIdList = await getDestinationIdList(finalPath);
 
-    const sessionId = await saveTravelSession(1, destinationIdList);
+    const sessionId = await saveTravelSession(userId, destinationIdList);
 
     return {
         sessionId,
