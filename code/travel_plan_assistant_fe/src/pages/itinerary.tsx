@@ -6,14 +6,16 @@ import {
   ChevronDown,
   CalendarDays,
   Check,
+  CloudCog,
 } from "lucide-react";
 import { ItineraryTimeline } from "../components/ItineraryTimeline";
 import DirectionsMap from "../components/DirectionsMap";
-import { type ItineraryDestination } from "../data/itinerary-data";
+import { type ItineraryDestination, type RouteSegment } from "../data/itinerary-data";
 
 export interface GeneratedTripSession {
   session_id: number;
   destinations: ItineraryDestination[];
+  routeSegments?: RouteSegment[];
 }
 
 export function Itinerary() {
@@ -31,6 +33,7 @@ export function Itinerary() {
       try {
         const res = await api.post<GeneratedTripSession[]>("/api/itinerary");
         const tripList = Array.isArray(res.data) ? res.data : [];
+        console.log(tripList);
         setTrips(tripList);
         if (tripList.length > 0) setSelectedTrip(tripList[0]);
       } catch (err) {
@@ -148,6 +151,7 @@ export function Itinerary() {
           activeId={activeDestination || undefined}
           onDestinationClick={handleDestinationClick}
           destinations={selectedTrip?.destinations || []}
+          routeSegments={selectedTrip?.routeSegments || []}
         />
       </section>
     </div>

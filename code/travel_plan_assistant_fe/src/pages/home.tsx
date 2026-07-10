@@ -68,8 +68,10 @@ export function Home() {
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const tripDays =
-    dateRange?.from && dateRange?.to
-      ? differenceInDays(dateRange.to, dateRange.from) + 1
+    dateRange?.from
+      ? dateRange.to
+        ? differenceInDays(dateRange.to, dateRange.from) + 1
+        : 1
       : 0;
 
   const [budget] = useState([1500]);
@@ -235,7 +237,7 @@ export function Home() {
                 >
                   <CalendarDays className="mr-2 h-4 w-4" />
                   {dateRange?.from
-                    ? dateRange.to
+                    ? dateRange.to && differenceInDays(dateRange.to, dateRange.from) !== 0
                       ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
                       : format(dateRange.from, "MMM dd, yyyy")
                     : "Select travel dates"}
@@ -331,8 +333,13 @@ export function Home() {
                   {getFilteredDestinations(startLocation).map((dest) => (
                     <button
                       key={dest.id}
-                      onClick={() => setStartLocation(dest.name)}
-                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm"
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setStartLocation(dest.name);
+                        setShowStartLocationDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm cursor-pointer"
                     >
                       {dest.name}
                     </button>
@@ -356,8 +363,13 @@ export function Home() {
                   {getFilteredDestinations(endLocation).map((dest) => (
                     <button
                       key={dest.id}
-                      onClick={() => setEndLocation(dest.name)}
-                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm"
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setEndLocation(dest.name);
+                        setShowEndLocationDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm cursor-pointer"
                     >
                       {dest.name}
                     </button>
@@ -390,8 +402,13 @@ export function Home() {
                   {getFilteredDestinations(placeInput).map((dest) => (
                     <button
                       key={dest.id}
-                      onClick={() => setPlaceInput(dest.name)}
-                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm"
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setPlaceInput(dest.name);
+                        setShowPlaceDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm cursor-pointer"
                     >
                       {dest.name}
                     </button>
@@ -415,10 +432,14 @@ export function Home() {
                 className="px-3 py-1.5 text-sm gap-1.5 bg-indigo-50 text-indigo-700"
               >
                 {place}
-                <X
-                  className="w-3 h-3 cursor-pointer"
+                <button
+                  type="button"
                   onClick={() => setPlaces(places.filter((p) => p !== place))}
-                />
+                  className="rounded-full hover:bg-indigo-100 p-0.5 transition-colors cursor-pointer flex items-center justify-center"
+                  aria-label={`Remove ${place}`}
+                >
+                  <X className="w-3.5 h-3.5 text-indigo-500 hover:text-indigo-700" />
+                </button>
               </Badge>
             ))}
           </div>

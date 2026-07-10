@@ -121,11 +121,10 @@ export function ItineraryTimeline({
 
                 <div className="flex-1 ml-4 mb-4">
                   <Card
-                    className={`overflow-hidden transition-all cursor-pointer group border-2 ${
-                      isActive
+                    className={`overflow-hidden transition-all cursor-pointer group border-2 ${isActive
                         ? "ring-2 shadow-xl"
                         : "shadow-md border-transparent"
-                    }`}
+                      }`}
                     style={{
                       borderColor: isActive ? colors.dot : "transparent",
                     }}
@@ -137,10 +136,10 @@ export function ItineraryTimeline({
                           src={`${apiBaseUrl}/public/destinations/${dest.display_picture}`}
                           alt={dest.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-duration-500"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              "https://via.placeholder.com/400x300?text=No+Image";
-                          }}
+                        // onError={(e) => {
+                        //   (e.target as HTMLImageElement).src =
+                        //     "https://via.placeholder.com/400x300?text=No+Image";
+                        // }}
                         />
                       </div>
                       <div className="flex-1 p-4 space-y-2">

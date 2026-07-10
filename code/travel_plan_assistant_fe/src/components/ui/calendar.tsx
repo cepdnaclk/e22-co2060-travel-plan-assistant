@@ -119,7 +119,7 @@ function MonthGrid({
     const isInRange = rangeFrom && rangeTo ? isBetween(date, rangeFrom, rangeTo) : false;
     const isRangeStart = rangeFrom && isSameDay(date, rangeFrom);
     const isRangeEnd = rangeTo && isSameDay(date, rangeTo);
-    const hasRange = !!(rangeFrom && rangeTo);
+    const hasRange = !!(rangeFrom && rangeTo) && !isSameDay(rangeFrom, rangeTo);
 
     const todayFlag = isToday(date);
 
@@ -242,8 +242,8 @@ function Calendar({
         // Clicked before start → swap
         onSelect({ from: date, to: from });
       } else if (isSameDay(date, from)) {
-        // Clicked same day → deselect
-        onSelect(undefined);
+        // Clicked same day → select it as end date too (single date select)
+        onSelect({ from: date, to: date });
       } else {
         onSelect({ from, to: date });
       }
