@@ -286,6 +286,7 @@ async function expandFrontierUntilTarget(
 
     let safety = 0;
     const MAX_STEPS = 50;
+    let lastFrontier = new Set([startID]);
 
     while (frontier.size > 0 && safety < MAX_STEPS) {
 
@@ -326,7 +327,24 @@ async function expandFrontierUntilTarget(
             );
         }
 
+        if (nextFrontier.size > 0) {
+            lastFrontier = new Set(nextFrontier);
+        }
+
         frontier = new Set(nextFrontier);
+    }
+
+    const fallback = await connectFrontierToTarget(
+        startID,
+        targetID,
+        parentMap,
+        nodeMap,
+        lastFrontier
+    );
+
+    if (fallback) {
+        console.log("🎯 TARGET CONNECTED VIA ORS FALLBACK", targetID);
+        return fallback;
     }
 
     console.log("❌ Target not reached");
@@ -386,6 +404,73 @@ async function buildSegmentPath(
         path,
         totalDistance,
         totalTime
+    };
+}
+
+async function connectFrontierToTarget(
+    startID,
+    targetID,
+    parentMap,
+    nodeMap,
+    frontier
+) {
+    if (!frontier || frontier.size === 0) {
+        return null;
+    }
+
+    let best = null;
+
+    for (const nodeID of frontier) {
+        const route = await getDistanceAndDurationByID(
+            nodeID,
+            targetID
+        );
+
+        if (!route) continue;
+
+        if (!best || route.distance < best.distance) {
+            best = {
+                nodeID,
+                distance: route.distance,
+                duration: route.duration
+            };
+        }
+    }
+
+    if (!best) {
+        return null;
+    }
+
+    const ids = [];
+    let current = best.nodeID;
+
+    while (current != null) {
+        ids.unshift(current);
+
+        if (current === startID) {
+            break;
+        }
+
+        current = parentMap.get(current);
+    }
+
+    if (ids[0] !== startID) {
+        return null;
+    }
+
+    const path = ids.map(id => nodeMap.get(id)).filter(Boolean);
+    const targetNode = await findByID(targetID);
+
+    if (!targetNode) {
+        return null;
+    }
+
+    path.push(targetNode);
+
+    return {
+        path,
+        totalDistance: best.distance,
+        totalTime: best.duration
     };
 }
 /**
