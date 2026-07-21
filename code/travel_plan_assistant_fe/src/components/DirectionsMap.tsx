@@ -1,18 +1,30 @@
 import React, { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-import type { ItineraryDestination } from "../pages/itinerary";
-
+import type { ItineraryDestination } from "../data/itinerary-data";
 
 interface DirectionsMapProps {
   destinations: ItineraryDestination[];
-  sessionId: number;
+  sessionId?: number;
 }
 
-const DirectionsMap: React.FC<DirectionsMapProps> = ({ destinations, sessionId }) => {
+const DirectionsMap: React.FC<DirectionsMapProps> = ({ destinations }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
 
   useEffect(() => {
+    if (!destinations || destinations.length < 2) return;
+
+    const validDestinations = destinations.filter(
+      (d) =>
+        d &&
+        d.lat != null &&
+        d.lng != null &&
+        !isNaN(parseFloat(d.lat)) &&
+        !isNaN(parseFloat(d.lng))
+    );
+
+    if (validDestinations.length < 2) return;
+
     const loader = new Loader({
       apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
       version: "weekly",
@@ -21,7 +33,6 @@ const DirectionsMap: React.FC<DirectionsMapProps> = ({ destinations, sessionId }
     loader.load().then(() => {
       if (!mapRef.current) return;
 
-      // 1. Setup Map & Renderer
       const map = new google.maps.Map(mapRef.current, {
         center: { lat: 7.8731, lng: 80.7718 },
         zoom: 7,
@@ -31,40 +42,38 @@ const DirectionsMap: React.FC<DirectionsMapProps> = ({ destinations, sessionId }
       renderer.setMap(map);
       rendererRef.current = renderer;
 
-      // 2. Check Cache
-      const cacheKey = `route_cache_${sessionId}`;
-      const cachedResponse = localStorage.getItem(cacheKey);
-
-      if (cachedResponse) {
-        console.log("Loading route from cache...");
-        renderer.setDirections(JSON.parse(cachedResponse));
-        return; // Stop here, no need to call Google Service
-      }
-
-      // 3. If no cache, call Directions Service
       const directionsService = new google.maps.DirectionsService();
-      
-      const origin = { lat: parseFloat(destinations[0].lat), lng: parseFloat(destinations[0].lng) };
-      const destination = { lat: parseFloat(destinations[destinations.length - 1].lat), lng: parseFloat(destinations[destinations.length - 1].lng) };
-      const waypoints = destinations.slice(1, -1).map(d => ({
-        location: { lat: parseFloat(d.lat), lng: parseFloat(d.lng) },
-        stopover: true
+
+      const origin = {
+        lat: parseFloat(validDestinations[0].lat!),
+        lng: parseFloat(validDestinations[0].lng!),
+      };
+      const destination = {
+        lat: parseFloat(validDestinations[validDestinations.length - 1].lat!),
+        lng: parseFloat(validDestinations[validDestinations.length - 1].lng!),
+      };
+      const waypoints = validDestinations.slice(1, -1).map((d) => ({
+        location: { lat: parseFloat(d.lat!), lng: parseFloat(d.lng!) },
+        stopover: true,
       }));
 
-      directionsService.route({
-        origin,
-        destination,
-        waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
-      }, (result, status) => {
-        if (status === "OK" && result) {
-          renderer.setDirections(result);
-          // Save to localStorage for next time
-          localStorage.setItem(cacheKey, JSON.stringify(result));
+      directionsService.route(
+        {
+          origin,
+          destination,
+          waypoints,
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === "OK" && result) {
+            renderer.setDirections(result);
+          } else {
+            console.error("Directions request failed with status:", status);
+          }
         }
-      });
+      );
     });
-  }, [destinations, sessionId]);
+  }, [destinations]);
 
   return (
     <div className="rounded-2xl overflow-hidden border border-gray-200">
@@ -74,3 +83,4 @@ const DirectionsMap: React.FC<DirectionsMapProps> = ({ destinations, sessionId }
 };
 
 export default DirectionsMap;
+
