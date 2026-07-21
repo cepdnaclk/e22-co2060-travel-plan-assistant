@@ -37,13 +37,6 @@ export function ItineraryTimeline({
   const getRouteFromPrev = (destId: string): RouteSegment | undefined =>
     routeSegments.find((r) => r.to === destId);
 
-  const isSameDayAsNext = (index: number) => {
-    if (index >= formattedDestinations.length - 1) return false;
-    return (
-      formattedDestinations[index].day === formattedDestinations[index + 1].day
-    );
-  };
-
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 

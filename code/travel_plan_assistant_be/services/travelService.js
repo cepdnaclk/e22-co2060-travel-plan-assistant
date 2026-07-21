@@ -78,14 +78,21 @@ async function createTravelPlan(
         end = desired.pop();
     }
 
-    const checkpoints = [start, ...desired, end];
-
     const feasibility = await validateFeasibility(
         startPlace,
         desiredPlaces,
         availableTime,
         endPlace
     );
+
+    const checkpointNames = (feasibility.suggestedPath && feasibility.suggestedPath.length > 0)
+        ? feasibility.suggestedPath
+        : [startPlace, ...desiredPlaces, endPlace].filter(Boolean);
+
+    const checkpoints = [];
+    for (const placeName of checkpointNames) {
+        checkpoints.push(await resolveDestination(placeName));
+    }
 
     const fullPath = [];
     const globalVisited = new Set();
@@ -152,12 +159,23 @@ async function createTravelPlan(
 
     const sessionId = await saveTravelSession(userId, destinationIdList);
 
+    let isFeasible = feasibility.feasible;
+    let warning = feasibility.warning || null;
+
+    if (totalTime > availableTime + 120) {
+        isFeasible = false;
+        if (!warning) {
+            warning = `Expanded trip travel time (${(totalTime / 60).toFixed(1)}h) exceeds available time budget (${(availableTime / 60).toFixed(1)}h).`;
+        }
+    }
+
     return {
         sessionId,
 
-        feasible: feasibility.feasible,
-        warning: feasibility.warning || null,
+        feasible: isFeasible,
+        warning,
         suggestedPath: feasibility.suggestedPath || null,
+        skippedLocations: feasibility.skippedLocations || [],
 
         path: finalPath,
 

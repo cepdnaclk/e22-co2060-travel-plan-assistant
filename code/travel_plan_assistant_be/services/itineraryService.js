@@ -51,10 +51,10 @@ async function getAllItinerary(user_id) {
       ids,
     );
 
-    const destMap = new Map(destinations.map((d) => [d.destinationID, d]));
+    const destMap = new Map(destinations.map((d) => [Number(d.destinationID), d]));
 
     const orderedDestinations = ids
-      .map((id) => destMap.get(id))
+      .map((id) => destMap.get(Number(id)))
       .filter(Boolean);
 
     // Calculate route segments between consecutive destinations

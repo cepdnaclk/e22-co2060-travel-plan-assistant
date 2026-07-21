@@ -114,19 +114,17 @@ async function validateFeasibility(
     desiredLocations = [],
     availableTime,
     endLocation = null
-    ) {
-
+) {
     if (!endLocation && desiredLocations.length === 0) {
         throw new Error("Need at least one desired location if no end location is given");
     }
 
-    const tolerance = 120; // Tolerence WINDOW
+    const tolerance = 120; // 2 hour tolerance window (minutes)
     const limit = availableTime + tolerance;
 
     let current = startLocation;
     let unvisited = [...desiredLocations];
 
-    // Duplicate removal
     if (endLocation) {
         unvisited = unvisited.filter(
             p => p.toLowerCase() !== endLocation.toLowerCase()
@@ -138,71 +136,67 @@ async function validateFeasibility(
     let totalDistance = 0;
 
     while (unvisited.length > 0) {
-
         let bestIndex = -1;
         let bestRoute = null;
         let bestCandidateTime = Infinity;
 
         for (let i = 0; i < unvisited.length; i++) {
-
             const info = await getRouteInfo(current, unvisited[i]);
 
-            const predictedTime =
-                totalTime + info.duration + 45;
+            let extraEndLegTime = 0;
+            if (endLocation && unvisited[i].toLowerCase() !== endLocation.toLowerCase()) {
+                try {
+                    const endLegInfo = await getRouteInfo(unvisited[i], endLocation);
+                    extraEndLegTime = endLegInfo.duration + 45;
+                } catch (err) {
+                    extraEndLegTime = 60;
+                }
+            }
 
-            if (predictedTime <= limit && info.duration < bestCandidateTime) {
+            const predictedTimeWithEnd = totalTime + (info.duration + 45) + extraEndLegTime;
+
+            if (predictedTimeWithEnd <= limit && info.duration < bestCandidateTime) {
                 bestCandidateTime = info.duration;
                 bestIndex = i;
                 bestRoute = info;
             }
         }
 
-        // if no valid next step fits in budget → stop building
         if (bestIndex === -1) break;
 
         const nextPlace = unvisited.splice(bestIndex, 1)[0];
-
         path.push(nextPlace);
         totalTime += bestRoute.duration + 45;
         totalDistance += bestRoute.distance;
-
         current = nextPlace;
     }
 
     // handle end location
     if (endLocation && current.toLowerCase() !== endLocation.toLowerCase()) {
-
         const finalLeg = await getRouteInfo(current, endLocation);
-
         totalTime += finalLeg.duration + 45;
         totalDistance += finalLeg.distance;
-
         path.push(endLocation);
     }
 
-    let feasible = totalTime <= availableTime;
+    const isWithinBudget = totalTime <= availableTime;
+    const isWithinTolerance = totalTime <= limit;
+    const isFeasible = isWithinBudget && unvisited.length === 0;
 
     let warning = null;
 
-    if (!feasible && totalTime <= limit) {
-
-    if (unvisited.length > 0 || (endLocation && !path.includes(endLocation))) {
-            warning = "Trip exceeds budget and could not include all desired locations within tolerance";
+    if (!isFeasible) {
+        if (unvisited.length > 0) {
+            warning = `Trip time budget exceeded (${Math.round(availableTime / 60)}h max). Could not include all requested locations: ${unvisited.join(", ")}`;
+        } else if (!isWithinBudget && isWithinTolerance) {
+            warning = "Trip slightly exceeds target duration but is within 2-hour tolerance.";
         } else {
-            warning = "Trip exceeds budget but is within 2 hour tolerance";
-        }
-
-    } else if (!feasible) {
-
-        if (unvisited.length > 0 || (endLocation && !path.includes(endLocation))) {
-            warning = "Trip significantly exceeds available time and cannot include all requested locations";
-        } else {
-            warning = "Trip significantly exceeds available time";
+            warning = "Trip total duration exceeds available time for selected date range.";
         }
     }
 
     return {
-        feasible,
+        feasible: isFeasible,
         warning,
         suggestedPath: path,
         skippedLocations: unvisited,

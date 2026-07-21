@@ -9,19 +9,23 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
-  itineraryDestinations,
-  routeSegments,
   categoryColors,
   type ItineraryDestination,
   type RouteSegment,
 } from "../data/itinerary-data";
+
+const MapContainerAny = MapContainer as any;
+const TileLayerAny = TileLayer as any;
+const CircleMarkerAny = CircleMarker as any;
+const TooltipAny = Tooltip as any;
+const PolylineAny = Polyline as any;
 
 // Sri Lanka center & zoom
 const SRI_LANKA_CENTER: [number, number] = [7.8731, 80.7718];
 const DEFAULT_ZOOM = 8;
 
 interface SriLankaMapProps {
-  activeId?: number;
+  activeId?: string | number;
   onDestinationClick?: (dest: ItineraryDestination) => void;
   destinations?: ItineraryDestination[];
   routeSegments?: RouteSegment[];
@@ -33,15 +37,22 @@ function FlyToActive({
   activeId,
   destinations,
 }: {
-  activeId?: number;
+  activeId?: string | number;
   destinations: ItineraryDestination[];
 }) {
   const map = useMap();
   useEffect(() => {
     if (activeId) {
-      const dest = destinations.find((d) => d.destinationID === activeId);
-      if (dest) {
-        map.flyTo([dest.lat, dest.lng], 10, { duration: 0.8 });
+      const dest = destinations.find(
+        (d) =>
+          d.id === activeId ||
+          d.destinationID === Number(activeId) ||
+          d.destinationID?.toString() === activeId
+      );
+      if (dest && dest.lat && dest.lng) {
+        map.flyTo([parseFloat(dest.lat), parseFloat(dest.lng)], 10, {
+          duration: 0.8,
+        });
       }
     } else {
       map.flyTo(SRI_LANKA_CENTER, DEFAULT_ZOOM, { duration: 0.8 });
@@ -53,19 +64,12 @@ function FlyToActive({
 export function SriLankaMap({
   activeId,
   onDestinationClick,
-  destinations,
-  routeSegments: segments,
+  destinations = [],
+  routeSegments: segments = [],
   routeCoords,
 }: SriLankaMapProps) {
-  const selectedDestinations =
-    destinations && destinations.length > 0
-      ? destinations
-      : itineraryDestinations;
-  const selectedSegments =
-    segments && segments.length > 0 ? segments : routeSegments;
-
-  const getDestById = (id: string) =>
-    selectedDestinations.find((d) => d.id === id);
+  const selectedDestinations = destinations;
+  const selectedSegments = segments;
 
   return (
     <div className="relative w-full">
@@ -101,14 +105,14 @@ export function SriLankaMap({
         </div>
 
         <div className="relative z-0">
-          <MapContainer
+          <MapContainerAny
             center={SRI_LANKA_CENTER}
             zoom={DEFAULT_ZOOM}
             scrollWheelZoom={true}
             style={{ height: "520px", width: "100%" }}
             zoomControl={false}
           >
-            <TileLayer
+            <TileLayerAny
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
@@ -120,7 +124,7 @@ export function SriLankaMap({
 
             {/* Route lines */}
             {routeCoords && routeCoords.length > 0 && (
-              <Polyline
+              <PolylineAny
                 positions={routeCoords}
                 pathOptions={{
                   color: "#4f46e5",
@@ -132,13 +136,18 @@ export function SriLankaMap({
 
             {/* Destination markers */}
             {selectedDestinations.map((dest) => {
-              const isActive = activeId === dest.id;
+              const isActive = activeId === dest.id || activeId === dest.destinationID;
               const color = categoryColors[dest.category]?.dot ?? "#6366f1";
 
+              if (!dest.lat || !dest.lng) return null;
+              const latNum = parseFloat(dest.lat);
+              const lngNum = parseFloat(dest.lng);
+              if (isNaN(latNum) || isNaN(lngNum)) return null;
+
               return (
-                <CircleMarker
-                  key={dest.id}
-                  center={[dest.lat, dest.lng]}
+                <CircleMarkerAny
+                  key={dest.id || dest.destinationID}
+                  center={[latNum, lngNum]}
                   radius={isActive ? 12 : 8}
                   pathOptions={{
                     fillColor: color,
@@ -151,7 +160,7 @@ export function SriLankaMap({
                     click: () => onDestinationClick?.(dest),
                   }}
                 >
-                  <Tooltip
+                  <TooltipAny
                     direction="top"
                     offset={[0, -10]}
                     className="destination-tooltip"
@@ -161,17 +170,17 @@ export function SriLankaMap({
                         {dest.name}
                       </p>
                       <p className="text-[11px] text-gray-500 mt-0.5">
-                        Day {dest.day} · {dest.district}
+                        Day {dest.day} · {dest.district_name || "Sri Lanka"}
                       </p>
                       <p className="text-[11px] text-gray-600 mt-1.5 line-clamp-2">
                         {dest.description}
                       </p>
                     </div>
-                  </Tooltip>
-                </CircleMarker>
+                  </TooltipAny>
+                </CircleMarkerAny>
               );
             })}
-          </MapContainer>
+          </MapContainerAny>
         </div>
       </div>
 
@@ -208,3 +217,4 @@ export function SriLankaMap({
     </div>
   );
 }
+

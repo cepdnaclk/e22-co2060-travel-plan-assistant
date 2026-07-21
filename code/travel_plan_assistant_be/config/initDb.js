@@ -39,7 +39,8 @@ async function initDb() {
                 { name: "description", definition: "TEXT NULL" },
                 { name: "photos", definition: "TEXT NULL" },
                 { name: "user_reviews", definition: "TEXT NULL" },
-                { name: "display_picture", definition: "VARCHAR(255) NULL" }
+                { name: "display_picture", definition: "VARCHAR(255) NULL" },
+                { name: "place_id", definition: "VARCHAR(255) NULL" }
             ];
 
             for (const col of requiredColumns) {

@@ -168,14 +168,32 @@ export function Home() {
             p.toLowerCase() !== endLocation.toLowerCase(),
         );
 
-        await api.post("/api/trips/generate", {
+        const response = await api.post("/api/trips/generate", {
           startPlace: startLocation,
           endPlace: endLocation,
           desiredPlaces: intermediateStops,
-          availableTime: tripDays * 24 * 60,
+          availableTime: tripDays * 12 * 60,
         });
 
-        navigate("/itinerary");
+        const tripData = response.data?.data;
+        let warningMsg: string | undefined = undefined;
+
+        if (tripData?.warning || tripData?.feasible === false) {
+          let msg: string =
+            tripData.warning ||
+            "Trip duration may not be enough for all requested locations.";
+          if (
+            tripData.skippedLocations &&
+            tripData.skippedLocations.length > 0 &&
+            !msg.includes("Could not include") &&
+            !msg.includes("omitted")
+          ) {
+            msg += ` (Locations omitted to fit selected date range: ${tripData.skippedLocations.join(", ")})`;
+          }
+          warningMsg = msg;
+        }
+
+        navigate("/itinerary", { state: warningMsg ? { warning: warningMsg } : undefined });
       } catch (error: any) {
         setGenerationError(
           error.response?.data?.error || "Failed to generate itinerary.",

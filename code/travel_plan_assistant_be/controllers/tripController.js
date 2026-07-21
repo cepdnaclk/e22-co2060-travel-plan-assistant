@@ -1,4 +1,5 @@
 const { createTravelPlan } = require("../services/travelService");
+const { validateFeasibility } = require("../services/distanceService");
 
 /**
  * Generate a travel plan based on provided parameters
@@ -33,7 +34,7 @@ async function generateTripPlan(req, res) {
 
         if (!availableTime || availableTime <= 0) {
             return res.status(400).json({
-                error: "Available time (in days) must be a positive number",
+                error: "Available time must be a positive number",
                 code: "INVALID_TIME"
             });
         }
@@ -64,6 +65,51 @@ async function generateTripPlan(req, res) {
     }
 }
 
+/**
+ * Validate feasibility of a travel plan without creating sessions
+ * POST /api/trips/check-feasibility
+ */
+async function checkFeasibility(req, res) {
+    try {
+        const { startPlace, desiredPlaces = [], availableTime, endPlace } = req.body;
+
+        if (!startPlace) {
+            return res.status(400).json({
+                error: "Starting location is required",
+                code: "MISSING_START_LOCATION"
+            });
+        }
+
+        if (!availableTime || availableTime <= 0) {
+            return res.status(400).json({
+                error: "Available time must be a positive number",
+                code: "INVALID_TIME"
+            });
+        }
+
+        const result = await validateFeasibility(
+            startPlace,
+            desiredPlaces,
+            availableTime,
+            endPlace
+        );
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error("Error checking trip feasibility:", error);
+
+        res.status(500).json({
+            success: false,
+            error: error.message || "Failed to check trip feasibility",
+            code: "FEASIBILITY_CHECK_ERROR"
+        });
+    }
+}
+
 module.exports = {
-    generateTripPlan
+    generateTripPlan,
+    checkFeasibility
 };
