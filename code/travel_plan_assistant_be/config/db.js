@@ -4,7 +4,7 @@ const pool = mysql.createPool({
     host: "localhost",
     user: "root",
     port: 3306,
-    password: "toor", // change if you set one
+    password: "Tharush@123", // change if you set one
     database: "travel_planner",
 });
 
