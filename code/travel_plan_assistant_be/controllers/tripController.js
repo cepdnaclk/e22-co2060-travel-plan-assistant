@@ -15,7 +15,7 @@ const { validateFeasibility } = require("../services/distanceService");
  */
 async function generateTripPlan(req, res) {
     try {
-        const { startPlace, desiredPlaces = [], availableTime, endPlace } = req.body;
+        const { startPlace, desiredPlaces = [], availableTime, endPlace, startTime, endTime } = req.body;
 
         // Validation
         if (!startPlace) {
@@ -45,7 +45,9 @@ async function generateTripPlan(req, res) {
             desiredPlaces,
             availableTime,
             endPlace,
-            req.user.userId
+            req.user.userId,
+            startTime || "08:30",
+            endTime || "20:00"
         );
 
         res.status(200).json({

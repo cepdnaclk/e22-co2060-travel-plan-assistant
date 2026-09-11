@@ -25,11 +25,13 @@ const tripRoutes = require("./routes/tripRoutes");
 const itineraryRoutes = require("./routes/itineraryRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const placeRoutes = require("./routes/placeRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/destinations", destinationRoutes);
+app.use("/api", placeRoutes);
 app.use("/api/trips", authMiddleware, tripRoutes);
 app.use("/api/itinerary", authMiddleware, itineraryRoutes);
 app.use("/public", express.static(path.join(process.cwd(), "public")));

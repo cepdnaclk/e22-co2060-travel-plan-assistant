@@ -21,6 +21,37 @@ export interface RouteSegment {
   transport: string;
 }
 
+export interface MilestonePlace {
+  id?: number | string;
+  hotel_id?: number | string;
+  restaurant_id?: number | string;
+  name: string;
+  lat: number | string;
+  lng: number | string;
+  address?: string;
+  rating?: number | string;
+  user_ratings_total?: number;
+  price_level?: number;
+  description?: string;
+  display_picture?: string;
+  phone_number?: string;
+  website?: string;
+  cuisine_type?: string;
+  hotel_type?: string;
+  distance_km?: number | string;
+  opening_hours?: any;
+  district_name?: string;
+}
+
+export interface ItineraryMilestone {
+  type: "lunch" | "overnight";
+  day: number;
+  restaurantId?: number;
+  hotelId?: number;
+  status: "pending" | "selected" | "ignored";
+  place?: MilestonePlace;
+}
+
 export const categoryColors: Record<
   string,
   { bg: string; text: string; dot: string }
@@ -32,4 +63,6 @@ export const categoryColors: Record<
   Wildlife: { bg: "bg-amber-50", text: "text-amber-700", dot: "#f59e0b" },
   Heritage: { bg: "bg-rose-50", text: "text-rose-700", dot: "#f43f5e" },
   Historical: { bg: "bg-indigo-50", text: "text-indigo-700", dot: "#6366f1" },
+  Hotel: { bg: "bg-indigo-50", text: "text-indigo-700", dot: "#6366f1" },
+  Restaurant: { bg: "bg-amber-50", text: "text-amber-700", dot: "#f59e0b" },
 };

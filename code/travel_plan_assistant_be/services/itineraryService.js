@@ -1,5 +1,7 @@
 const db = require("../config/db");
 const { getCandidateRoutes } = require("./neighborService");
+const { getHotelById } = require("./hotelService");
+const { getRestaurantById } = require("./restaurantService");
 
 function formatDuration(minutes) {
   if (minutes < 60) {
@@ -27,10 +29,10 @@ async function getAllItinerary(user_id) {
   const result = [];
 
   for (const session of sessions) {
-    // Parse travel_plan (handle JSON string or array)
-    let ids;
+    // Parse travel_plan (support both legacy array [1,2,3] and structured object)
+    let parsedPlan;
     try {
-      ids =
+      parsedPlan =
         typeof session.travel_plan === "string"
           ? JSON.parse(session.travel_plan)
           : session.travel_plan;
@@ -39,14 +41,33 @@ async function getAllItinerary(user_id) {
       continue;
     }
 
+    let ids = [];
+    let startTime = "08:30";
+    let endTime = "20:00";
+    let rawMilestones = [];
+
+    if (Array.isArray(parsedPlan)) {
+      ids = parsedPlan;
+    } else if (parsedPlan && typeof parsedPlan === "object") {
+      ids = Array.isArray(parsedPlan.checkpoints) ? parsedPlan.checkpoints : [];
+      startTime = parsedPlan.startTime || "08:30";
+      endTime = parsedPlan.endTime || "20:00";
+      rawMilestones = Array.isArray(parsedPlan.milestones) ? parsedPlan.milestones : [];
+    }
+
     // Skip empty plans
     if (!Array.isArray(ids) || ids.length === 0) continue;
 
     const placeholders = ids.map(() => "?").join(",");
 
     const [destinations] = await db.execute(
-      `SELECT d.destinationID, d.name, d.description, d.lat, d.lng, d.tag, d.display_picture, dist.district_name
-       FROM destinations d INNER JOIN districts dist ON d.district_id = dist.district_id 
+      `SELECT d.destinationID, d.name, d.description, d.lat, d.lng, d.tag, d.display_picture, d.type, d.rating, dist.district_name,
+              h.hotel_id, h.hotel_type, h.price_level as hotel_price_level, h.phone_number as hotel_phone, h.website as hotel_website,
+              r.restaurant_id, r.cuisine_type, r.price_level as restaurant_price_level, r.phone_number as restaurant_phone, r.website as restaurant_website, r.opening_hours
+       FROM destinations d 
+       LEFT JOIN districts dist ON d.district_id = dist.district_id 
+       LEFT JOIN hotels h ON d.destinationID = h.destination_id
+       LEFT JOIN restaurants r ON d.destinationID = r.destination_id
        WHERE d.destinationID IN (${placeholders})`,
       ids,
     );
@@ -54,7 +75,23 @@ async function getAllItinerary(user_id) {
     const destMap = new Map(destinations.map((d) => [Number(d.destinationID), d]));
 
     const orderedDestinations = ids
-      .map((id) => destMap.get(Number(id)))
+      .map((id) => {
+        const d = destMap.get(Number(id));
+        if (!d) return null;
+        let parsedTag = d.tag;
+        if (typeof d.tag === "string") {
+          try {
+            parsedTag = JSON.parse(d.tag);
+          } catch (e) {
+            parsedTag = [d.tag];
+          }
+        }
+        return {
+          ...d,
+          type: d.type || "attraction",
+          tag: parsedTag,
+        };
+      })
       .filter(Boolean);
 
     // Calculate route segments between consecutive destinations
@@ -94,17 +131,106 @@ async function getAllItinerary(user_id) {
       }
     }
 
+    // Enrich milestones with actual place details
+    const enrichedMilestones = [];
+    for (const m of rawMilestones) {
+      if (m.type === "lunch" && m.restaurantId) {
+        const restaurant = await getRestaurantById(m.restaurantId);
+        enrichedMilestones.push({ ...m, place: restaurant });
+      } else if (m.type === "overnight" && m.hotelId) {
+        const hotel = await getHotelById(m.hotelId);
+        enrichedMilestones.push({ ...m, place: hotel });
+      } else {
+        enrichedMilestones.push(m);
+      }
+    }
+
     result.push({
       session_id: session.session_id,
       destinations: orderedDestinations,
       routeSegments,
+      startTime,
+      endTime,
+      milestones: enrichedMilestones,
     });
   }
 
   return result;
 }
 
+/**
+ * Update milestone selection (lunch restaurant or night hotel or ignore) in session
+ */
+async function updateSessionMilestone(sessionId, userId, { type, day = 1, placeId = null, status = "selected" }) {
+  const [sessions] = await db.execute(
+    "SELECT session_id, travel_plan FROM user_travel_sessions WHERE session_id = ? AND user_id = ? LIMIT 1",
+    [sessionId, userId]
+  );
+
+  if (!sessions.length) {
+    throw new Error("Session not found or access denied");
+  }
+
+  let plan;
+  try {
+    plan = typeof sessions[0].travel_plan === "string"
+      ? JSON.parse(sessions[0].travel_plan)
+      : sessions[0].travel_plan;
+  } catch (err) {
+    plan = {};
+  }
+
+  if (Array.isArray(plan)) {
+    plan = {
+      checkpoints: plan,
+      startTime: "08:30",
+      endTime: "20:00",
+      milestones: []
+    };
+  }
+
+  if (!Array.isArray(plan.milestones)) {
+    plan.milestones = [];
+  }
+
+  const existingIdx = plan.milestones.findIndex(
+    (m) => m.type === type && (m.day || 1) === (day || 1)
+  );
+
+  const milestoneEntry = {
+    type,
+    day: day || 1,
+    restaurantId: type === "lunch" ? placeId : undefined,
+    hotelId: type === "overnight" ? placeId : undefined,
+    status: status || (placeId ? "selected" : "ignored")
+  };
+
+  if (existingIdx >= 0) {
+    plan.milestones[existingIdx] = milestoneEntry;
+  } else {
+    plan.milestones.push(milestoneEntry);
+  }
+
+  await db.execute(
+    "UPDATE user_travel_sessions SET travel_plan = ? WHERE session_id = ?",
+    [JSON.stringify(plan), sessionId]
+  );
+
+  // Return the enriched milestone
+  let placeDetails = null;
+  if (type === "lunch" && placeId) {
+    placeDetails = await getRestaurantById(placeId);
+  } else if (type === "overnight" && placeId) {
+    placeDetails = await getHotelById(placeId);
+  }
+
+  return {
+    ...milestoneEntry,
+    place: placeDetails
+  };
+}
+
 module.exports = {
   getAllItinerary,
+  updateSessionMilestone,
 };
-

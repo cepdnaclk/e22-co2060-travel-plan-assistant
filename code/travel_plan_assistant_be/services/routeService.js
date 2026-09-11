@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const GOOGLE_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
-const { safeApiCall } = require("../helpers/safeApi");
+const { safeApiCall } = require("../helpers/safeAPI");
 const { findByID } = require("../services/destinationService");
 
 /**

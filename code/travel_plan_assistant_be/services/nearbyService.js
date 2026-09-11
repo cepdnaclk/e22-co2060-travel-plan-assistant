@@ -25,7 +25,7 @@ async function nearbyExists(sourceID, destinationID) {
 async function getDestinationWithinRadius(lat, lng, radius = 5000) {
 
     const [rows] = await db.execute(
-        `SELECT destinationID, district_id, name, lat, lng,
+        `SELECT destinationID, district_id, name, lat, lng, place_id, type,
                 ST_Distance_Sphere(coords, POINT(?, ?)) AS distance
          FROM destinations
          HAVING distance <= ? AND distance > 0

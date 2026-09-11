@@ -52,7 +52,9 @@ async function createTravelPlan(
     desiredPlaces = [],
     availableTime,
     endPlace = null,
-    userId
+    userId,
+    startTime = "08:30",
+    endTime = "20:00"
 ) {
 
     if (!startPlace) {
@@ -157,7 +159,14 @@ async function createTravelPlan(
 
     const destinationIdList = await getDestinationIdList(finalPath);
 
-    const sessionId = await saveTravelSession(userId, destinationIdList);
+    const planData = {
+        checkpoints: destinationIdList,
+        startTime,
+        endTime,
+        milestones: []
+    };
+
+    const sessionId = await saveTravelSession(userId, planData);
 
     let isFeasible = feasibility.feasible;
     let warning = feasibility.warning || null;
