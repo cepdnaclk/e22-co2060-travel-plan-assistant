@@ -18,6 +18,7 @@ import {
   Loader2,
   AlertCircle,
   Navigation,
+  Clock,
 } from "lucide-react";
 
 import { Card } from "../components/ui/card";
@@ -81,6 +82,8 @@ export function Home() {
   const [validationError, setValidationError] = useState("");
   const [placeInput, setPlaceInput] = useState("");
   const [places, setPlaces] = useState<string[]>([]);
+  const [startTime, setStartTime] = useState("08:30");
+  const [endTime, setEndTime] = useState("20:00");
 
   useEffect(() => {
     if (validationError) {
@@ -92,7 +95,7 @@ export function Home() {
   useEffect(() => {
     const loadDestinations = async () => {
       try {
-        const response = await api.get<ApiDestination[]>("/api/destinations");
+        const response = await api.get<ApiDestination[]>("/api/destinations?type=attraction");
         const destinationList = Array.isArray(response.data)
           ? response.data
           : [];
@@ -173,6 +176,8 @@ export function Home() {
           endPlace: endLocation,
           desiredPlaces: intermediateStops,
           availableTime: tripDays * 12 * 60,
+          startTime,
+          endTime,
         });
 
         const tripData = response.data?.data;
@@ -276,6 +281,38 @@ export function Home() {
                 {tripDays} days
               </span>
             )}
+          </div>
+        </section>
+
+        {/* Daily Schedule & Timing */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold text-gray-800 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-500" /> Daily Schedule & Milestones
+            </Label>
+            <span className="text-xs font-medium text-gray-500">
+              Used for lunch & hotel prompts
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-600 font-medium">Daily Start Time</Label>
+              <Input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="h-11 cursor-pointer font-medium bg-white"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-600 font-medium">Daily End Time (Overnight Stop)</Label>
+              <Input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="h-11 cursor-pointer font-medium bg-white"
+              />
+            </div>
           </div>
         </section>
 

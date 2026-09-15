@@ -9,7 +9,7 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 // Checks the destination already exist in DB before API call
 async function findByName(place) {
   const [rows] = await db.execute(
-    "SELECT destinationID, name, lat, lng FROM destinations WHERE name = ? LIMIT 1",
+    "SELECT destinationID, name, lat, lng, type FROM destinations WHERE name = ? LIMIT 1",
     [place],
   );
 
@@ -17,9 +17,11 @@ async function findByName(place) {
 
   return {
     id: rows[0].destinationID,
+    destinationID: rows[0].destinationID,
     name: rows[0].name,
     lat: parseFloat(rows[0].lat),
     lng: parseFloat(rows[0].lng),
+    type: rows[0].type || "attraction",
   };
 }
 
@@ -28,22 +30,62 @@ async function findByName(place) {
  */
 async function findByID(id) {
   const [rows] = await db.execute(
-    "SELECT destinationID, name, lat, lng, rating, tag, description, user_reviews, display_picture FROM destinations WHERE destinationID = ? LIMIT 1",
+    `SELECT d.destinationID, d.name, d.lat, d.lng, d.rating, d.tag, d.description, d.user_reviews, d.display_picture, d.type, d.district_id, dist.district_name,
+            h.hotel_id, h.hotel_type, h.price_level as hotel_price_level, h.phone_number as hotel_phone, h.website as hotel_website,
+            r.restaurant_id, r.cuisine_type, r.price_level as restaurant_price_level, r.phone_number as restaurant_phone, r.website as restaurant_website, r.opening_hours
+     FROM destinations d
+     LEFT JOIN districts dist ON d.district_id = dist.district_id
+     LEFT JOIN hotels h ON d.destinationID = h.destination_id
+     LEFT JOIN restaurants r ON d.destinationID = r.destination_id
+     WHERE d.destinationID = ? LIMIT 1`,
     [id],
   );
 
   if (!rows.length) return null;
 
+  const row = rows[0];
+  let parsedTag = row.tag;
+  if (typeof row.tag === "string") {
+    try {
+      parsedTag = JSON.parse(row.tag);
+    } catch (e) {
+      parsedTag = [row.tag];
+    }
+  }
+
+  let parsedReviews = row.user_reviews;
+  if (typeof row.user_reviews === "string") {
+    try {
+      parsedReviews = JSON.parse(row.user_reviews);
+    } catch (e) {
+      parsedReviews = [];
+    }
+  }
+
   return {
-    id: rows[0].destinationID,
-    name: rows[0].name,
-    lat: parseFloat(rows[0].lat),
-    lng: parseFloat(rows[0].lng),
-    rating: rows[0].rating,
-    tag: rows[0].tag,
-    description: rows[0].description,
-    user_reviews: rows[0].user_reviews,
-    display_picture: rows[0].display_picture,
+    id: row.destinationID,
+    destinationID: row.destinationID,
+    name: row.name,
+    lat: parseFloat(row.lat),
+    lng: parseFloat(row.lng),
+    rating: row.rating,
+    tag: parsedTag,
+    type: row.type || "attraction",
+    description: row.description,
+    user_reviews: parsedReviews,
+    display_picture: row.display_picture,
+    district_name: row.district_name,
+    hotel_id: row.hotel_id,
+    hotel_type: row.hotel_type,
+    hotel_price_level: row.hotel_price_level,
+    hotel_phone: row.hotel_phone,
+    hotel_website: row.hotel_website,
+    restaurant_id: row.restaurant_id,
+    cuisine_type: row.cuisine_type,
+    restaurant_price_level: row.restaurant_price_level,
+    restaurant_phone: row.restaurant_phone,
+    restaurant_website: row.restaurant_website,
+    opening_hours: row.opening_hours,
   };
 }
 /**
@@ -72,11 +114,12 @@ async function insertDestination({
   photos = null,
   user_reviews = null,
   display_picture = null,
+  type = "attraction",
 }) {
   const [result] = await db.execute(
     `INSERT INTO destinations
-            (name, lat, lng, rating, created_at, coords, district_id, tag, place_id, description, photos, user_reviews, display_picture)
-            VALUES (?, ?, ?, ?, NOW(), POINT(?, ?), ?, ?, ?, ?, ?, ?, ?)`,
+            (name, lat, lng, rating, created_at, coords, district_id, tag, place_id, description, photos, user_reviews, display_picture, type)
+            VALUES (?, ?, ?, ?, NOW(), POINT(?, ?), ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       name,
       lat,
@@ -85,24 +128,59 @@ async function insertDestination({
       lng,
       lat,
       district_id,
-      tag,
+      tag ? (Array.isArray(tag) ? JSON.stringify(tag) : tag) : null,
       place_id,
       description,
       photos ? JSON.stringify(photos) : null,
       user_reviews ? JSON.stringify(user_reviews) : null,
       display_picture,
+      type,
     ],
   );
 
   return result.insertId;
 }
 
-async function getAllDestinations() {
-  const [rows] = await db.execute(
-    "SELECT destinationID, name, rating, tag, description, display_picture FROM destinations",
-  );
+async function getAllDestinations({ type } = {}) {
+  let query = `
+    SELECT d.destinationID, d.name, d.rating, d.tag, d.description, d.display_picture, d.type, d.district_id, dist.district_name,
+           h.hotel_id, h.hotel_type, h.price_level as hotel_price_level, h.phone_number as hotel_phone, h.website as hotel_website,
+           r.restaurant_id, r.cuisine_type, r.price_level as restaurant_price_level, r.phone_number as restaurant_phone, r.website as restaurant_website, r.opening_hours
+    FROM destinations d
+    LEFT JOIN districts dist ON d.district_id = dist.district_id
+    LEFT JOIN hotels h ON d.destinationID = h.destination_id
+    LEFT JOIN restaurants r ON d.destinationID = r.destination_id
+  `;
+  const params = [];
 
-  return rows;
+  if (type) {
+    if (type === "attraction") {
+      query += " WHERE (d.type = 'attraction' OR d.type IS NULL)";
+    } else {
+      query += " WHERE d.type = ?";
+      params.push(type);
+    }
+  }
+
+  query += " ORDER BY d.destinationID ASC";
+
+  const [rows] = await db.execute(query, params);
+
+  return rows.map((r) => {
+    let parsedTag = r.tag;
+    if (typeof r.tag === "string") {
+      try {
+        parsedTag = JSON.parse(r.tag);
+      } catch (e) {
+        parsedTag = [r.tag];
+      }
+    }
+    return {
+      ...r,
+      type: r.type || "attraction",
+      tag: parsedTag,
+    };
+  });
 }
 
 async function getPlaceDetails(placeId) {
@@ -112,7 +190,7 @@ async function getPlaceDetails(placeId) {
       {
         params: {
           place_id: placeId,
-          fields: "photos,reviews,editorial_summary",
+          fields: "name,formatted_address,geometry,rating,user_ratings_total,price_level,photos,reviews,editorial_summary,formatted_phone_number,website,opening_hours",
           key: API_KEY,
         },
       },
@@ -123,6 +201,14 @@ async function getPlaceDetails(placeId) {
     if (!result) return null;
 
     return {
+      name: result.name || null,
+      address: result.formatted_address || null,
+      rating: result.rating || null,
+      user_ratings_total: result.user_ratings_total || 0,
+      price_level: result.price_level != null ? result.price_level : null,
+      phone_number: result.formatted_phone_number || null,
+      website: result.website || null,
+      opening_hours: result.opening_hours?.weekday_text || null,
       description: result.editorial_summary?.overview || null,
 
       photos: (result.photos || []).slice(0, 10).map((p) => p.photo_reference),

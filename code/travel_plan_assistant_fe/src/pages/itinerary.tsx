@@ -12,12 +12,19 @@ import {
 } from "lucide-react";
 import { ItineraryTimeline } from "../components/ItineraryTimeline";
 import DirectionsMap from "../components/DirectionsMap";
-import { type ItineraryDestination, type RouteSegment } from "../data/itinerary-data";
+import {
+  type ItineraryDestination,
+  type RouteSegment,
+  type ItineraryMilestone,
+} from "../data/itinerary-data";
 
 export interface GeneratedTripSession {
   session_id: number;
   destinations: ItineraryDestination[];
   routeSegments?: RouteSegment[];
+  startTime?: string;
+  endTime?: string;
+  milestones?: ItineraryMilestone[];
 }
 
 export function calculateTotalTripTime(routeSegments?: RouteSegment[]): string {
@@ -240,10 +247,33 @@ export function Itinerary() {
 
       <section>
         <ItineraryTimeline
+          sessionId={selectedTrip?.session_id}
           activeId={activeDestination || undefined}
           onDestinationClick={handleDestinationClick}
           destinations={selectedTrip?.destinations || []}
           routeSegments={selectedTrip?.routeSegments || []}
+          startTime={selectedTrip?.startTime || "08:30"}
+          endTime={selectedTrip?.endTime || "20:00"}
+          milestones={selectedTrip?.milestones || []}
+          onMilestoneUpdated={(updated) => {
+            if (!selectedTrip) return;
+            const currentMilestones = [...(selectedTrip.milestones || [])];
+            const idx = currentMilestones.findIndex(
+              (m) => m.type === updated.type && (m.day || 1) === (updated.day || 1)
+            );
+            if (idx >= 0) {
+              currentMilestones[idx] = updated;
+            } else {
+              currentMilestones.push(updated);
+            }
+            const updatedTrip = { ...selectedTrip, milestones: currentMilestones };
+            setSelectedTrip(updatedTrip);
+            setTrips((prevTrips) =>
+              prevTrips.map((t) =>
+                t.session_id === updatedTrip.session_id ? updatedTrip : t
+              )
+            );
+          }}
         />
       </section>
     </div>

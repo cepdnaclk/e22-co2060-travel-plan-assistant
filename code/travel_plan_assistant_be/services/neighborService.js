@@ -3,12 +3,12 @@ const { getDistanceAndDurationByID } = require("./routeService");
 const { insertNearbyDestination } = require("./nearbyService");
 const { filterTowardTarget } = require("./directionalService");
 
-async function getSpatialCandidates(destinationID, radiusKm = 10, limit = 10) {
+async function getSpatialCandidates(destinationID, radiusKm = 10, limit = 10, targetID = null) {
 
     const radiusMeters = radiusKm * 1000;
 
-    const [rows] = await db.execute(
-        `
+    const query = targetID
+        ? `
         SELECT 
             destinationID,
             ST_Distance_Sphere(
@@ -17,10 +17,27 @@ async function getSpatialCandidates(destinationID, radiusKm = 10, limit = 10) {
             ) AS distance
         FROM destinations
         WHERE destinationID != ?
+          AND (type = 'attraction' OR type IS NULL OR destinationID = ?)
         ORDER BY distance ASC
-        `,
-        [destinationID, destinationID]
-    );
+        `
+        : `
+        SELECT 
+            destinationID,
+            ST_Distance_Sphere(
+                coords,
+                (SELECT coords FROM destinations WHERE destinationID = ?)
+            ) AS distance
+        FROM destinations
+        WHERE destinationID != ?
+          AND (type = 'attraction' OR type IS NULL)
+        ORDER BY distance ASC
+        `;
+
+    const params = targetID
+        ? [destinationID, destinationID, targetID]
+        : [destinationID, destinationID];
+
+    const [rows] = await db.execute(query, params);
 
     // filter in JS (more stable than SQL edge cases)
     const filtered = rows

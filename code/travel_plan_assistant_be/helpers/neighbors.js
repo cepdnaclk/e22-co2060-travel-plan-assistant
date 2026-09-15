@@ -7,17 +7,18 @@ const { getSpatialCandidates, getCandidateRoutes, getValidNeighbors } = require(
  * @param {number} destinationID
  * @returns {Array<{id:number, distance:number, duration:number}>}
  */
-async function getNeighbors(destinationID) {
+async function getNeighbors(destinationID, targetID = null) {
 
     const SPATIAL_RADIUS_KM = 10;
     const LIMIT = 10;
     const MAX_ROUTE_KM = 25;
 
-    // 1. Get spatial candidates
+    // 1. Get spatial candidates (only attractions or target)
     const candidates = await getSpatialCandidates(
         destinationID,
         SPATIAL_RADIUS_KM,
-        LIMIT
+        LIMIT,
+        targetID
     );
 
     // 2. Get cached/API route data

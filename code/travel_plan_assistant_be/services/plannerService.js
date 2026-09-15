@@ -183,8 +183,8 @@ async function expandFrontier(frontier, targetID, visited) {
 
     for (const nodeID of currentLevel) {
 
-        // STEP 1: get normal neighbors
-        const neighbors = await getNeighbors(nodeID);
+        // STEP 1: get normal neighbors (attractions only, or target)
+        const neighbors = await getNeighbors(nodeID, targetID);
 
         // STEP 2: strict toward-target filter
         let candidates = await filterTowardTarget(
@@ -208,11 +208,17 @@ async function expandFrontier(frontier, targetID, visited) {
             }
         }
 
-        // STEP 4: choose first valid unvisited candidate
+        // STEP 4: choose first valid unvisited candidate (strictly attraction or target)
         let chosen = null;
 
         for (const c of candidates) {
             if (!visited.has(c.id)) {
+                if (c.id !== targetID) {
+                    const checkNode = await findByID(c.id);
+                    if (checkNode && checkNode.type && checkNode.type !== "attraction") {
+                        continue;
+                    }
+                }
                 chosen = c;
                 break;
             }
@@ -229,15 +235,18 @@ async function expandFrontier(frontier, targetID, visited) {
             continue;
         }
 
-        // STEP 6: commit the chosen node after frontier expansion so
-        // it can still be added as the next frontier node when it is
-        // the candidate that was selected.
+        if (fullNode.id !== targetID && fullNode.type && fullNode.type !== "attraction") {
+            continue;
+        }
+
+        // STEP 6: commit the chosen node after frontier expansion
         for (const c of candidates) {
 
             if (!visited.has(c.id)) {
 
                 const node = await findByID(c.id);
                 if (!node) continue;
+                if (node.id !== targetID && node.type && node.type !== "attraction") continue;
 
                 visited.add(node.id);
                 nextFrontier.add(node.id);

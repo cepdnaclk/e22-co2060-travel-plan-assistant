@@ -30,7 +30,71 @@ async function initDb() {
         `);
         console.log("✓ user_travel_sessions table ready.");
 
-        // 3. Ensure destinations table has the newer columns
+        // 3. Create hotels table if not exists
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS hotels (
+                hotel_id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                district_id INT NULL,
+                destination_id INT NULL,
+                lat DECIMAL(10, 8) NOT NULL,
+                lng DECIMAL(11, 8) NOT NULL,
+                coords POINT NOT NULL,
+                address VARCHAR(255) NULL,
+                rating DECIMAL(2, 1) NULL,
+                user_ratings_total INT DEFAULT 0,
+                price_level INT NULL,
+                hotel_type VARCHAR(100) NULL,
+                place_id VARCHAR(255) NULL,
+                description TEXT NULL,
+                photos TEXT NULL,
+                display_picture VARCHAR(255) NULL,
+                phone_number VARCHAR(50) NULL,
+                website VARCHAR(255) NULL,
+                amenities TEXT NULL,
+                user_reviews TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log("✓ hotels table ready.");
+
+        // 4. Create restaurants table if not exists
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS restaurants (
+                restaurant_id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                district_id INT NULL,
+                destination_id INT NULL,
+                lat DECIMAL(10, 8) NOT NULL,
+                lng DECIMAL(11, 8) NOT NULL,
+                coords POINT NOT NULL,
+                address VARCHAR(255) NULL,
+                rating DECIMAL(2, 1) NULL,
+                user_ratings_total INT DEFAULT 0,
+                price_level INT NULL,
+                cuisine_type VARCHAR(100) NULL,
+                place_id VARCHAR(255) NULL,
+                description TEXT NULL,
+                photos TEXT NULL,
+                display_picture VARCHAR(255) NULL,
+                phone_number VARCHAR(50) NULL,
+                website VARCHAR(255) NULL,
+                opening_hours TEXT NULL,
+                user_reviews TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log("✓ restaurants table ready.");
+
+        // Ensure directories for media exist
+        const fs = require("fs");
+        const path = require("path");
+        const hotelDir = path.join(__dirname, "../public/hotels");
+        const restDir = path.join(__dirname, "../public/restaurants");
+        if (!fs.existsSync(hotelDir)) fs.mkdirSync(hotelDir, { recursive: true });
+        if (!fs.existsSync(restDir)) fs.mkdirSync(restDir, { recursive: true });
+
+        // 5. Ensure destinations table has the newer columns
         try {
             const [columns] = await db.execute("SHOW COLUMNS FROM destinations");
             const columnNamesLower = columns.map(c => (c.Field || c.field || "").toLowerCase());
@@ -40,7 +104,8 @@ async function initDb() {
                 { name: "photos", definition: "TEXT NULL" },
                 { name: "user_reviews", definition: "TEXT NULL" },
                 { name: "display_picture", definition: "VARCHAR(255) NULL" },
-                { name: "place_id", definition: "VARCHAR(255) NULL" }
+                { name: "place_id", definition: "VARCHAR(255) NULL" },
+                { name: "type", definition: "VARCHAR(50) DEFAULT 'attraction'" }
             ];
 
             for (const col of requiredColumns) {

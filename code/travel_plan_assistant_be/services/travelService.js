@@ -52,7 +52,9 @@ async function createTravelPlan(
     desiredPlaces = [],
     availableTime,
     endPlace = null,
-    userId
+    userId,
+    startTime = "08:30",
+    endTime = "20:00"
 ) {
 
     if (!startPlace) {
@@ -149,6 +151,8 @@ async function createTravelPlan(
 
     for (const node of fullPath) {
         if (seen.has(node.id)) continue;
+        // Ignore hotels and restaurants as main itinerary attraction stops
+        if (node.type && node.type !== "attraction") continue;
         seen.add(node.id);
         uniquePath.push(node);
     }
@@ -157,7 +161,14 @@ async function createTravelPlan(
 
     const destinationIdList = await getDestinationIdList(finalPath);
 
-    const sessionId = await saveTravelSession(userId, destinationIdList);
+    const planData = {
+        checkpoints: destinationIdList,
+        startTime,
+        endTime,
+        milestones: []
+    };
+
+    const sessionId = await saveTravelSession(userId, planData);
 
     let isFeasible = feasibility.feasible;
     let warning = feasibility.warning || null;
