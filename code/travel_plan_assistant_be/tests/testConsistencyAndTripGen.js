@@ -211,9 +211,42 @@ async function runVerification() {
   });
 
   // -------------------------------------------------------------------------
-  // PART 5: TEST OVERNIGHT STAY MILESTONE (Evening Search & Selection)
+  // PART 5: TEST DINNER MILESTONE (Evening Restaurant Search & Selection)
   // -------------------------------------------------------------------------
-  console.log("\n>>> [STEP 5] Testing Overnight Stay Milestone: Proximity Search & Selection...");
+  console.log("\n>>> [STEP 5] Testing Dinner Milestone: Proximity Search & Selection...");
+  // Pick dinner stop (near final attraction before hotel)
+  const dinnerStop = sessionItinerary.destinations[sessionItinerary.destinations.length - 1];
+  console.log(`Dinner stop for evening meal prompt: "${dinnerStop.name}" at coords (${dinnerStop.lat}, ${dinnerStop.lng})`);
+
+  const nearbyDinnerRestaurants = await getNearbyRestaurants(dinnerStop.lat, dinnerStop.lng, 25, 5);
+  console.log(`Found ${nearbyDinnerRestaurants.length} nearby dinner restaurants:`);
+  nearbyDinnerRestaurants.forEach((r, i) => {
+    console.log(`  ${i + 1}. ${r.name} | ${r.cuisine_type || "Cuisine"} | ⭐ ${r.rating || "N/A"} | ${r.distance_km} km away`);
+  });
+
+  const selectedDinner = nearbyDinnerRestaurants.length > 0 ? nearbyDinnerRestaurants[0] : null;
+  if (selectedDinner) {
+    console.log(`\nUser selects Restaurant for Dinner: "${selectedDinner.name}" (ID: ${selectedDinner.restaurant_id})`);
+    const dinnerMilestoneUpdate = await updateSessionMilestone(sessionId, testUserId, {
+      type: "dinner",
+      day: 1,
+      placeId: selectedDinner.restaurant_id,
+      status: "selected"
+    });
+    console.log("Dinner milestone updated in session:", {
+      type: dinnerMilestoneUpdate.type,
+      day: dinnerMilestoneUpdate.day,
+      status: dinnerMilestoneUpdate.status,
+      restaurantName: dinnerMilestoneUpdate.place?.name,
+      restaurantAddress: dinnerMilestoneUpdate.place?.address,
+      cuisine: dinnerMilestoneUpdate.place?.cuisine_type
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // PART 6: TEST OVERNIGHT STAY MILESTONE (Night Hotel Search & Selection)
+  // -------------------------------------------------------------------------
+  console.log("\n>>> [STEP 6] Testing Overnight Stay Milestone: Proximity Search & Selection...");
   // Pick evening stop (last destination: Galle)
   const eveningStop = sessionItinerary.destinations[sessionItinerary.destinations.length - 1];
   console.log(`Evening stop for hotel stay prompt: "${eveningStop.name}" at coords (${eveningStop.lat}, ${eveningStop.lng})`);
@@ -249,9 +282,9 @@ async function runVerification() {
   });
 
   // -------------------------------------------------------------------------
-  // PART 6: VERIFY PERSISTENCE UPON RELOAD
+  // PART 7: VERIFY PERSISTENCE UPON RELOAD
   // -------------------------------------------------------------------------
-  console.log("\n>>> [STEP 6] Verifying Persistence Across Reload...");
+  console.log("\n>>> [STEP 7] Verifying Persistence Across Reload...");
   const reloadedItineraries = await getAllItinerary(testUserId);
   const reloadedSession = reloadedItineraries.find(s => s.session_id === sessionId);
 
@@ -264,9 +297,10 @@ async function runVerification() {
   });
 
   const hasLunch = reloadedSession.milestones.some(m => m.type === "lunch" && m.restaurantId === selectedRestaurant.restaurant_id);
+  const hasDinner = !selectedDinner || reloadedSession.milestones.some(m => m.type === "dinner" && m.restaurantId === selectedDinner.restaurant_id);
   const hasHotel = reloadedSession.milestones.some(m => m.type === "overnight" && m.hotelId === selectedHotel.hotel_id);
 
-  if (!hasLunch || !hasHotel) {
+  if (!hasLunch || !hasDinner || !hasHotel) {
     throw new Error("Failed persistence verification: Milestones were not correctly retrieved from DB!");
   }
 

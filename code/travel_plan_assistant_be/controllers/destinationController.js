@@ -2,7 +2,8 @@ const destinationService = require("../services/destinationService");
 
 exports.getDestinations = async (req, res) => {
   try {
-    const destinations = await destinationService.getAllDestinations();
+    const { type } = req.query;
+    const destinations = await destinationService.getAllDestinations({ type });
     res.json(destinations);
   } catch (error) {
     console.error("Error fetching destinations:", error);

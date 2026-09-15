@@ -26,7 +26,8 @@ async function findDirectionalCandidate(
         const rawCandidates = await getSpatialCandidates(
             currentID,
             radius,
-            limit
+            limit,
+            targetID
         );
 
 
@@ -99,7 +100,7 @@ async function getTowardCandidatesWithFallback(
     console.log("\n===== TOWARD CANDIDATES START =====");
 
     // 1. normal neighbors (cheap cached graph)
-    const neighbors = await getNeighbors(currentID);
+    const neighbors = await getNeighbors(currentID, targetID);
 
     console.log("NEIGHBORS:", neighbors);
 

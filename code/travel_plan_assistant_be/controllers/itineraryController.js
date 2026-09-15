@@ -17,8 +17,8 @@ exports.saveMilestone = async (req, res) => {
   const sessionId = parseInt(req.params.sessionId, 10);
   const { type, day, placeId, status } = req.body;
 
-  if (!type) {
-    return res.status(400).json({ error: "Milestone type is required (lunch or overnight)" });
+  if (!type || !["lunch", "dinner", "overnight"].includes(type)) {
+    return res.status(400).json({ error: "Milestone type is required (lunch, dinner, or overnight)" });
   }
 
   try {

@@ -141,8 +141,8 @@ async function insertDestination({
   return result.insertId;
 }
 
-async function getAllDestinations() {
-  const [rows] = await db.execute(`
+async function getAllDestinations({ type } = {}) {
+  let query = `
     SELECT d.destinationID, d.name, d.rating, d.tag, d.description, d.display_picture, d.type, d.district_id, dist.district_name,
            h.hotel_id, h.hotel_type, h.price_level as hotel_price_level, h.phone_number as hotel_phone, h.website as hotel_website,
            r.restaurant_id, r.cuisine_type, r.price_level as restaurant_price_level, r.phone_number as restaurant_phone, r.website as restaurant_website, r.opening_hours
@@ -150,8 +150,21 @@ async function getAllDestinations() {
     LEFT JOIN districts dist ON d.district_id = dist.district_id
     LEFT JOIN hotels h ON d.destinationID = h.destination_id
     LEFT JOIN restaurants r ON d.destinationID = r.destination_id
-    ORDER BY d.destinationID ASC
-  `);
+  `;
+  const params = [];
+
+  if (type) {
+    if (type === "attraction") {
+      query += " WHERE (d.type = 'attraction' OR d.type IS NULL)";
+    } else {
+      query += " WHERE d.type = ?";
+      params.push(type);
+    }
+  }
+
+  query += " ORDER BY d.destinationID ASC";
+
+  const [rows] = await db.execute(query, params);
 
   return rows.map((r) => {
     let parsedTag = r.tag;

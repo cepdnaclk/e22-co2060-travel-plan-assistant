@@ -73,10 +73,13 @@ export function ItineraryTimeline({
   onMilestoneUpdated,
 }: ItineraryTimelineProps) {
   const [expandedLunch, setExpandedLunch] = useState(false);
+  const [expandedDinner, setExpandedDinner] = useState(false);
   const [expandedHotel, setExpandedHotel] = useState(false);
   const [nearbyRestaurants, setNearbyRestaurants] = useState<MilestonePlace[]>([]);
+  const [nearbyDinnerRestaurants, setNearbyDinnerRestaurants] = useState<MilestonePlace[]>([]);
   const [nearbyHotels, setNearbyHotels] = useState<MilestonePlace[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
+  const [loadingDinnerRestaurants, setLoadingDinnerRestaurants] = useState(false);
   const [loadingHotels, setLoadingHotels] = useState(false);
 
   const apiBaseUrl =
@@ -139,11 +142,13 @@ export function ItineraryTimeline({
 
   // Target coordinates for Lunch (near the midday stop)
   const lunchRefDest = formattedDestinations[lunchStopIndex];
-  // Target coordinates for Hotel (near the final stop of the day)
+  // Target coordinates for Dinner & Hotel (near the final stop of the day)
+  const dinnerRefDest = formattedDestinations[formattedDestinations.length - 1];
   const hotelRefDest = formattedDestinations[formattedDestinations.length - 1];
 
   // Existing milestone decisions
   const lunchMilestone = milestones.find((m) => m.type === "lunch");
+  const dinnerMilestone = milestones.find((m) => m.type === "dinner");
   const hotelMilestone = milestones.find((m) => m.type === "overnight");
 
   // Load nearby restaurants when lunch prompt is expanded
@@ -196,9 +201,34 @@ export function ItineraryTimeline({
     }
   }, [expandedHotel, hotelRefDest?.lat, hotelRefDest?.lng]);
 
+  // Load nearby restaurants when dinner prompt is expanded
+  useEffect(() => {
+    if (expandedDinner && dinnerRefDest?.lat && dinnerRefDest?.lng) {
+      const fetchDinner = async () => {
+        try {
+          setLoadingDinnerRestaurants(true);
+          const res = await api.get<MilestonePlace[]>("/api/restaurants/nearby", {
+            params: {
+              lat: dinnerRefDest.lat,
+              lng: dinnerRefDest.lng,
+              radius: 20,
+              limit: 4,
+            },
+          });
+          setNearbyDinnerRestaurants(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+          console.error("Error loading nearby dinner restaurants:", err);
+        } finally {
+          setLoadingDinnerRestaurants(false);
+        }
+      };
+      fetchDinner();
+    }
+  }, [expandedDinner, dinnerRefDest?.lat, dinnerRefDest?.lng]);
+
   // Handler to persist milestone
   const handleSelectMilestone = async (
-    type: "lunch" | "overnight",
+    type: "lunch" | "dinner" | "overnight",
     placeId: number | null,
     status: "selected" | "ignored"
   ) => {
@@ -217,6 +247,7 @@ export function ItineraryTimeline({
         onMilestoneUpdated?.(res.data.milestone);
       }
       if (type === "lunch") setExpandedLunch(false);
+      if (type === "dinner") setExpandedDinner(false);
       if (type === "overnight") setExpandedHotel(false);
     } catch (err) {
       console.error(`Failed to save ${type} milestone:`, err);
@@ -539,6 +570,199 @@ export function ItineraryTimeline({
                                           )
                                         }
                                         className="w-full bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold h-7 rounded-lg mt-1"
+                                      >
+                                        Select
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ========================================================= */}
+              {/* DINNER MILESTONE PROMPT OR CONFIRMED STOP */}
+              {/* ========================================================= */}
+              {isLastDestination && (
+                <div className="flex items-stretch gap-0 my-3">
+                  <div className="flex flex-col items-center shrink-0 w-10 self-stretch">
+                    <div className="flex-1 w-px bg-orange-300" />
+                    <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-[3px] border-orange-500 bg-orange-50 shadow-md">
+                      <Utensils className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div className="flex-1 w-px bg-purple-300" />
+                  </div>
+
+                  <div className="flex-1 ml-4 mb-4">
+                    {/* CASE 1: DINNER CHOSEN */}
+                    {dinnerMilestone?.status === "selected" && dinnerMilestone.place ? (
+                      <Card className="overflow-hidden border-2 border-orange-300 bg-gradient-to-r from-orange-50/50 to-amber-50/30 p-4 shadow-md rounded-2xl">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <div className="sm:w-36 h-28 rounded-xl overflow-hidden shrink-0 bg-orange-100">
+                            <img
+                              src={
+                                dinnerMilestone.place.display_picture
+                                  ? `${apiBaseUrl}/public/restaurants/${dinnerMilestone.place.display_picture}`
+                                  : "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=400"
+                              }
+                              alt={dinnerMilestone.place.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1.5 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <Badge className="bg-orange-600 text-white text-[11px] font-bold">
+                                  🍽️ Confirmed Dinner Stop (~19:30)
+                                </Badge>
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedDinner((p) => !p)}
+                                  className="text-xs text-orange-700 hover:underline font-semibold"
+                                >
+                                  Change
+                                </button>
+                              </div>
+                              <h4 className="text-base font-bold text-gray-900 mt-1">
+                                {dinnerMilestone.place.name}
+                              </h4>
+                              <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-orange-600" />
+                                {dinnerMilestone.place.address || dinnerRefDest?.name}
+                              </p>
+                              <div className="flex items-center gap-3 text-xs text-gray-600 pt-1">
+                                <span className="flex items-center gap-1 text-yellow-600 font-bold">
+                                  ★ {dinnerMilestone.place.rating || "4.5"}
+                                </span>
+                                <span>•</span>
+                                <span>{dinnerMilestone.place.cuisine_type || "Local Cuisine"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ) : dinnerMilestone?.status === "ignored" ? (
+                      /* CASE 2: DINNER SKIPPED */
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs text-gray-500">
+                        <span className="flex items-center gap-2">
+                          <Utensils className="w-4 h-4 text-gray-400" />
+                          <span>Dinner recommendation skipped</span>
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setExpandedDinner(true)}
+                          className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold h-7"
+                        >
+                          Pick a restaurant
+                        </Button>
+                      </div>
+                    ) : (
+                      /* CASE 3: DINNER PENDING PROMPT */
+                      <Card className="overflow-hidden border-2 border-dashed border-orange-400 bg-orange-50/40 p-4 rounded-2xl shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-orange-100 text-orange-800 border-orange-300 font-semibold">
+                                🍽️ Evening Dinner Milestone
+                              </Badge>
+                              <span className="text-xs text-gray-500 font-semibold">
+                                ~19:30 (Dinner)
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-bold text-gray-900">
+                              Where would you like to have dinner near {dinnerRefDest?.name}?
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              Choose a top-rated local dining spot before retiring for the night.
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                              size="sm"
+                              onClick={() => setExpandedDinner((prev) => !prev)}
+                              className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-xl h-9"
+                            >
+                              <Utensils className="w-3.5 h-3.5 mr-1.5" />
+                              {expandedDinner ? "Hide Options" : "Choose Restaurant"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleSelectMilestone("dinner", null, "ignored")}
+                              className="text-xs text-gray-600 hover:bg-gray-100 rounded-xl h-9 border-gray-300"
+                            >
+                              Skip
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Expandable options drawer */}
+                        {expandedDinner && (
+                          <div className="mt-4 pt-4 border-t border-orange-200 space-y-3 animate-in fade-in duration-200">
+                            <p className="text-xs font-bold text-orange-900 uppercase tracking-wider">
+                              Recommended Restaurants for Dinner Nearby
+                            </p>
+                            {loadingDinnerRestaurants ? (
+                              <div className="p-6 text-center text-xs text-gray-500">
+                                Finding the best dinner restaurants near {dinnerRefDest?.name}...
+                              </div>
+                            ) : nearbyDinnerRestaurants.length === 0 ? (
+                              <div className="p-4 text-center text-xs text-gray-500">
+                                No nearby restaurants found within 20km.
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {nearbyDinnerRestaurants.map((r) => (
+                                  <div
+                                    key={r.restaurant_id}
+                                    className="flex gap-3 p-2.5 rounded-xl bg-white border border-orange-100 shadow-xs hover:border-orange-400 transition-colors"
+                                  >
+                                    <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
+                                      <img
+                                        src={
+                                          r.display_picture
+                                            ? `${apiBaseUrl}/public/restaurants/${r.display_picture}`
+                                            : "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=200"
+                                        }
+                                        alt={r.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 flex flex-col justify-between">
+                                      <div>
+                                        <h5 className="font-bold text-xs text-gray-900 line-clamp-1">
+                                          {r.name}
+                                        </h5>
+                                        <div className="flex items-center gap-1 text-[11px] text-yellow-600 font-semibold">
+                                          ★ {r.rating || "4.5"}
+                                          {r.distance_km && (
+                                            <span className="text-gray-400 font-normal">
+                                              • {r.distance_km} km away
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-[11px] text-gray-500 line-clamp-1">
+                                          {r.cuisine_type || "Local Cuisine"}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        onClick={() =>
+                                          handleSelectMilestone(
+                                            "dinner",
+                                            Number(r.restaurant_id),
+                                            "selected"
+                                          )
+                                        }
+                                        className="w-full bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-bold h-7 rounded-lg mt-1"
                                       >
                                         Select
                                       </Button>

@@ -78,6 +78,10 @@ async function getAllItinerary(user_id) {
       .map((id) => {
         const d = destMap.get(Number(id));
         if (!d) return null;
+        // Ignore hotels and restaurants as main attraction stops
+        if (d.type === "hotel" || d.type === "restaurant") {
+          return null;
+        }
         let parsedTag = d.tag;
         if (typeof d.tag === "string") {
           try {
@@ -131,10 +135,10 @@ async function getAllItinerary(user_id) {
       }
     }
 
-    // Enrich milestones with actual place details
+    // Enrich milestones with actual place details (lunch, dinner, overnight)
     const enrichedMilestones = [];
     for (const m of rawMilestones) {
-      if (m.type === "lunch" && m.restaurantId) {
+      if ((m.type === "lunch" || m.type === "dinner") && m.restaurantId) {
         const restaurant = await getRestaurantById(m.restaurantId);
         enrichedMilestones.push({ ...m, place: restaurant });
       } else if (m.type === "overnight" && m.hotelId) {
@@ -159,7 +163,7 @@ async function getAllItinerary(user_id) {
 }
 
 /**
- * Update milestone selection (lunch restaurant or night hotel or ignore) in session
+ * Update milestone selection (lunch restaurant, dinner restaurant, night hotel, or ignore) in session
  */
 async function updateSessionMilestone(sessionId, userId, { type, day = 1, placeId = null, status = "selected" }) {
   const [sessions] = await db.execute(
@@ -200,7 +204,7 @@ async function updateSessionMilestone(sessionId, userId, { type, day = 1, placeI
   const milestoneEntry = {
     type,
     day: day || 1,
-    restaurantId: type === "lunch" ? placeId : undefined,
+    restaurantId: (type === "lunch" || type === "dinner") ? placeId : undefined,
     hotelId: type === "overnight" ? placeId : undefined,
     status: status || (placeId ? "selected" : "ignored")
   };
@@ -218,7 +222,7 @@ async function updateSessionMilestone(sessionId, userId, { type, day = 1, placeI
 
   // Return the enriched milestone
   let placeDetails = null;
-  if (type === "lunch" && placeId) {
+  if ((type === "lunch" || type === "dinner") && placeId) {
     placeDetails = await getRestaurantById(placeId);
   } else if (type === "overnight" && placeId) {
     placeDetails = await getHotelById(placeId);

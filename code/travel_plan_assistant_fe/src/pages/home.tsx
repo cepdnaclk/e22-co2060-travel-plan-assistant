@@ -95,7 +95,7 @@ export function Home() {
   useEffect(() => {
     const loadDestinations = async () => {
       try {
-        const response = await api.get<ApiDestination[]>("/api/destinations");
+        const response = await api.get<ApiDestination[]>("/api/destinations?type=attraction");
         const destinationList = Array.isArray(response.data)
           ? response.data
           : [];

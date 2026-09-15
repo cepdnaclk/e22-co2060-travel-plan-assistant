@@ -44,7 +44,7 @@ export interface MilestonePlace {
 }
 
 export interface ItineraryMilestone {
-  type: "lunch" | "overnight";
+  type: "lunch" | "dinner" | "overnight";
   day: number;
   restaurantId?: number;
   hotelId?: number;

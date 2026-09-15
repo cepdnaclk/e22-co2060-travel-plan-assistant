@@ -151,6 +151,8 @@ async function createTravelPlan(
 
     for (const node of fullPath) {
         if (seen.has(node.id)) continue;
+        // Ignore hotels and restaurants as main itinerary attraction stops
+        if (node.type && node.type !== "attraction") continue;
         seen.add(node.id);
         uniquePath.push(node);
     }
