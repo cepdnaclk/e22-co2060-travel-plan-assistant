@@ -35,3 +35,72 @@ exports.saveMilestone = async (req, res) => {
     res.status(500).json({ error: error.message || "Failed to save milestone" });
   }
 };
+
+exports.replacePlace = async (req, res) => {
+  const userId = req.user.userId;
+  const sessionId = parseInt(req.params.sessionId, 10);
+  const { oldPlaceId, newPlaceId } = req.body;
+
+  if (!oldPlaceId || !newPlaceId) {
+    return res.status(400).json({ error: "oldPlaceId and newPlaceId are required" });
+  }
+
+  try {
+    const updatedTrip = await itineraryService.replaceSessionDestination(
+      sessionId,
+      userId,
+      oldPlaceId,
+      newPlaceId
+    );
+    res.json({ success: true, trip: updatedTrip });
+  } catch (error) {
+    console.error("Error replacing place:", error);
+    res.status(500).json({ error: error.message || "Failed to replace place" });
+  }
+};
+
+exports.removePlace = async (req, res) => {
+  const userId = req.user.userId;
+  const sessionId = parseInt(req.params.sessionId, 10);
+  const placeId = parseInt(req.params.placeId, 10);
+
+  if (!placeId) {
+    return res.status(400).json({ error: "Valid placeId is required" });
+  }
+
+  try {
+    const updatedTrip = await itineraryService.removeSessionDestination(
+      sessionId,
+      userId,
+      placeId
+    );
+    res.json({ success: true, trip: updatedTrip });
+  } catch (error) {
+    console.error("Error removing place:", error);
+    res.status(500).json({ error: error.message || "Failed to remove place" });
+  }
+};
+
+exports.updatePlaceDuration = async (req, res) => {
+  const userId = req.user.userId;
+  const sessionId = parseInt(req.params.sessionId, 10);
+  const placeId = parseInt(req.params.placeId, 10);
+  const { duration } = req.body;
+
+  if (!placeId || !duration) {
+    return res.status(400).json({ error: "Valid placeId and duration (in minutes) are required" });
+  }
+
+  try {
+    const updatedTrip = await itineraryService.updateSessionPlaceDuration(
+      sessionId,
+      userId,
+      placeId,
+      duration
+    );
+    res.json({ success: true, trip: updatedTrip });
+  } catch (error) {
+    console.error("Error updating place duration:", error);
+    res.status(500).json({ error: error.message || "Failed to update place duration" });
+  }
+};

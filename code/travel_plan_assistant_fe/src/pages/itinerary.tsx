@@ -9,6 +9,7 @@ import {
   Check,
   AlertTriangle,
   Clock,
+  Car,
 } from "lucide-react";
 import { ItineraryTimeline } from "../components/ItineraryTimeline";
 import DirectionsMap from "../components/DirectionsMap";
@@ -63,6 +64,44 @@ export function calculateTotalTripTime(routeSegments?: RouteSegment[]): string {
   }
 }
 
+export function calculateTotalTripDuration(
+  destinations?: ItineraryDestination[],
+  routeSegments?: RouteSegment[]
+): string {
+  if (!destinations || destinations.length === 0) return "0 mins";
+
+  let totalMinutes = 0;
+
+  // Add visit durations
+  for (const dest of destinations) {
+    totalMinutes += dest.visitDuration || 90;
+  }
+
+  // Add travel durations
+  if (routeSegments) {
+    for (const seg of routeSegments) {
+      if (!seg.duration || seg.duration === "Unknown") continue;
+      let mins = 0;
+      const hrMatch = seg.duration.match(/(\d+)\s*hr/i);
+      const minMatch = seg.duration.match(/(\d+)\s*min/i);
+      if (hrMatch) mins += parseInt(hrMatch[1], 10) * 60;
+      if (minMatch) mins += parseInt(minMatch[1], 10);
+      totalMinutes += mins;
+    }
+  }
+
+  const hrs = Math.floor(totalMinutes / 60);
+  const mins = Math.round(totalMinutes % 60);
+
+  if (hrs > 0 && mins > 0) {
+    return `${hrs} hr ${mins} mins`;
+  } else if (hrs > 0) {
+    return `${hrs} hr`;
+  } else {
+    return `${mins} mins`;
+  }
+}
+
 export function Itinerary() {
   const location = useLocation();
   const warningMessage = location.state?.warning as string | undefined;
@@ -104,6 +143,15 @@ export function Itinerary() {
     setActiveDestination(dest.id || dest.destinationID?.toString() || null);
   };
 
+  const handleTripUpdated = (updatedTrip: GeneratedTripSession) => {
+    setSelectedTrip(updatedTrip);
+    setTrips((prevTrips) =>
+      prevTrips.map((t) =>
+        t.session_id === updatedTrip.session_id ? updatedTrip : t
+      )
+    );
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
       {warningMessage && (
@@ -128,7 +176,7 @@ export function Itinerary() {
 
       {/* TRIP SUMMARY STATS & DROPDOWN */}
       <div className="flex flex-col items-center gap-4">
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl">
           <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/90 border border-gray-100 shadow-md">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
               <MapPin className="w-5 h-5" />
@@ -138,7 +186,7 @@ export function Itinerary() {
               <p className="text-lg font-bold text-gray-900">
                 {selectedTrip?.destinations.length || 0}{" "}
                 <span className="text-xs font-normal text-gray-500">
-                  {selectedTrip?.destinations.length === 1 ? "location" : "locations"}
+                  {selectedTrip?.destinations.length === 1 ? "stop" : "stops"}
                 </span>
               </p>
             </div>
@@ -146,19 +194,34 @@ export function Itinerary() {
 
           <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/90 border border-gray-100 shadow-md">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-purple-50 text-purple-600 shrink-0">
+              <Car className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Driving Travel Time</p>
+              <p className="text-lg font-bold text-gray-900">
+                {calculateTotalTripTime(selectedTrip?.routeSegments)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/90 border border-gray-100 shadow-md">
+            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Total Trip Time</p>
+              <p className="text-xs text-gray-500 font-medium">Total Trip Duration</p>
               <p className="text-lg font-bold text-gray-900">
-                {calculateTotalTripTime(selectedTrip?.routeSegments)}
+                {calculateTotalTripDuration(
+                  selectedTrip?.destinations,
+                  selectedTrip?.routeSegments
+                )}
               </p>
             </div>
           </div>
         </div>
 
         {/* DROPDOWN */}
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full max-w-3xl">
           <button
             onClick={() => setDropdownOpen((p) => !p)}
             className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white/80 border shadow-lg hover:border-indigo-200 transition-colors"
@@ -183,8 +246,16 @@ export function Itinerary() {
                   {selectedTrip?.destinations.length || 0} locations
                 </span>
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-purple-500" />
-                  {calculateTotalTripTime(selectedTrip?.routeSegments)}
+                  <Car className="w-3 h-3 text-purple-500" />
+                  {calculateTotalTripTime(selectedTrip?.routeSegments)} driving
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-emerald-500" />
+                  {calculateTotalTripDuration(
+                    selectedTrip?.destinations,
+                    selectedTrip?.routeSegments
+                  )}{" "}
+                  total
                 </span>
               </p>
             </div>
@@ -214,7 +285,15 @@ export function Itinerary() {
                       <p className="text-xs text-gray-500 flex items-center gap-3 mt-0.5">
                         <span>{trip.destinations.length} locations</span>
                         <span>•</span>
-                        <span>{calculateTotalTripTime(trip.routeSegments)}</span>
+                        <span>{calculateTotalTripTime(trip.routeSegments)} driving</span>
+                        <span>•</span>
+                        <span>
+                          {calculateTotalTripDuration(
+                            trip.destinations,
+                            trip.routeSegments
+                          )}{" "}
+                          total
+                        </span>
                       </p>
                     </div>
                     {selectedTrip?.session_id === trip.session_id && (
@@ -255,6 +334,7 @@ export function Itinerary() {
           startTime={selectedTrip?.startTime || "08:30"}
           endTime={selectedTrip?.endTime || "20:00"}
           milestones={selectedTrip?.milestones || []}
+          onTripUpdated={handleTripUpdated}
           onMilestoneUpdated={(updated) => {
             if (!selectedTrip) return;
             const currentMilestones = [...(selectedTrip.milestones || [])];
