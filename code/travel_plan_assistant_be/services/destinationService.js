@@ -276,6 +276,110 @@ async function downloadPlacePhoto(photoReference, fileName) {
   }
 }
 
+/**
+ * Find nearby attractions within radiusKm from a destination ID
+ */
+async function getNearbyAttractions(destinationId, { radiusKm = 30, limit = 8, excludeIds = [] } = {}) {
+  const dest = await findByID(destinationId);
+  if (!dest) {
+    throw new Error("Source destination not found");
+  }
+
+  const lat = dest.lat;
+  const lng = dest.lng;
+
+  const safeLimit = Math.max(1, parseInt(limit, 10) || 8);
+  const initialRadiusMeters = parseFloat(radiusKm) * 1000;
+
+  const fullExclude = new Set([Number(destinationId)]);
+  if (Array.isArray(excludeIds)) {
+    excludeIds.forEach((id) => {
+      const num = Number(id);
+      if (!isNaN(num)) fullExclude.add(num);
+    });
+  }
+
+  const excludeArr = Array.from(fullExclude);
+
+  const runQuery = async (radiusMeters) => {
+    let query = `
+      SELECT d.destinationID, d.name, d.lat, d.lng, d.rating, d.tag, d.description,
+             d.display_picture, d.type, dist.district_name,
+             ROUND(ST_Distance_Sphere(d.coords, POINT(?, ?)) / 1000, 1) AS distance_km,
+             ST_Distance_Sphere(d.coords, POINT(?, ?)) AS distance_meters
+      FROM destinations d
+      LEFT JOIN districts dist ON d.district_id = dist.district_id
+      WHERE (d.type = 'attraction' OR d.type IS NULL)
+    `;
+    const params = [lng, lat, lng, lat];
+
+    if (excludeArr.length > 0) {
+      const placeholders = excludeArr.map(() => "?").join(",");
+      query += ` AND d.destinationID NOT IN (${placeholders})`;
+      params.push(...excludeArr);
+    }
+
+    query += `
+      HAVING distance_meters <= ? AND distance_meters > 0
+      ORDER BY distance_meters ASC, d.rating DESC
+      LIMIT ${safeLimit}
+    `;
+    params.push(radiusMeters);
+
+    const [rows] = await db.execute(query, params);
+    return rows;
+  };
+
+  let rows = await runQuery(initialRadiusMeters);
+
+  if (rows.length < 3 && initialRadiusMeters < 60000) {
+    rows = await runQuery(60000);
+  }
+
+  if (rows.length < 3) {
+    let fallbackQuery = `
+      SELECT d.destinationID, d.name, d.lat, d.lng, d.rating, d.tag, d.description,
+             d.display_picture, d.type, dist.district_name,
+             ROUND(ST_Distance_Sphere(d.coords, POINT(?, ?)) / 1000, 1) AS distance_km,
+             ST_Distance_Sphere(d.coords, POINT(?, ?)) AS distance_meters
+      FROM destinations d
+      LEFT JOIN districts dist ON d.district_id = dist.district_id
+      WHERE (d.type = 'attraction' OR d.type IS NULL)
+    `;
+    const fallbackParams = [lng, lat, lng, lat];
+    if (excludeArr.length > 0) {
+      const placeholders = excludeArr.map(() => "?").join(",");
+      fallbackQuery += ` AND d.destinationID NOT IN (${placeholders})`;
+      fallbackParams.push(...excludeArr);
+    }
+    fallbackQuery += `
+      ORDER BY distance_meters ASC, d.rating DESC
+      LIMIT ${safeLimit}
+    `;
+    const [fallbackRows] = await db.execute(fallbackQuery, fallbackParams);
+    rows = fallbackRows;
+  }
+
+  return rows.map((r) => {
+    let parsedTag = r.tag;
+    if (typeof r.tag === "string") {
+      try {
+        parsedTag = JSON.parse(r.tag);
+      } catch (e) {
+        parsedTag = [r.tag];
+      }
+    }
+    return {
+      ...r,
+      lat: parseFloat(r.lat),
+      lng: parseFloat(r.lng),
+      type: r.type || "attraction",
+      tag: parsedTag || [],
+      category: (parsedTag && parsedTag[0]) || "Point of Interest",
+    };
+  });
+}
+
 module.exports = {
   findByName,
   findByID,
@@ -285,4 +389,5 @@ module.exports = {
   getPlaceDetails,
   downloadPlacePhoto,
   getTrendingDestinations,
+  getNearbyAttractions,
 };

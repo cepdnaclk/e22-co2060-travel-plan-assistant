@@ -11,6 +11,21 @@ export interface ItineraryDestination {
   day: number;
   display_picture: string;
   district_name: string;
+  visitDuration?: number; // Duration in minutes spent at this place
+}
+
+export interface NearbyCandidatePlace {
+  destinationID: number;
+  name: string;
+  description?: string;
+  lat: number;
+  lng: number;
+  tag?: string[];
+  category?: string;
+  rating?: number | string;
+  display_picture?: string;
+  district_name?: string;
+  distance_km?: number | string;
 }
 
 export interface RouteSegment {
