@@ -1035,32 +1035,6 @@ title: Travel Plan Assistant
     </ul>
   </div>
 
-  <!-- 8. LINKS -->
-  <h2 id="links" style="font-weight: 700; color: #0f172a; margin-top: 2rem;">8. Links &amp; References</h2>
-
-  <div class="tpa-card">
-    <div class="row">
-      <div class="col-md-6 mb-2">
-        <ul style="list-style: none; padding-left: 0; margin-bottom: 0;">
-          <li style="margin-bottom: 8px;">
-            🔗 <a href="https://github.com/cepdnaclk/e22-co2060-travel-plan-assistant" target="_blank" style="font-weight: 600; color: #0284c7;">Project GitHub Repository</a>
-          </li>
-          <li style="margin-bottom: 8px;">
-            🌐 <a href="https://cepdnaclk.github.io/e22-co2060-travel-plan-assistant" target="_blank" style="font-weight: 600; color: #0284c7;">Project GitHub Pages Site</a>
-          </li>
-        </ul>
-      </div>
-      <div class="col-md-6 mb-2">
-        <ul style="list-style: none; padding-left: 0; margin-bottom: 0;">
-          <li style="margin-bottom: 8px;">
-            🏛️ <a href="http://www.ce.pdn.ac.lk/" target="_blank" style="font-weight: 600; color: #0284c7;">Department of Computer Engineering</a>
-          </li>
-          <li style="margin-bottom: 8px;">
-            🎓 <a href="https://eng.pdn.ac.lk/" target="_blank" style="font-weight: 600; color: #0284c7;">Faculty of Engineering, University of Peradeniya</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
+ 
 
 </div>
