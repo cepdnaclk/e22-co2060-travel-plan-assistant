@@ -7,6 +7,10 @@ const pool = mysql.createPool({
     port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
     password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : "",
     database: process.env.DB_NAME || "travel_planner",
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: { rejectUnauthorized: false } // Required for Aiven Cloud
 });
 
 module.exports = pool;
