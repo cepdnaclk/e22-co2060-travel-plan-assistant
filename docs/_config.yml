@@ -1,9 +1,9 @@
 # This theme is based on https://github.com/jekyll/minima
 # Please refer above link to know the available configurations
 
-title: ""
+title: "Travel Plan Assistant"
 remote_theme: cepdnaclk/eYY-project-theme
-description: ""
+description: "AI-Powered Algorithmic Trip Planner & Smart Corridor Navigator | Department of Computer Engineering, University of Peradeniya"
 markdown: kramdown
 
 kramdown:
