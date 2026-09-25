@@ -4,7 +4,6 @@ import { Home } from "./pages/home";
 import { Dashboard } from "./pages/dashboard";
 import { Destinations } from "./pages/destinations";
 import { Itinerary } from "./pages/itinerary";
-import { Budget } from "./pages/budget";
 import { MyProfile } from "./pages/my-profile";
 import { MyTrips } from "./pages/my-trips";
 import { Wishlist } from "./pages/wishlist";

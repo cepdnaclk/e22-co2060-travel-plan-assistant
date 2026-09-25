@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router";
 import { api } from "../axios";
 
 export function Subscription() {
-  const { user } = useAuth();
+  useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<{ isSubscribed: boolean; planCount: number } | null>(null);
