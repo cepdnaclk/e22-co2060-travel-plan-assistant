@@ -4,7 +4,6 @@ import {
   Plane,
   MapPin,
   Calendar,
-  DollarSign,
   Sparkles,
   LayoutDashboard,
   LogIn,

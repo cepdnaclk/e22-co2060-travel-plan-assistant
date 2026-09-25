@@ -75,7 +75,6 @@ export function Home() {
         : 1
       : 0;
 
-  const [budget] = useState([1500]);
   const [transport, setTransport] = useState<string>("car");
   const [tier, setTier] = useState<string>("standard");
   const [startLocation, setStartLocation] = useState("");
