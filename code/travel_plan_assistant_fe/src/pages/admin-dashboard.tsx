@@ -23,6 +23,7 @@ interface RegisteredUser {
     email: string;
     role: string;
     status: "pending" | "approved" | "rejected";
+    is_subscribed: boolean;
     created_at: string;
 }
 
@@ -78,7 +79,8 @@ export function AdminDashboard() {
         const approved = users.filter((u) => u.status === "approved").length;
         const pending = users.filter((u) => u.status === "pending").length;
         const rejected = users.filter((u) => u.status === "rejected").length;
-        return { total, approved, pending, rejected };
+        const subscribed = users.filter((u) => u.is_subscribed).length;
+        return { total, approved, pending, rejected, subscribed };
     }, [users]);
 
     // Filtering
@@ -125,7 +127,7 @@ export function AdminDashboard() {
                     { label: "Total Registrations", value: stats.total, icon: Users, color: "text-indigo-600 bg-indigo-50 border-indigo-100 animate-in fade-in duration-300" },
                     { label: "Pending Approval", value: stats.pending, icon: Clock, color: "text-amber-600 bg-amber-50 border-amber-100 animate-in fade-in duration-300 delay-75" },
                     { label: "Approved Accounts", value: stats.approved, icon: UserCheck, color: "text-emerald-600 bg-emerald-50 border-emerald-100 animate-in fade-in duration-300 delay-150" },
-                    { label: "Rejected Requests", value: stats.rejected, icon: UserX, color: "text-rose-600 bg-rose-50 border-rose-100 animate-in fade-in duration-300 delay-225" },
+                    { label: "Premium Subscribers", value: stats.subscribed, icon: Shield, color: "text-blue-600 bg-blue-50 border-blue-100 animate-in fade-in duration-300 delay-225" },
                 ].map((stat, i) => {
                     const Icon = stat.icon;
                     return (
@@ -182,6 +184,7 @@ export function AdminDashboard() {
                             <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 <th className="px-6 py-4">User Details</th>
                                 <th className="px-6 py-4">Security Role</th>
+                                <th className="px-6 py-4">Subscription</th>
                                 <th className="px-6 py-4">Registration Date</th>
                                 <th className="px-6 py-4">API Access Status</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
@@ -230,6 +233,14 @@ export function AdminDashboard() {
                                                     day: "numeric"
                                                 })}
                                             </div>
+                                        </td>
+                                        {/* Subscription */}
+                                        <td className="px-6 py-4">
+                                            {user.is_subscribed ? (
+                                                <Badge className="bg-blue-50 text-blue-700 border-0">Premium</Badge>
+                                            ) : (
+                                                <Badge className="bg-gray-100 text-gray-600 border-0">Free</Badge>
+                                            )}
                                         </td>
                                         {/* Status */}
                                         <td className="px-6 py-4">

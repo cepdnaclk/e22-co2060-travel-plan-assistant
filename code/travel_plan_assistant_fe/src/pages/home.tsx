@@ -59,7 +59,7 @@ export function Home() {
   const { isAuthenticated, setShowLoginModal, setPendingAction } = useAuth();
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<{ message: string; code?: string } | null>(null);
   const [destinations, setDestinations] = useState<DestinationOption[]>([]);
 
   const [showStartLocationDropdown, setShowStartLocationDropdown] =
@@ -77,6 +77,7 @@ export function Home() {
 
   const [budget] = useState([1500]);
   const [transport, setTransport] = useState<string>("car");
+  const [tier, setTier] = useState<string>("standard");
   const [startLocation, setStartLocation] = useState("");
   const [endLocation, setEndLocation] = useState("");
   const [validationError, setValidationError] = useState("");
@@ -178,6 +179,7 @@ export function Home() {
           availableTime: tripDays * 12 * 60,
           startTime,
           endTime,
+          tier,
         });
 
         const tripData = response.data?.data;
@@ -200,9 +202,10 @@ export function Home() {
 
         navigate("/itinerary", { state: warningMsg ? { warning: warningMsg } : undefined });
       } catch (error: any) {
-        setGenerationError(
-          error.response?.data?.error || "Failed to generate itinerary.",
-        );
+        setGenerationError({
+          message: error.response?.data?.error || "Failed to generate itinerary.",
+          code: error.response?.data?.code
+        });
       } finally {
         setIsGenerating(false);
       }
@@ -316,21 +319,42 @@ export function Home() {
           </div>
         </section>
 
-        {/* 2. Budget (Implementation Soon) */}
-        <section className="space-y-4 opacity-60 pointer-events-none">
+        {/* 2. Travel Tier (Budget Estimation) */}
+        <section className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-base font-semibold text-gray-800 flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-emerald-500" />
-              Planned Budget
+              Travel Style (Cost Estimation)
             </Label>
-            <span className="text-2xl font-bold bg-linear-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
-              ${budget[0].toLocaleString()}
-            </span>
           </div>
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
-              Budget planning will be implemented soon
-            </p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { id: "budget", label: "Budget", desc: "Local transport, simple meals" },
+              { id: "standard", label: "Standard", desc: "Comfortable, moderate spending" },
+              { id: "luxury", label: "Luxury", desc: "Premium travel & dining" }
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTier(t.id)}
+                className={cn(
+                  "flex flex-col items-start gap-1 p-3 rounded-xl border-2 transition-all text-left",
+                  tier === t.id
+                    ? "border-emerald-500 bg-emerald-50 scale-[1.02]"
+                    : "border-gray-200 bg-white hover:border-emerald-200 cursor-pointer"
+                )}
+              >
+                <span className={cn(
+                  "font-bold text-sm",
+                  tier === t.id ? "text-emerald-700" : "text-gray-700"
+                )}>
+                  {t.label}
+                </span>
+                <span className="text-[10px] text-gray-500 leading-tight">
+                  {t.desc}
+                </span>
+              </button>
+            ))}
           </div>
         </section>
 
@@ -524,9 +548,14 @@ export function Home() {
         </Button>
 
         {generationError && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
-            {generationError}
-          </p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-red-600 mb-3">{generationError.message}</p>
+            {generationError.code === "SUBSCRIPTION_REQUIRED" && (
+              <Button onClick={() => navigate("/subscription")} className="bg-indigo-600 text-white hover:bg-indigo-700">
+                Subscribe Now
+              </Button>
+            )}
+          </div>
         )}
       </Card>
     </div>

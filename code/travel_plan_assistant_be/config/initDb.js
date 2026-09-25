@@ -14,6 +14,7 @@ async function initDb() {
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
                 status VARCHAR(50) DEFAULT 'pending',
+                is_subscribed BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -86,6 +87,19 @@ async function initDb() {
         `);
         console.log("✓ restaurants table ready.");
 
+        // 4.5 Create wishlists table if not exists
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS wishlists (
+                wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                destination_id INT NOT NULL,
+                note TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY user_dest (user_id, destination_id)
+            )
+        `);
+        console.log("✓ wishlists table ready.");
+
         // Ensure directories for media exist
         const fs = require("fs");
         const path = require("path");
@@ -125,6 +139,29 @@ async function initDb() {
             }
         } catch (err) {
             console.error("Warning: Failed to verify destinations table columns:", err.message);
+        }
+
+        // 6. Ensure users table has is_subscribed column and profile fields
+        try {
+            const [columns] = await db.execute("SHOW COLUMNS FROM users");
+            const columnNamesLower = columns.map(c => (c.Field || c.field || "").toLowerCase());
+            
+            if (!columnNamesLower.includes("is_subscribed")) {
+                console.log("Adding missing column 'is_subscribed' to 'users' table...");
+                await db.execute("ALTER TABLE users ADD COLUMN is_subscribed BOOLEAN DEFAULT FALSE");
+                console.log("✓ Added column 'is_subscribed'.");
+            }
+            if (!columnNamesLower.includes("phone")) {
+                await db.execute("ALTER TABLE users ADD COLUMN phone VARCHAR(50) NULL");
+            }
+            if (!columnNamesLower.includes("location")) {
+                await db.execute("ALTER TABLE users ADD COLUMN location VARCHAR(255) NULL");
+            }
+            if (!columnNamesLower.includes("preferences")) {
+                await db.execute("ALTER TABLE users ADD COLUMN preferences JSON NULL");
+            }
+        } catch (err) {
+            console.error("Warning: Failed to verify users table columns:", err.message);
         }
 
         // 4. Check if users exist, if not, seed default users

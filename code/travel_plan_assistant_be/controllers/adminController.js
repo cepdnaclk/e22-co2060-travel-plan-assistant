@@ -4,7 +4,7 @@ const db = require("../config/db");
 async function getUsers(req, res) {
     try {
         const [rows] = await db.execute(
-            "SELECT user_id, name, email, role, status, created_at FROM users ORDER BY created_at DESC"
+            "SELECT user_id, name, email, role, status, is_subscribed, created_at FROM users ORDER BY created_at DESC"
         );
         return res.json({
             success: true,

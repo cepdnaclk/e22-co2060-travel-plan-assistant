@@ -12,6 +12,8 @@ import { DestinationDetails } from "./pages/destination-details";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminRoute } from "./components/AdminRoute";
 import { AdminDashboard } from "./pages/admin-dashboard";
+import { Subscription } from "./pages/subscription";
+import { SubscriptionSuccess } from "./pages/subscription-success";
 
 export const router = createBrowserRouter([
   {
@@ -29,10 +31,12 @@ export const router = createBrowserRouter([
         children: [
           { path: "plan", Component: Home },
           { path: "itinerary", Component: Itinerary },
-          { path: "budget", Component: Budget },
+          // { path: "budget", Component: Budget }, // Disabled as per user request to integrate into itinerary
           { path: "profile", Component: MyProfile },
           { path: "my-trips", Component: MyTrips },
           { path: "wishlist", Component: Wishlist },
+          { path: "subscription", Component: Subscription },
+          { path: "subscription/success", Component: SubscriptionSuccess },
         ],
       },
 

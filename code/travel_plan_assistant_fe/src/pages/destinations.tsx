@@ -15,6 +15,7 @@ import {
   Phone,
   Globe,
   X,
+  Heart,
 } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -59,6 +60,37 @@ export function Destinations() {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedDetailPlace, setSelectedDetailPlace] = useState<DestinationCardItem | null>(null);
+  const [wishlistIds, setWishlistIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchWishlistIds = async () => {
+      try {
+        const { data } = await api.get("/api/wishlist/ids");
+        if (data.success) {
+          setWishlistIds(data.ids);
+        }
+      } catch (err) {
+        console.error("Failed to fetch wishlist ids");
+      }
+    };
+    void fetchWishlistIds();
+  }, []);
+
+  const toggleWishlist = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      if (wishlistIds.includes(id)) {
+        await api.delete(`/api/wishlist/remove/${id}`);
+        setWishlistIds(prev => prev.filter(i => i !== id));
+      } else {
+        await api.post("/api/wishlist/add", { destination_id: id });
+        setWishlistIds(prev => [...prev, id]);
+      }
+    } catch (err) {
+      console.error("Failed to toggle wishlist");
+    }
+  };
 
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000";
@@ -321,12 +353,12 @@ export function Destinations() {
         </div>
 
         {subCategories.length > 2 && (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
             {subCategories.map((category) => (
               <Badge
                 key={category}
                 variant={selectedSubCategory === category ? "default" : "outline"}
-                className={`cursor-pointer px-4 py-2 text-xs font-medium transition-all ${
+                className={`shrink-0 snap-start cursor-pointer px-4 py-2 text-xs font-medium transition-all ${
                   selectedSubCategory === category
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
@@ -371,12 +403,28 @@ export function Destinations() {
 
                   {/* Rating Badge */}
                   {place.rating > 0 && (
-                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-xl shadow-md flex items-center gap-1">
+                    <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-xl shadow-md flex items-center gap-1">
                       <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
                       <span className="text-xs font-bold text-gray-800">
                         {place.rating}
                       </span>
                     </div>
+                  )}
+
+                  {/* Wishlist Button */}
+                  {place.numericId && (
+                    <button
+                      onClick={(e) => toggleWishlist(e, place.numericId!)}
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 flex items-center justify-center transition-colors shadow-sm z-10"
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-colors ${
+                          wishlistIds.includes(place.numericId)
+                            ? "text-rose-500 fill-rose-500"
+                            : "text-gray-400"
+                        }`}
+                      />
+                    </button>
                   )}
 
                   {/* Type Badge */}

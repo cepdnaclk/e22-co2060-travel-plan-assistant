@@ -54,7 +54,8 @@ async function createTravelPlan(
     endPlace = null,
     userId,
     startTime = "08:30",
-    endTime = "20:00"
+    endTime = "20:00",
+    tier = "standard"
 ) {
 
     if (!startPlace) {
@@ -180,6 +181,31 @@ async function createTravelPlan(
         }
     }
 
+    // Cost Estimation Logic
+    let costPerKm = 100;
+    let mealCost = 3500;
+    let attractionCost = 2000;
+    
+    if (tier === 'budget') {
+        costPerKm = 50; 
+        mealCost = 1500;
+        attractionCost = 500;
+    } else if (tier === 'luxury') {
+        costPerKm = 200; 
+        mealCost = 8000;
+        attractionCost = 5000;
+    }
+    
+    // totalTime is in minutes. Assume 1 meal every 4 hours (240 mins)
+    const numMeals = Math.max(1, Math.floor(availableTime / 240)); 
+    const numAttractions = desiredPlaces.length; 
+    
+    const estimatedTransportCost = totalDistance * costPerKm;
+    const estimatedMealsCost = numMeals * mealCost;
+    const estimatedAttractionsCost = numAttractions * attractionCost;
+    
+    const totalEstimatedCost = estimatedTransportCost + estimatedMealsCost + estimatedAttractionsCost;
+
     return {
         sessionId,
 
@@ -192,6 +218,14 @@ async function createTravelPlan(
 
         totalTime: totalTime.toFixed(2),
         totalDistance: totalDistance.toFixed(2),
+        
+        estimatedCost: totalEstimatedCost,
+        estimatedCostBreakdown: {
+            transport: estimatedTransportCost,
+            meals: estimatedMealsCost,
+            attractions: estimatedAttractionsCost,
+            tier
+        },
 
         checkpoints: checkpoints.map(c => c.name),
 

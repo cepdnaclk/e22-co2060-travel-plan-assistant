@@ -26,6 +26,13 @@ export interface GeneratedTripSession {
   startTime?: string;
   endTime?: string;
   milestones?: ItineraryMilestone[];
+  estimatedCost?: number;
+  estimatedCostBreakdown?: {
+    transport: number;
+    meals: number;
+    attractions: number;
+    tier: string;
+  };
 }
 
 export function calculateTotalTripTime(routeSegments?: RouteSegment[]): string {
@@ -176,7 +183,7 @@ export function Itinerary() {
 
       {/* TRIP SUMMARY STATS & DROPDOWN */}
       <div className="flex flex-col items-center gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full max-w-4xl">
           <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/90 border border-gray-100 shadow-md">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
               <MapPin className="w-5 h-5" />
@@ -218,6 +225,18 @@ export function Itinerary() {
               </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/90 border border-gray-100 shadow-md">
+            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-amber-50 text-amber-600 shrink-0">
+              <span className="font-bold text-lg">LKR</span>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Est. Cost ({selectedTrip?.estimatedCostBreakdown?.tier || 'standard'})</p>
+              <p className="text-lg font-bold text-gray-900">
+                {selectedTrip?.estimatedCost ? selectedTrip.estimatedCost.toLocaleString() : "N/A"}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* DROPDOWN */}
@@ -256,6 +275,10 @@ export function Itinerary() {
                     selectedTrip?.routeSegments
                   )}{" "}
                   total
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="font-bold text-[10px] text-amber-500">LKR</span>
+                  {selectedTrip?.estimatedCost ? selectedTrip.estimatedCost.toLocaleString() : "N/A"} est. cost
                 </span>
               </p>
             </div>

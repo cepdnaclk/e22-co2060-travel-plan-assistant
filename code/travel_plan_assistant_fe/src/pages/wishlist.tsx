@@ -1,12 +1,13 @@
-
-import { useState } from "react";
-import { Heart, MapPin, Star, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MapPin, Star, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import { api } from "../axios";
 
 interface WishlistItem {
     id: number;
+    wishlist_id: number;
     name: string;
     location: string;
     category: string;
@@ -15,63 +16,6 @@ interface WishlistItem {
     note: string;
 }
 
-const initialWishlist: WishlistItem[] = [
-    {
-        id: 1,
-        name: "Sigiriya Rock Fortress",
-        location: "Matale, Sri Lanka",
-        category: "Historical",
-        rating: 4.9,
-        image: "https://images.unsplash.com/photo-1586613835650-9077e4931573?auto=format&fit=crop&q=80&w=600",
-        note: "Must visit at sunrise for the best views",
-    },
-    {
-        id: 2,
-        name: "Mirissa Beach",
-        location: "Matara, Sri Lanka",
-        category: "Nature",
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=600",
-        note: "Whale watching season Dec–Apr",
-    },
-    {
-        id: 3,
-        name: "Temple of the Tooth",
-        location: "Kandy, Sri Lanka",
-        category: "Culture",
-        rating: 4.8,
-        image: "https://images.unsplash.com/photo-1590123575938-254aaa2cbb07?auto=format&fit=crop&q=80&w=600",
-        note: "Evening puja ceremony is unforgettable",
-    },
-    {
-        id: 4,
-        name: "Nine Arches Bridge",
-        location: "Ella, Sri Lanka",
-        category: "Adventure",
-        rating: 4.6,
-        image: "https://images.unsplash.com/photo-1586613835650-9077e4931573?auto=format&fit=crop&q=80&w=600",
-        note: "Best with the morning train passing through",
-    },
-    {
-        id: 5,
-        name: "Galle Fort",
-        location: "Galle, Sri Lanka",
-        category: "Heritage",
-        rating: 4.8,
-        image: "https://images.unsplash.com/photo-1573225935973-40799471a5e0?auto=format&fit=crop&q=80&w=600",
-        note: "Get lost in the colonial streets at sunset",
-    },
-    {
-        id: 6,
-        name: "Yala National Park",
-        location: "Hambantota, Sri Lanka",
-        category: "Wildlife",
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1581337204873-ef36aa186caa?auto=format&fit=crop&q=80&w=600",
-        note: "Leopard safari — early morning is best",
-    },
-];
-
 const categoryColors: Record<string, string> = {
     Historical: "bg-indigo-50 text-indigo-700",
     Nature: "bg-emerald-50 text-emerald-700",
@@ -79,14 +23,49 @@ const categoryColors: Record<string, string> = {
     Adventure: "bg-orange-50 text-orange-700",
     Heritage: "bg-rose-50 text-rose-700",
     Wildlife: "bg-amber-50 text-amber-700",
+    Attraction: "bg-blue-50 text-blue-700",
 };
 
 export function Wishlist() {
-    const [items, setItems] = useState(initialWishlist);
+    const [items, setItems] = useState<WishlistItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const removeItem = (id: number) => {
-        setItems((prev) => prev.filter((item) => item.id !== id));
+    useEffect(() => {
+        fetchWishlist();
+    }, []);
+
+    const fetchWishlist = async () => {
+        try {
+            const { data } = await api.get("/api/wishlist");
+            if (data.success) {
+                setItems(data.items);
+            }
+        } catch (error) {
+            console.error("Failed to fetch wishlist", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    const removeItem = async (destinationId: number) => {
+        try {
+            const { data } = await api.delete(`/api/wishlist/remove/${destinationId}`);
+            if (data.success) {
+                setItems((prev) => prev.filter((item) => item.id !== destinationId));
+            }
+        } catch (error) {
+            console.error("Failed to remove item", error);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <p className="text-gray-500">Loading your wishlist...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -128,7 +107,7 @@ export function Wishlist() {
                                 {/* Heart & remove */}
                                 <button
                                     onClick={() => removeItem(item.id)}
-                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 flex items-center justify-center transition-colors shadow-sm"
+                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 flex items-center justify-center transition-colors shadow-sm z-10"
                                     title="Remove from wishlist"
                                 >
                                     <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
@@ -143,16 +122,20 @@ export function Wishlist() {
 
                             {/* Content */}
                             <div className="p-4 space-y-2.5">
-                                <h3 className="font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
-                                    {item.name}
-                                </h3>
+                                <Link to={`/destinations/${item.id}`}>
+                                    <h3 className="font-bold text-gray-900 hover:text-indigo-700 transition-colors cursor-pointer">
+                                        {item.name}
+                                    </h3>
+                                </Link>
                                 <div className="flex items-center gap-1.5 text-sm text-gray-500">
                                     <MapPin className="w-3.5 h-3.5 text-indigo-400" />
                                     {item.location}
                                 </div>
-                                <p className="text-xs text-gray-400 italic bg-gray-50 px-3 py-2 rounded-lg">
-                                    "{item.note}"
-                                </p>
+                                {item.note && (
+                                    <p className="text-xs text-gray-400 italic bg-gray-50 px-3 py-2 rounded-lg line-clamp-2">
+                                        "{item.note}"
+                                    </p>
+                                )}
                             </div>
                         </Card>
                     ))}
