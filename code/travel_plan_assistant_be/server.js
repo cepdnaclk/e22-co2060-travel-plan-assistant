@@ -2,15 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const axios = require("axios");
-const dotenv = require("dotenv");
 
-const { getCoordinates } = require("./services/routeService");
 const initDb = require("./config/initDb");
 const authMiddleware = require("./middlewares/authMiddleware");
 
 require("dotenv").config();
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const app = express();
 
 app.use(cors());
