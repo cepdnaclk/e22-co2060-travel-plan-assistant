@@ -13,8 +13,10 @@ import {
   Heart,
   Map as MapIcon,
   Shield,
+  Star,
 } from "lucide-react";
 
+import { api } from "../axios";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { LoginModal } from "../components/LoginModal";
 import { Button } from "../components/ui/button";
@@ -49,6 +51,25 @@ function RootLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout, setShowLoginModal } = useAuth();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchSub = async () => {
+        try {
+          const { data } = await api.get("/api/subscriptions/status");
+          if (data?.success) {
+            setIsSubscribed(data.isSubscribed);
+          }
+        } catch (err) {
+          console.error("Failed to fetch subscription status");
+        }
+      };
+      fetchSub();
+    } else {
+      setIsSubscribed(false);
+    }
+  }, [isAuthenticated]);
 
   const isDashboard = location.pathname === "/";
   const [scrolled, setScrolled] = useState(false);
@@ -60,6 +81,13 @@ function RootLayout() {
       ? [{ path: "/admin", label: "Admin", icon: Shield, protected: true }]
       : []),
   ];
+
+  // Track last non-subscription path for return redirect
+  useEffect(() => {
+    if (!location.pathname.startsWith("/subscription")) {
+      localStorage.setItem("travelplan_return_to", location.pathname + location.search);
+    }
+  }, [location]);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -97,13 +125,12 @@ function RootLayout() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header — transparent on dashboard until user scrolls, always styled on other pages */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
           ? isDashboard
             ? "bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm"
             : "bg-white/80 backdrop-blur-sm border-b border-gray-200"
           : "bg-transparent"
-      }`}>
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo → Plan Trip */}
@@ -146,19 +173,41 @@ function RootLayout() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className={`flex items-center gap-2 px-2 py-1.5 rounded-xl transition-colors cursor-pointer outline-none ${isTransparent ? "hover:bg-white/10" : "hover:bg-gray-100"}`}>
-                      <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
-                        {user.initials}
+                      <div className="relative">
+                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+                          {user.initials}
+                        </div>
+                        {isSubscribed && (
+                          <div
+                            className="absolute -top-1.5 -right-1.5"
+                            title="Premium Subscriber"
+                          >
+                            <Star className="w-4 h-4 text-white fill-amber-400 drop-shadow-sm" strokeWidth={2.5} />
+                          </div>
+                        )}
                       </div>
-                      <span className={`hidden sm:inline text-sm font-medium transition-colors duration-500 ${isTransparent ? "text-white" : "text-gray-700"}`}>
-                        {user.name}
-                      </span>
+                      <div className={`hidden sm:flex flex-col items-start transition-colors duration-500 ${isTransparent ? "text-white" : "text-gray-700"}`}>
+                        <span className="text-sm font-medium leading-none mt-0.5">{user.name}</span>
+                        {isSubscribed && (
+                          <span className={`text-[10px] font-bold uppercase tracking-wider mt-1 leading-none ${isTransparent ? "text-amber-300" : "text-amber-600"}`}>
+                            Premium
+                          </span>
+                        )}
+                      </div>
                       <ChevronDown className={`w-3.5 h-3.5 hidden sm:block transition-colors duration-500 ${isTransparent ? "text-white/60" : "text-gray-400"}`} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 mt-1">
                     <DropdownMenuLabel className="font-normal px-3 py-2.5">
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">{user.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-900">{user.name}</span>
+                          {isSubscribed && (
+                            <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wider">
+                              Premium
+                            </span>
+                          )}
+                        </div>
                         <span className="text-xs text-gray-500 mt-0.5">{user.email}</span>
                       </div>
                     </DropdownMenuLabel>

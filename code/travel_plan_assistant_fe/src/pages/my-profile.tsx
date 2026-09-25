@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Calendar, MapPin, Edit3 } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Edit3, Map, Camera, Globe, Crown } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -118,13 +118,13 @@ export function MyProfile() {
             {/* Profile Header */}
             <div className="relative">
                 {/* Cover */}
-                <div className="h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl">
+                <div className="h-48 rounded-2xl overflow-hidden bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl">
                     <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRWMGgxdjM0aDI1djFIMzZ6TTAgMzVoMVYwaDJ2MzVIRHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
                 </div>
 
                 {/* Avatar */}
                 <div className="absolute -bottom-14 left-8 flex items-end gap-5">
-                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white overflow-hidden relative">
+                    <div className="w-28 h-28 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white overflow-hidden relative">
                         {profileImage ? (
                             <img src={profileImage} className="w-full h-full object-cover" />
                         ) : (
@@ -274,13 +274,13 @@ export function MyProfile() {
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
-                            { label: "Trips Planned", value: stats.tripsPlanned, icon: "🗺️" },
-                            { label: "Places Saved", value: stats.placesVisited, icon: "📍" },
-                            { label: "Photos Taken", value: stats.photosTaken, icon: "📸" },
-                            { label: "Countries", value: stats.countries, icon: "🌍" },
+                            { label: "Trips Planned", value: stats.tripsPlanned, icon: <Map className="w-7 h-7 text-indigo-500" /> },
+                            { label: "Places Saved", value: stats.placesVisited, icon: <MapPin className="w-7 h-7 text-rose-500" /> },
+                            { label: "Photos Taken", value: stats.photosTaken, icon: <Camera className="w-7 h-7 text-amber-500" /> },
+                            { label: "Countries", value: stats.countries, icon: <Globe className="w-7 h-7 text-emerald-500" /> },
                         ].map((stat) => (
-                            <div key={stat.label} className="text-center p-4 rounded-xl bg-gradient-to-br from-gray-50 to-indigo-50/50">
-                                <div className="text-2xl mb-1">{stat.icon}</div>
+                            <div key={stat.label} className="text-center p-4 rounded-xl bg-linear-to-br from-gray-50 to-indigo-50/50">
+                                <div className="mb-2 flex justify-center">{stat.icon}</div>
                                 <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
                                 <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
                             </div>
@@ -290,24 +290,44 @@ export function MyProfile() {
 
                 {/* Subscription Status */}
                 <Card className="p-6 shadow-md border-0 md:col-span-2">
-                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-5">
-                        <User className="w-5 h-5 text-indigo-500" />
-                        Subscription Status
-                    </h2>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-indigo-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <Crown className="w-5 h-5 text-indigo-500" />
+                            Subscription Plan
+                        </h2>
+                        {subStatus?.isSubscribed && (
+                            <Badge className="bg-emerald-100 text-emerald-700 border-0 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Active
+                            </Badge>
+                        )}
+                    </div>
+
+                    <div className={`p-5 rounded-xl border ${subStatus?.isSubscribed ? 'bg-amber-50/50 border-amber-100' : 'bg-gray-50 border-gray-100'} flex flex-col md:flex-row justify-between items-start md:items-center gap-4`}>
                         <div>
-                            <h3 className="text-md font-semibold text-gray-900">
-                                {subStatus?.isSubscribed ? "Premium Plan" : "Free Plan"}
+                            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                                {subStatus?.isSubscribed ? "Premium Member" : "Free Tier"}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                                {subStatus?.isSubscribed 
-                                    ? "You have unlimited access to all features." 
+                            <p className="text-sm text-gray-500 mt-1">
+                                {subStatus?.isSubscribed
+                                    ? "You have unlimited access to AI planning and all premium features."
                                     : `You have used ${subStatus?.planCount ?? 0} out of 3 free trips.`}
                             </p>
+                            {!subStatus?.isSubscribed && (
+                                <div className="mt-3 flex items-center gap-3">
+                                    <div className="flex-1 w-full sm:w-50 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-indigo-500 rounded-full"
+                                            style={{ width: `${Math.min(((subStatus?.planCount ?? 0) / 3) * 100, 100)}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs font-semibold text-gray-500">{subStatus?.planCount ?? 0}/3</span>
+                                </div>
+                            )}
                         </div>
                         {!subStatus?.isSubscribed && (
-                            <Link to="/subscription">
-                                <Button className="mt-4 md:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white">
+                            <Link to="/subscription" className="w-full md:w-auto shrink-0 mt-2 md:mt-0">
+                                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
                                     Upgrade to Premium
                                 </Button>
                             </Link>

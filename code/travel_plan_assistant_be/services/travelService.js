@@ -162,26 +162,7 @@ async function createTravelPlan(
 
     const destinationIdList = await getDestinationIdList(finalPath);
 
-    const planData = {
-        checkpoints: destinationIdList,
-        startTime,
-        endTime,
-        milestones: []
-    };
-
-    const sessionId = await saveTravelSession(userId, planData);
-
-    let isFeasible = feasibility.feasible;
-    let warning = feasibility.warning || null;
-
-    if (totalTime > availableTime + 120) {
-        isFeasible = false;
-        if (!warning) {
-            warning = `Expanded trip travel time (${(totalTime / 60).toFixed(1)}h) exceeds available time budget (${(availableTime / 60).toFixed(1)}h).`;
-        }
-    }
-
-    // Cost Estimation Logic
+    // Cost Estimation Logic (Values in LKR/Rupees)
     let costPerKm = 100;
     let mealCost = 3500;
     let attractionCost = 2000;
@@ -206,6 +187,33 @@ async function createTravelPlan(
     
     const totalEstimatedCost = estimatedTransportCost + estimatedMealsCost + estimatedAttractionsCost;
 
+    const planData = {
+        checkpoints: destinationIdList,
+        startTime,
+        endTime,
+        milestones: [],
+        estimatedCost: totalEstimatedCost,
+        estimatedCostBreakdown: {
+            transport: estimatedTransportCost,
+            meals: estimatedMealsCost,
+            attractions: estimatedAttractionsCost,
+            tier,
+            currency: 'Rs'
+        }
+    };
+
+    const sessionId = await saveTravelSession(userId, planData);
+
+    let isFeasible = feasibility.feasible;
+    let warning = feasibility.warning || null;
+
+    if (totalTime > availableTime + 120) {
+        isFeasible = false;
+        if (!warning) {
+            warning = `Expanded trip travel time (${(totalTime / 60).toFixed(1)}h) exceeds available time budget (${(availableTime / 60).toFixed(1)}h).`;
+        }
+    }
+
     return {
         sessionId,
 
@@ -224,7 +232,8 @@ async function createTravelPlan(
             transport: estimatedTransportCost,
             meals: estimatedMealsCost,
             attractions: estimatedAttractionsCost,
-            tier
+            tier,
+            currency: 'Rs'
         },
 
         checkpoints: checkpoints.map(c => c.name),

@@ -438,11 +438,13 @@ export function Destinations() {
                           : "bg-blue-600/90 text-white"
                       }`}
                     >
-                      {place.type === "hotel"
-                        ? "🏨 Hotel"
-                        : place.type === "restaurant"
-                        ? "🍽️ Restaurant"
-                        : "🏛️ Attraction"}
+                      {place.type === "hotel" ? (
+                        <span className="flex items-center gap-1.5"><Hotel className="w-3.5 h-3.5" /> Hotel</span>
+                      ) : place.type === "restaurant" ? (
+                        <span className="flex items-center gap-1.5"><Utensils className="w-3.5 h-3.5" /> Restaurant</span>
+                      ) : (
+                        <span className="flex items-center gap-1.5"><Compass className="w-3.5 h-3.5" /> Attraction</span>
+                      )}
                     </Badge>
                   </div>
                 </div>

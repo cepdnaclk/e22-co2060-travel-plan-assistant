@@ -17,12 +17,12 @@ interface Expense {
 }
 
 export function Budget() {
-  const totalBudget = 5000;
+  const totalBudget = 150000;
   const [expenses, setExpenses] = useState<Expense[]>([
-    { id: 1, category: "Accommodation", description: "Hotel booking", amount: 1200, date: "2026-03-15" },
-    { id: 2, category: "Transportation", description: "Flight tickets", amount: 800, date: "2026-03-10" },
-    { id: 3, category: "Food", description: "Restaurant dinner", amount: 150, date: "2026-03-16" },
-    { id: 4, category: "Activities", description: "Museum tickets", amount: 75, date: "2026-03-17" },
+    { id: 1, category: "Accommodation", description: "Hotel booking", amount: 35000, date: "2026-03-15" },
+    { id: 2, category: "Transportation", description: "Flight/Train tickets", amount: 15000, date: "2026-03-10" },
+    { id: 3, category: "Food", description: "Restaurant dinner", amount: 4500, date: "2026-03-16" },
+    { id: 4, category: "Activities", description: "Museum tickets", amount: 2500, date: "2026-03-17" },
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -121,7 +121,7 @@ export function Budget() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">Amount (Rs.)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -155,14 +155,14 @@ export function Budget() {
             <p className="text-sm text-gray-600">Total Budget</p>
             <DollarSign className="w-5 h-5 text-gray-400" />
           </div>
-          <p className="text-3xl font-bold text-gray-900">${totalBudget.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-gray-900">Rs. {totalBudget.toLocaleString()}</p>
         </Card>
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-gray-600">Total Spent</p>
             <TrendingUp className="w-5 h-5 text-red-500" />
           </div>
-          <p className="text-3xl font-bold text-red-600">${totalSpent.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-red-600">Rs. {totalSpent.toLocaleString()}</p>
         </Card>
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
@@ -170,7 +170,7 @@ export function Budget() {
             <TrendingDown className="w-5 h-5 text-green-500" />
           </div>
           <p className={`text-3xl font-bold ${remaining >= 0 ? "text-green-600" : "text-red-600"}`}>
-            ${Math.abs(remaining).toLocaleString()}
+            Rs. {Math.abs(remaining).toLocaleString()}
           </p>
         </Card>
       </div>
@@ -185,8 +185,8 @@ export function Budget() {
           <Progress value={percentageSpent} className="h-3" />
           <p className="text-sm text-gray-600">
             {remaining >= 0
-              ? `You have $${remaining.toLocaleString()} left to spend`
-              : `You are over budget by $${Math.abs(remaining).toLocaleString()}`}
+              ? `You have Rs. ${remaining.toLocaleString()} left to spend`
+              : `You are over budget by Rs. ${Math.abs(remaining).toLocaleString()}`}
           </p>
         </div>
       </Card>
@@ -201,7 +201,7 @@ export function Budget() {
               <div key={category} className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-700">{category}</span>
-                  <span className="font-medium">${amount.toLocaleString()}</span>
+                  <span className="font-medium">Rs. {amount.toLocaleString()}</span>
                 </div>
                 <Progress value={percentage} className="h-2" />
               </div>
@@ -235,7 +235,7 @@ export function Budget() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-semibold text-gray-900">
-                      ${expense.amount.toLocaleString()}
+                      Rs. {expense.amount.toLocaleString()}
                     </span>
                     <Button
                       variant="ghost"
