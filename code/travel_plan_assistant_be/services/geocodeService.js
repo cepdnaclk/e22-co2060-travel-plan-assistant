@@ -5,9 +5,10 @@ const GOOGLE_BASE_URL =
 
 async function geocodePlace(place) {
     try {
+        const searchQuery = place.toLowerCase().includes("sri lanka") ? place : `${place} Sri Lanka`;
         const response = await axios.get(GOOGLE_BASE_URL, {
             params: {
-                input: place,
+                input: searchQuery,
                 inputtype: "textquery",
                 fields: "place_id,name,geometry/location,rating,types",
                 key: process.env.GOOGLE_API_KEY
