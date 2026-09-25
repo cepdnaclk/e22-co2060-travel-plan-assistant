@@ -15,7 +15,7 @@ const { validateFeasibility } = require("../services/distanceService");
  */
 async function generateTripPlan(req, res) {
     try {
-        const { startPlace, desiredPlaces = [], availableTime, endPlace, startTime, endTime } = req.body;
+        const { startPlace, desiredPlaces = [], availableTime, endPlace, startTime, endTime, tier = 'standard' } = req.body;
 
         // Validation
         if (!startPlace) {
@@ -39,6 +39,22 @@ async function generateTripPlan(req, res) {
             });
         }
 
+        // Subscription check
+        const db = require("../config/db");
+        const [userRows] = await db.execute("SELECT is_subscribed FROM users WHERE user_id = ?", [req.user.userId]);
+        const isSubscribed = userRows.length > 0 && userRows[0].is_subscribed;
+
+        if (!isSubscribed) {
+            const [sessionRows] = await db.execute("SELECT COUNT(*) as count FROM user_travel_sessions WHERE user_id = ?", [req.user.userId]);
+            const planCount = sessionRows[0].count;
+            if (planCount >= 3) {
+                return res.status(403).json({
+                    error: "You have reached the limit of 3 free trips. Please subscribe to continue.",
+                    code: "SUBSCRIPTION_REQUIRED"
+                });
+            }
+        }
+
         // Generate the travel plan
         const travelPlan = await createTravelPlan(
             startPlace,
@@ -47,7 +63,8 @@ async function generateTripPlan(req, res) {
             endPlace,
             req.user.userId,
             startTime || "08:30",
-            endTime || "20:00"
+            endTime || "20:00",
+            tier
         );
 
         res.status(200).json({

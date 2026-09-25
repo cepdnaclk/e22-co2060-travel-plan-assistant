@@ -43,9 +43,7 @@ const navItems = [
     label: "Itinerary",
     icon: Calendar,
     protected: true,
-  },
-  { path: "/budget", label: "Budget", icon: DollarSign, protected: true },
-
+  }
 ];
 
 function RootLayout() {

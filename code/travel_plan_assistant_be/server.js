@@ -26,14 +26,20 @@ const itineraryRoutes = require("./routes/itineraryRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const placeRoutes = require("./routes/placeRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.use("/api/destinations", destinationRoutes);
 app.use("/api", placeRoutes);
 app.use("/api/trips", authMiddleware, tripRoutes);
 app.use("/api/itinerary", authMiddleware, itineraryRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/wishlist", authMiddleware, wishlistRoutes);
 app.use("/public", express.static(path.join(process.cwd(), "public")));
 
 app.post("/api/directions", authMiddleware, async (req, res) => {

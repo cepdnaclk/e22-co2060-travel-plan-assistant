@@ -21,6 +21,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import heroBg from "../assets/hero-bg.png";
+import { PiHandsPrayingFill } from "react-icons/pi";
 
 
 
@@ -29,7 +30,7 @@ const features = [
     icon: Compass,
     title: "Smart Itineraries",
     description:
-      "AI-powered trip planning that crafts the perfect route across Sri Lanka's 25 districts.",
+      "Smart trip planning that crafts the perfect route across Sri Lanka's 25 districts.",
   },
   {
     icon: Map,
@@ -150,16 +151,18 @@ export function Dashboard() {
 
         {/* Hero Content — directly on the image, no box */}
         <div className="relative z-10 flex flex-col items-center text-center px-6 py-24 w-full max-w-3xl mx-auto">
-          {/* Praying hands emoji */}
-          <p
-            className="text-5xl mb-4"
+          {/* Praying hands icon */}
+          <div
+            className="mb-4 flex justify-center"
             style={{
-              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
               animation: "heroFadeUp 0.8s ease-out both",
             }}
           >
-            🙏
-          </p>
+            <PiHandsPrayingFill
+              size={64}
+              className="text-white drop-shadow-md"
+            />
+          </div>
 
           {/* Greeting Text */}
           <h1
@@ -322,7 +325,7 @@ export function Dashboard() {
                 journey.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                With AI-powered itinerary generation, interactive maps, budget
+                With automated itinerary generation, interactive maps, budget
                 tracking, and curated local experiences, you'll spend less time
                 planning and more time exploring the Pearl of the Indian Ocean.
               </p>
