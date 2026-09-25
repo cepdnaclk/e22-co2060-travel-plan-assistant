@@ -106,7 +106,7 @@ export function AdminDashboard() {
         <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
             {/* Header */}
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-linear-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
                     Admin Dashboard
                 </h1>
                 <p className="text-gray-500">
@@ -163,11 +163,10 @@ export function AdminDashboard() {
                         <button
                             key={filter}
                             onClick={() => setStatusFilter(filter)}
-                            className={`px-4 py-2 text-xs font-semibold rounded-lg capitalize transition-all cursor-pointer ${
-                                statusFilter === filter
+                            className={`px-4 py-2 text-xs font-semibold rounded-lg capitalize transition-all cursor-pointer ${statusFilter === filter
                                     ? "bg-white text-indigo-700 shadow-sm border border-gray-100"
                                     : "text-gray-500 hover:text-gray-800"
-                            }`}
+                                }`}
                         >
                             {filter}
                         </button>
@@ -244,13 +243,12 @@ export function AdminDashboard() {
                                         {/* Status */}
                                         <td className="px-6 py-4">
                                             <Badge
-                                                className={`capitalize px-2.5 py-1 text-[11px] font-semibold border-0 ${
-                                                    user.status === "approved"
+                                                className={`capitalize px-2.5 py-1 text-[11px] font-semibold border-0 ${user.status === "approved"
                                                         ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                                         : user.status === "rejected"
-                                                        ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
-                                                        : "bg-amber-50 text-amber-700 hover:bg-amber-100"
-                                                }`}
+                                                            ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
+                                                            : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                                    }`}
                                             >
                                                 {user.status}
                                             </Badge>

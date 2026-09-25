@@ -33,6 +33,7 @@ export interface GeneratedTripSession {
     attractions: number;
     tier: string;
   };
+  created_at?: string;
 }
 
 export function calculateTotalTripTime(routeSegments?: RouteSegment[]): string {
@@ -129,7 +130,20 @@ export function Itinerary() {
         const tripList = Array.isArray(res.data) ? res.data : [];
         console.log(tripList);
         setTrips(tripList);
-        if (tripList.length > 0) setSelectedTrip(tripList[0]);
+        
+        if (tripList.length > 0) {
+          const stateSessionId = location.state?.sessionId;
+          if (stateSessionId) {
+            const found = tripList.find((t) => t.session_id === stateSessionId);
+            if (found) {
+              setSelectedTrip(found);
+            } else {
+              setSelectedTrip(tripList[0]);
+            }
+          } else {
+            setSelectedTrip(tripList[0]);
+          }
+        }
       } catch (err) {
         console.error("Error fetching generated trip:", err);
       }

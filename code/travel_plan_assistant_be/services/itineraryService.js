@@ -33,6 +33,8 @@ async function formatSessionItinerary(session) {
   let endTime = "20:00";
   let rawMilestones = [];
   let customDurations = {};
+  let estimatedCost = null;
+  let estimatedCostBreakdown = null;
 
   if (Array.isArray(parsedPlan)) {
     ids = parsedPlan;
@@ -42,6 +44,8 @@ async function formatSessionItinerary(session) {
     endTime = parsedPlan.endTime || "20:00";
     rawMilestones = Array.isArray(parsedPlan.milestones) ? parsedPlan.milestones : [];
     customDurations = parsedPlan.customDurations || {};
+    estimatedCost = parsedPlan.estimatedCost || null;
+    estimatedCostBreakdown = parsedPlan.estimatedCostBreakdown || null;
   }
 
   // Skip empty plans
@@ -153,6 +157,9 @@ async function formatSessionItinerary(session) {
     startTime,
     endTime,
     milestones: enrichedMilestones,
+    estimatedCost,
+    estimatedCostBreakdown,
+    created_at: session.created_at,
   };
 }
 
@@ -162,7 +169,7 @@ async function getAllItinerary(user_id) {
   }
 
   const [sessions] = await db.execute(
-    "SELECT session_id, travel_plan FROM user_travel_sessions WHERE user_id = ? ORDER BY created_at DESC",
+    "SELECT session_id, travel_plan, created_at FROM user_travel_sessions WHERE user_id = ? ORDER BY created_at DESC",
     [user_id],
   );
 

@@ -20,7 +20,9 @@ export function SubscriptionSuccess() {
         if (data.success) {
           setStatus("success");
           setTimeout(() => {
-            navigate("/plan");
+            const returnTo = localStorage.getItem("travelplan_return_to") || "/plan";
+            localStorage.removeItem("travelplan_return_to");
+            navigate(returnTo);
           }, 3000);
         } else {
           setStatus("error");
@@ -35,7 +37,7 @@ export function SubscriptionSuccess() {
   }, [sessionId, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md text-center">
         {status === "loading" && (
           <div>
@@ -56,7 +58,7 @@ export function SubscriptionSuccess() {
             <p className="mt-2 text-sm text-gray-600">
               Thank you for subscribing. You now have unlimited access to create travel plans.
             </p>
-            <p className="mt-4 text-sm text-gray-500">Redirecting you to the planner...</p>
+            <p className="mt-4 text-sm text-gray-500">Redirecting you back...</p>
           </div>
         )}
 

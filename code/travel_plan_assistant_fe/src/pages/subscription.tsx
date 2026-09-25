@@ -70,7 +70,7 @@ export function Subscription() {
         <div className="px-6 pt-6 pb-8 sm:p-10 sm:pt-6">
           <ul className="space-y-4">
             <li className="flex items-start">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <svg className="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -78,7 +78,7 @@ export function Subscription() {
               <p className="ml-3 text-base text-gray-700">Unlimited Trip Plans</p>
             </li>
             <li className="flex items-start">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <svg className="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
