@@ -1,0 +1,1353 @@
+---
+layout: home
+permalink: index.html
+repository-name: e22-co2060-travel-plan-assistant
+title: Travel Plan Assistant
+---
+
+<!-- TRAVEL PLAN ASSISTANT - OFFICIAL PROJECT DOCUMENTATION -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --tpa-primary: #0284c7;
+  --tpa-primary-dark: #0369a1;
+  --tpa-primary-light: #e0f2fe;
+  --tpa-primary-glow: rgba(2, 132, 199, 0.25);
+  --tpa-accent: #06b6d4;
+  --tpa-accent-dark: #0891b2;
+  --tpa-accent-light: #cffafe;
+  --tpa-success: #10b981;
+  --tpa-success-dark: #059669;
+  --tpa-success-light: #dcfce7;
+  --tpa-warning: #f59e0b;
+  --tpa-warning-light: #fef3c7;
+  --tpa-purple: #8b5cf6;
+  --tpa-purple-light: #f3e8ff;
+  --tpa-dark: #0f172a;
+  --tpa-slate: #1e293b;
+  --tpa-gray-bg: #f8fafc;
+  --tpa-card-bg: #ffffff;
+  --tpa-card-border: #e2e8f0;
+  --tpa-text-main: #1e293b;
+  --tpa-text-muted: #64748b;
+  --tpa-radius-sm: 6px;
+  --tpa-radius-md: 10px;
+  --tpa-radius-lg: 16px;
+  --tpa-shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --tpa-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --tpa-shadow-lg: 0 12px 28px -6px rgba(2, 132, 199, 0.15), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
+}
+
+/* Reset & Container */
+.tpa-container {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--tpa-text-main);
+  line-height: 1.65;
+  font-size: 15px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 0.5rem 3rem 0.5rem;
+}
+
+.tpa-container * {
+  box-sizing: border-box;
+}
+
+/* Hero Section */
+.tpa-hero {
+  position: relative;
+  border-radius: var(--tpa-radius-lg);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  background: var(--tpa-dark);
+  box-shadow: var(--tpa-shadow-lg);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+
+.tpa-hero img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.tpa-hero:hover img {
+  transform: scale(1.02);
+}
+
+.tpa-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.88) 60%, rgba(15, 23, 42, 0.98) 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tpa-hero-overlay h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.tpa-hero-overlay p {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+/* Badge System */
+.tpa-badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 1.25rem 0 1.5rem 0;
+}
+
+.tpa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-decoration: none !important;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.tpa-badge:hover {
+  transform: translateY(-1px);
+}
+
+.badge-primary-soft { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+.badge-success-soft { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-warning-soft { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-purple-soft  { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.badge-dark-soft    { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+
+/* Call to Action Buttons */
+.tpa-btn-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 1.5rem 0 2rem 0;
+}
+
+.tpa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--tpa-radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.tpa-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  border: 1px solid #0284c7;
+}
+
+.tpa-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  color: #ffffff !important;
+}
+
+.tpa-btn-secondary {
+  background: #ffffff;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1;
+  box-shadow: var(--tpa-shadow-sm);
+}
+
+.tpa-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0284c7 !important;
+  transform: translateY(-2px);
+  box-shadow: var(--tpa-shadow-md);
+}
+
+/* Quick Navigation Bar */
+.section-nav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 1.75rem 0 2rem 0;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  box-shadow: var(--tpa-shadow-sm);
+  position: sticky;
+  top: 10px;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.section-nav-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tpa-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+}
+
+.section-nav-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--tpa-radius-sm);
+  color: #334155 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.section-nav-link:hover {
+  background: var(--tpa-primary);
+  color: #ffffff !important;
+  border-color: var(--tpa-primary);
+  transform: translateY(-1px);
+}
+
+/* Section Headings */
+.tpa-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--tpa-dark);
+  margin: 2.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f1f5f9;
+  letter-spacing: -0.015em;
+}
+
+.tpa-section-heading svg {
+  color: var(--tpa-primary);
+  flex-shrink: 0;
+}
+
+/* Card System */
+.tpa-card {
+  background: var(--tpa-card-bg);
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--tpa-shadow-sm);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tpa-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: var(--tpa-shadow-md);
+}
+
+.tpa-card-header-styled {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tpa-card-header-styled h4 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--tpa-dark);
+}
+
+/* Team Grid */
+.tpa-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 2rem 0;
+}
+
+.tpa-member-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  padding: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.tpa-member-card:hover {
+  transform: translateY(-3px);
+  border-color: #38bdf8;
+  box-shadow: var(--tpa-shadow-lg);
+}
+
+.tpa-member-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--tpa-primary-dark);
+  background: var(--tpa-primary-light);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 0.5rem;
+}
+
+.tpa-member-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tpa-dark);
+  margin-bottom: 0.4rem;
+}
+
+.tpa-member-email {
+  font-size: 0.82rem;
+  color: var(--tpa-text-muted);
+  text-decoration: none !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  word-break: break-all;
+  transition: color 0.15s ease;
+}
+
+.tpa-member-email:hover {
+  color: var(--tpa-primary);
+  text-decoration: underline !important;
+}
+
+/* Feature Grid */
+.tpa-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.25rem;
+  margin: 1.25rem 0 2rem 0;
+}
+
+.feature-box {
+  background: #ffffff;
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  padding: 1.35rem;
+  box-shadow: var(--tpa-shadow-sm);
+  border-top: 3.5px solid var(--tpa-primary);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--tpa-shadow-md);
+}
+
+.feature-box.accent-emerald { border-top-color: var(--tpa-success); }
+.feature-box.accent-purple  { border-top-color: var(--tpa-purple); }
+.feature-box.accent-amber   { border-top-color: var(--tpa-warning); }
+
+.feature-box-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--tpa-dark);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-box-desc {
+  font-size: 0.88rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Destination Gallery */
+.tpa-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.gallery-card {
+  background: #ffffff;
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--tpa-shadow-md);
+}
+
+.gallery-card-img-wrap {
+  width: 100%;
+  height: 130px;
+  overflow: hidden;
+  position: relative;
+  background: #0f172a;
+}
+
+.gallery-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.gallery-card:hover .gallery-card-img-wrap img {
+  transform: scale(1.08);
+}
+
+.gallery-card-label {
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--tpa-dark);
+  text-align: center;
+}
+
+/* Architecture Container */
+.architecture-svg-wrap {
+  background: #ffffff;
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  padding: 1.5rem;
+  margin: 1.25rem 0;
+  box-shadow: var(--tpa-shadow-sm);
+  overflow-x: auto;
+}
+
+.arch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.82rem;
+  color: var(--tpa-text-muted);
+  margin-top: 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--tpa-card-border);
+}
+
+.arch-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+}
+
+.arch-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Tables */
+.tpa-table-responsive {
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  border-radius: var(--tpa-radius-sm);
+  border: 1px solid var(--tpa-card-border);
+  box-shadow: var(--tpa-shadow-sm);
+}
+
+.tpa-table {
+  width: 100%;
+  margin-bottom: 0;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  background: #ffffff;
+}
+
+.tpa-table th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  padding: 11px 16px;
+  border-bottom: 2px solid var(--tpa-card-border);
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+
+.tpa-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+  vertical-align: middle;
+}
+
+.tpa-table tr:last-child td {
+  border-bottom: none;
+}
+
+.tpa-table tr:hover td {
+  background: #f8fafc;
+}
+
+.tpa-table code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  color: #0f172a;
+}
+
+/* Progress Pills */
+.progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.progress-done {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.progress-planned {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* Testing Grid */
+.testing-card {
+  background: #f8fafc;
+  border: 1px solid var(--tpa-card-border);
+  border-radius: var(--tpa-radius-md);
+  padding: 1.25rem;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.testing-card:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: var(--tpa-shadow-sm);
+  transform: translateY(-2px);
+}
+
+.testing-card-title {
+  color: var(--tpa-dark);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.testing-card-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tpa-hero-overlay h1 {
+    font-size: 1.6rem;
+  }
+  .section-nav-pills {
+    position: static;
+  }
+  .tpa-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<div class="tpa-container">
+
+  <!-- HERO SECTION -->
+  <div class="tpa-hero">
+    <img src="./images/cover_page.jpg" alt="Travel Plan Assistant Banner - Smart Algorithmic Itinerary Planning" />
+    <div class="tpa-hero-overlay">
+      <h1>Travel Plan Assistant</h1>
+      <p>Automated algorithmic itinerary generation engine and smart corridor travel companion designed to solve fragmented trip planning through graph-based routing, geospatial intelligence, and dynamic schedule optimization.</p>
+    </div>
+  </div>
+
+  <!-- PROJECT BADGES -->
+  <div class="tpa-badge-group">
+    <span class="tpa-badge badge-primary-soft">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      CO2060 Systems Design
+    </span>
+    <span class="tpa-badge badge-success-soft">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      Status: Active MVP (Sprint 3 Complete)
+    </span>
+    <span class="tpa-badge badge-purple-soft">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      Team Phoenix
+    </span>
+    <span class="tpa-badge badge-warning-soft">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      React 19 &bull; Node.js &bull; Express &bull; MySQL Spatial
+    </span>
+    <span class="tpa-badge badge-dark-soft">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+      Dept. of Computer Engineering, UoP
+    </span>
+  </div>
+
+  <!-- QUICK ACTION BUTTONS -->
+  <div class="tpa-btn-bar">
+    <a href="https://github.com/cepdnaclk/e22-co2060-travel-plan-assistant" target="_blank" class="tpa-btn tpa-btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      GitHub Repository
+    </a>
+    <a href="https://cepdnaclk.github.io/e22-co2060-travel-plan-assistant" target="_blank" class="tpa-btn tpa-btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      Live Project Documentation
+    </a>
+    <a href="http://www.ce.pdn.ac.lk/" target="_blank" class="tpa-btn tpa-btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+      Department of Computer Engineering
+    </a>
+  </div>
+
+  <!-- TEAM SECTION -->
+  <div class="tpa-card-header-styled" style="margin-top: 2rem;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    <h4>👥 Team Phoenix &bull; Undergraduate Engineers</h4>
+  </div>
+  <p style="color: #64748b; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 1rem;">
+    Department of Computer Engineering, Faculty of Engineering, University of Peradeniya
+  </p>
+
+  <div class="tpa-team-grid">
+    <div class="tpa-member-card">
+      <span class="tpa-member-number">E/22/061</span>
+      <div class="tpa-member-name">D.L.S.K. Dasanayaka</div>
+      <a class="tpa-member-email" href="mailto:e22061@eng.pdn.ac.lk">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        e22061@eng.pdn.ac.lk
+      </a>
+    </div>
+
+    <div class="tpa-member-card">
+      <span class="tpa-member-number">E/22/074</span>
+      <div class="tpa-member-name">W.Y.N. Dewshan</div>
+      <a class="tpa-member-email" href="mailto:e22074@eng.pdn.ac.lk">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        e22074@eng.pdn.ac.lk
+      </a>
+    </div>
+
+    <div class="tpa-member-card">
+      <span class="tpa-member-number">E/22/233</span>
+      <div class="tpa-member-name">T.S.P. Matharaarachchi</div>
+      <a class="tpa-member-email" href="mailto:e22233@eng.pdn.ac.lk">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        e22233@eng.pdn.ac.lk
+      </a>
+    </div>
+
+    <div class="tpa-member-card">
+      <span class="tpa-member-number">E/22/253</span>
+      <div class="tpa-member-name">G.T. Nethmina</div>
+      <a class="tpa-member-email" href="mailto:e22253@eng.pdn.ac.lk">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        e22253@eng.pdn.ac.lk
+      </a>
+    </div>
+  </div>
+
+  <!-- TABLE OF CONTENTS NAV PILLS -->
+  <div class="section-nav-pills">
+    <span class="section-nav-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+      Quick Nav:
+    </span>
+    <a href="#introduction" class="section-nav-link">1. Introduction</a>
+    <a href="#key-features" class="section-nav-link">2. Feature Matrix</a>
+    <a href="#solution-architecture" class="section-nav-link">3. Architecture</a>
+    <a href="#software-designs" class="section-nav-link">4. Algorithms & Design</a>
+    <a href="#current-progress" class="section-nav-link">5. Milestones</a>
+    <a href="#testing" class="section-nav-link">6. Testing</a>
+    <a href="#conclusion" class="section-nav-link">7. Roadmap</a>
+    <a href="#links" class="section-nav-link">8. Links</a>
+  </div>
+
+  <!-- 1. INTRODUCTION -->
+  <h2 id="introduction" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    1. Introduction
+  </h2>
+  
+  <div class="tpa-card">
+    <p>
+      Modern leisure and business travel requires synthesizing dozens of fragmented data sources: researching reputable attractions, estimating vehicular transit times, calculating realistic visit durations, booking roadside dining and lodging, and adjusting to rigid daily schedules. For multi-destination exploration (such as touring Sri Lanka's historical, coastal, and hill-country circuits), travelers frequently suffer from <strong>itinerary fatigue</strong>, sub-optimal travel corridors, and unrealistic time expectations.
+    </p>
+    <p>
+      <strong>Travel Plan Assistant</strong> addresses this friction by providing an end-to-end, automated planning ecosystem. Rather than offering static point-to-point maps or uncurated listicles, the system leverages <strong>graph-based heuristic pathfinding</strong> to automatically generate balanced, multi-stop itineraries. Users define their origin, intended destinations, time budgets, and pacing preferences; the engine dynamically sequences the stops, calculates exact arrival and departure times, and seamlessly recommends verified hotels and restaurants precisely along the transit path.
+    </p>
+
+    <div class="row mt-3">
+      <div class="col-md-4 mb-2">
+        <div style="background: #f8fafc; border-left: 3.5px solid #0284c7; padding: 12px 14px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <strong style="color: #0f172a; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            Fragmented Discovery
+          </strong>
+          <p style="font-size: 0.83rem; color: #64748b; margin: 4px 0 0 0; line-height: 1.5;">Replaces 4+ disparate apps with an all-in-one synchronized planner.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-2">
+        <div style="background: #f8fafc; border-left: 3.5px solid #10b981; padding: 12px 14px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <strong style="color: #0f172a; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            Algorithmic Optimization
+          </strong>
+          <p style="font-size: 0.83rem; color: #64748b; margin: 4px 0 0 0; line-height: 1.5;">Bidirectional route search with 3 distinct pacing &amp; transit variants.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-2">
+        <div style="background: #f8fafc; border-left: 3.5px solid #f59e0b; padding: 12px 14px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <strong style="color: #0f172a; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            Smart Corridor Amenities
+          </strong>
+          <p style="font-size: 0.83rem; color: #64748b; margin: 4px 0 0 0; line-height: 1.5;">Proximity-filtered accommodations and dining without detour overhead.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. KEY FEATURES -->
+  <h2 id="key-features" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+    2. Core Capabilities &amp; Feature Matrix
+  </h2>
+
+  <div class="tpa-features-grid">
+    <div class="feature-box">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        Bidirectional Route Search
+      </div>
+      <p class="feature-box-desc">
+        Expands simultaneous forward and backward frontiers between origin and destination nodes, discovering optimal intermediate waypoints and generating 3 distinct styles: Shortest, Balanced, and Scenic.
+      </p>
+    </div>
+
+    <div class="feature-box accent-emerald">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Dynamic Schedule Computation
+      </div>
+      <p class="feature-box-desc">
+        Auto-calculates transit duration, arrival times, and departure timestamps per stop while enforcing overall day-time budgets (e.g., 08:30 to 20:00) and user-customized dwell times.
+      </p>
+    </div>
+
+    <div class="feature-box accent-purple">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        Corridor Stays &amp; Dining
+      </div>
+      <p class="feature-box-desc">
+        Integrates verified hotels and dining options directly adjacent to the travel corridor, displaying pricing tiers, ratings, opening hours, contact details, and web links.
+      </p>
+    </div>
+
+    <div class="feature-box accent-amber">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        Interactive Plan Management
+      </div>
+      <p class="feature-box-desc">
+        Full customization UI allowing travelers to reorder stops, modify checkpoint visit times, save itineraries to multi-trip archives, and bookmark destinations in personalized wishlists.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        Geospatial Map Visualization
+      </div>
+      <p class="feature-box-desc">
+        Integrated interactive map visualizing route polylines, ordered stop pins, amenity badges, and interactive popups with direct navigation assistance.
+      </p>
+    </div>
+
+    <div class="feature-box accent-emerald">
+      <div class="feature-box-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Admin Portal &amp; Monetization
+      </div>
+      <p class="feature-box-desc">
+        Role-based admin control for managing destination catalogs and reviewing user access, accompanied by subscription tiers (Free vs. Premium Voyager) with seamless checkout.
+      </p>
+    </div>
+  </div>
+
+  <!-- DESTINATIONS SHOWCASE -->
+  <div class="tpa-card">
+    <div class="tpa-card-header-styled">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+      <h4>Rich Sri Lankan Destination Repository</h4>
+    </div>
+    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem;">
+      Pre-loaded with verified spatial coordinates, district tags, imagery, and historical context across top travel regions:
+    </p>
+
+    <div class="tpa-gallery">
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/sigiriya.png" alt="Sigiriya Rock Fortress" />
+        </div>
+        <div class="gallery-card-label">Sigiriya Fortress</div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/kandy.png" alt="Kandy Temple of the Tooth" />
+        </div>
+        <div class="gallery-card-label">Kandy &amp; Heritage</div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/ella.png" alt="Nine Arches Bridge Ella" />
+        </div>
+        <div class="gallery-card-label">Ella Mountains</div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/galle-fort.png" alt="Galle Dutch Fort" />
+        </div>
+        <div class="gallery-card-label">Galle Dutch Fort</div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/nuwara-eliya.png" alt="Nuwara Eliya Tea Country" />
+        </div>
+        <div class="gallery-card-label">Nuwara Eliya</div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-card-img-wrap">
+          <img src="./images/destinations/mirissa.png" alt="Mirissa Beach" />
+        </div>
+        <div class="gallery-card-label">Mirissa Coastline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SOLUTION ARCHITECTURE -->
+  <h2 id="solution-architecture" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+    3. Solution Architecture
+  </h2>
+
+  <p>
+    The system follows a decoupled, three-tier <strong>Client-Server &amp; Distributed Service Architecture</strong>. High-performance RESTful JSON APIs bridge the frontend React client with the Node.js business tier, MySQL spatial database, and external routing services.
+  </p>
+
+  <div class="architecture-svg-wrap">
+    <svg viewBox="0 0 880 440" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad-fe" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0284c7"/>
+          <stop offset="100%" stop-color="#0369a1"/>
+        </linearGradient>
+        <linearGradient id="grad-be" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0f172a"/>
+          <stop offset="100%" stop-color="#1e293b"/>
+        </linearGradient>
+        <linearGradient id="grad-db" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#059669"/>
+          <stop offset="100%" stop-color="#047857"/>
+        </linearGradient>
+        <linearGradient id="grad-ext" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d97706"/>
+          <stop offset="100%" stop-color="#b45309"/>
+        </linearGradient>
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+          <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.08"/>
+        </filter>
+      </defs>
+
+      <!-- CLIENT LAYER -->
+      <g filter="url(#shadow)">
+        <rect x="20" y="20" width="220" height="390" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="20" y="20" width="220" height="42" rx="12" fill="url(#grad-fe)"/>
+        <text x="130" y="47" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">1. Client Layer (React 19)</text>
+        
+        <rect x="35" y="78" width="190" height="42" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="45" y="104" fill="#0f172a" font-size="12" font-weight="600">Dynamic Plan Generator</text>
+        
+        <rect x="35" y="130" width="190" height="42" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="45" y="156" fill="#0f172a" font-size="12" font-weight="600">Interactive Map (Leaflet)</text>
+        
+        <rect x="35" y="182" width="190" height="42" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="45" y="208" fill="#0f172a" font-size="12" font-weight="600">Itinerary Schedule Editor</text>
+        
+        <rect x="35" y="234" width="190" height="42" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="45" y="260" fill="#0f172a" font-size="12" font-weight="600">Destination Directory</text>
+
+        <rect x="35" y="286" width="190" height="42" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="45" y="312" fill="#0f172a" font-size="12" font-weight="600">Wishlist &amp; Trip Sessions</text>
+
+        <rect x="35" y="338" width="190" height="50" rx="6" fill="#e0f2fe" stroke="#bae6fd"/>
+        <text x="45" y="360" fill="#0369a1" font-size="11" font-weight="700">Deployment: Vercel CDN</text>
+        <text x="45" y="376" fill="#0284c7" font-size="10">Custom Domain &bull; Zero Lag</text>
+      </g>
+
+      <!-- ARROW 1 -->
+      <path d="M 240 215 L 290 215" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arrow)" stroke-dasharray="4,4"/>
+      <polygon points="295,215 285,210 285,220" fill="#0284c7"/>
+      <text x="268" y="200" fill="#0284c7" font-size="10" font-weight="700" text-anchor="middle">HTTPS</text>
+      <text x="268" y="235" fill="#64748b" font-size="9" text-anchor="middle">REST / JSON</text>
+
+      <!-- BACKEND ENGINE LAYER -->
+      <g filter="url(#shadow)">
+        <rect x="300" y="20" width="280" height="390" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="300" y="20" width="280" height="42" rx="12" fill="url(#grad-be)"/>
+        <text x="440" y="47" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">2. Engine &amp; API (Node / Express)</text>
+        
+        <rect x="315" y="78" width="250" height="44" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="325" y="98" fill="#0f172a" font-size="12" font-weight="700">plannerService</text>
+        <text x="325" y="113" fill="#64748b" font-size="10">Bidirectional heuristic search (3 styles)</text>
+        
+        <rect x="315" y="132" width="250" height="44" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="325" y="152" fill="#0f172a" font-size="12" font-weight="700">itineraryService</text>
+        <text x="325" y="167" fill="#64748b" font-size="10">Timeline timestamps &amp; duration limits</text>
+        
+        <rect x="315" y="186" width="250" height="44" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="325" y="206" fill="#0f172a" font-size="12" font-weight="700">hotel &amp; restaurantService</text>
+        <text x="325" y="221" fill="#64748b" font-size="10">Corridor-based amenity lookup</text>
+
+        <rect x="315" y="240" width="250" height="44" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="325" y="260" fill="#0f172a" font-size="12" font-weight="700">auth &amp; adminController</text>
+        <text x="325" y="275" fill="#64748b" font-size="10">JWT, role guards, user approval flow</text>
+
+        <rect x="315" y="294" width="250" height="44" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="325" y="314" fill="#0f172a" font-size="12" font-weight="700">subscriptionService</text>
+        <text x="325" y="329" fill="#64748b" font-size="10">Premium checkout &amp; tier entitlements</text>
+
+        <rect x="315" y="348" width="250" height="44" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="325" y="367" fill="#334155" font-size="11" font-weight="700">Host: DigitalOcean Ubuntu VPS</text>
+        <text x="325" y="382" fill="#64748b" font-size="10">PM2 Daemon &bull; Low Latency Pool</text>
+      </g>
+
+      <!-- ARROW 2: TO DATABASE -->
+      <path d="M 580 140 L 640 140" stroke="#059669" stroke-width="2.5"/>
+      <polygon points="645,140 635,135 635,145" fill="#059669"/>
+      <text x="612" y="130" fill="#059669" font-size="9" font-weight="700" text-anchor="middle">SQL Query</text>
+
+      <!-- DATABASE LAYER -->
+      <g filter="url(#shadow)">
+        <rect x="650" y="20" width="210" height="215" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="650" y="20" width="210" height="42" rx="12" fill="url(#grad-db)"/>
+        <text x="755" y="47" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">3. MySQL Spatial DB</text>
+
+        <rect x="665" y="74" width="180" height="28" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="93" fill="#0f172a" font-size="11" font-weight="600">&bull; destinations (Spatial POINT)</text>
+
+        <rect x="665" y="108" width="180" height="28" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="127" fill="#0f172a" font-size="11" font-weight="600">&bull; nearby_destinations (Edges)</text>
+
+        <rect x="665" y="142" width="180" height="28" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="161" fill="#0f172a" font-size="11" font-weight="600">&bull; hotels &amp; restaurants</text>
+
+        <rect x="665" y="176" width="180" height="45" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="195" fill="#0f172a" font-size="11" font-weight="600">&bull; users, sessions, wishlists</text>
+        <text x="675" y="210" fill="#64748b" font-size="10">Zero cold-start VPS engine</text>
+      </g>
+
+      <!-- ARROW 3: TO EXTERNAL APIS -->
+      <path d="M 580 300 L 640 300" stroke="#d97706" stroke-width="2.5"/>
+      <polygon points="645,300 635,295 635,305" fill="#d97706"/>
+      <text x="612" y="290" fill="#d97706" font-size="9" font-weight="700" text-anchor="middle">External HTTP</text>
+
+      <!-- EXTERNAL SERVICES LAYER -->
+      <g filter="url(#shadow)">
+        <rect x="650" y="250" width="210" height="160" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="650" y="250" width="210" height="42" rx="12" fill="url(#grad-ext)"/>
+        <text x="755" y="277" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">4. External Integrations</text>
+
+        <rect x="665" y="304" width="180" height="30" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="324" fill="#0f172a" font-size="11" font-weight="600">Google Distance Matrix API</text>
+
+        <rect x="665" y="340" width="180" height="30" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+        <text x="675" y="360" fill="#0f172a" font-size="11" font-weight="600">Google Places / Geocoding</text>
+
+        <rect x="665" y="376" width="180" height="26" rx="4" fill="#fef3c7" stroke="#fde68a"/>
+        <text x="675" y="394" fill="#b45309" font-size="10" font-weight="600">Real-time distance &amp; traffic</text>
+      </g>
+    </svg>
+
+    <div class="arch-legend">
+      <div class="arch-legend-item"><span class="arch-dot" style="background: #0284c7;"></span> Client View Tier</div>
+      <div class="arch-legend-item"><span class="arch-dot" style="background: #0f172a;"></span> Core Express API &amp; Algorithmic Services</div>
+      <div class="arch-legend-item"><span class="arch-dot" style="background: #059669;"></span> MySQL Spatial Relational Database</div>
+      <div class="arch-legend-item"><span class="arch-dot" style="background: #d97706;"></span> External Routing &amp; Geospatial Services</div>
+    </div>
+  </div>
+
+  <!-- 4. SOFTWARE DESIGNS -->
+  <h2 id="software-designs" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+    4. Software &amp; Algorithmic Designs
+  </h2>
+
+  <div class="tpa-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">
+      4.1 Graph-Based Bidirectional Route Optimization
+    </h3>
+    <p>
+      At the heart of the Travel Plan Assistant is an algorithmic bidirectional expansion engine. Traditional single-source Dijkstra or TSP approaches often incur exponential search spaces when evaluating multi-criteria geographic networks. To generate intuitive travel sequences across regional nodes, the system applies <strong>bidirectional search</strong> with separate forward and backward visited sets to prevent false cycle detection:
+    </p>
+
+    <div class="tpa-table-responsive">
+      <table class="tpa-table">
+        <thead>
+          <tr>
+            <th>Route Style</th>
+            <th>Algorithmic Selection Strategy</th>
+            <th>Neighbor Distance Threshold</th>
+            <th>Primary Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Shortest (Direct)</strong></td>
+            <td>Selects closest neighbor (rank 0) along directional vector toward destination</td>
+            <td><code>distance &le; 25 km</code></td>
+            <td>Fastest transit, minimal fuel consumption, business travel</td>
+          </tr>
+          <tr>
+            <td><strong>Balanced (Average)</strong></td>
+            <td>Selects median-ranked candidate neighbor: <code>index = floor((len - 1)/2)</code></td>
+            <td><code>distance &le; 25 km</code></td>
+            <td>Balanced discovery, blending primary highways with popular towns</td>
+          </tr>
+          <tr>
+            <td><strong>Scenic (Longest)</strong></td>
+            <td>Selects farthest valid candidate neighbor: <code>index = len - 1</code></td>
+            <td><code>distance &le; 25 km</code></td>
+            <td>Leisure exploration, coastal/mountain scenic routes, maximum attractions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size: 0.88rem; color: #64748b; margin-top: 0.75rem;">
+      Directional filtering (<code>directionalService.js</code>) utilizes vector angle bounds between the current candidate and destination coordinates to guarantee forward geographic momentum and avoid backtrack loops.
+    </p>
+  </div>
+
+  <div class="tpa-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">
+      4.2 Corridor-Based Amenity Extraction
+    </h3>
+    <p>
+      Unlike naive radius searches that recommend hotels 30 km in the opposite direction, the <code>hotelService</code> and <code>restaurantService</code> utilize <strong>bounding corridors</strong> along the sequence of itinerary legs.
+    </p>
+    <ul>
+      <li><strong>Separation of Concerns:</strong> Hotels and dining spots are tagged distinctly from primary tourist attractions, preventing administrative confusion in the graph engine.</li>
+      <li><strong>Rich Amenity Attributes:</strong> Stores price levels (<code>$</code> to <code>$$$$</code>), opening hours, user ratings, photo URLs, cuisine types, phone numbers, and official websites.</li>
+      <li><strong>On-Path Presentation:</strong> The frontend renders accommodation options directly below each day leg, enabling 1-click booking navigation.</li>
+    </ul>
+  </div>
+
+  <div class="tpa-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">
+      4.3 Database Schema &amp; Spatial Modeling
+    </h3>
+    <p>
+      The MySQL relational schema leverages native spatial data types (<code>POINT</code>, <code>lat</code>, <code>lng</code>) for millisecond-fast distance calculations:
+    </p>
+
+    <div class="tpa-table-responsive">
+      <table class="tpa-table">
+        <thead>
+          <tr>
+            <th>Table Name</th>
+            <th>Primary Keys / Indices</th>
+            <th>Core Attributes</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>destinations</code></td>
+            <td><code>destinationID</code> (PK), Spatial (POINT)</td>
+            <td>name, lat, lng, description, photos, rating, display_picture, type</td>
+            <td>Attraction repository across districts</td>
+          </tr>
+          <tr>
+            <td><code>nearby_destinations</code></td>
+            <td>Composite (source_id, destination_id)</td>
+            <td>distance_km, duration_mins, road_condition</td>
+            <td>Graph edges connecting nodes</td>
+          </tr>
+          <tr>
+            <td><code>hotels</code></td>
+            <td><code>hotel_id</code> (PK), destination_id (FK)</td>
+            <td>name, lat, lng, price_level, hotel_type, phone, website, photos</td>
+            <td>Accommodations along travel corridors</td>
+          </tr>
+          <tr>
+            <td><code>restaurants</code></td>
+            <td><code>restaurant_id</code> (PK), destination_id (FK)</td>
+            <td>name, lat, lng, cuisine_type, price_level, opening_hours</td>
+            <td>Dining spots along routes</td>
+          </tr>
+          <tr>
+            <td><code>users</code></td>
+            <td><code>user_id</code> (PK), email (UNIQUE)</td>
+            <td>name, password (bcrypt), role, status, is_subscribed, preferences</td>
+            <td>Authentication, RBAC &amp; profile settings</td>
+          </tr>
+          <tr>
+            <td><code>user_travel_sessions</code></td>
+            <td><code>session_id</code> (PK), user_id (FK)</td>
+            <td>travel_plan (JSON), milestones, customDurations, created_at</td>
+            <td>Stateful persistence of customized plans</td>
+          </tr>
+          <tr>
+            <td><code>wishlists</code></td>
+            <td><code>wishlist_id</code> (PK), UNIQUE(user_id, dest_id)</td>
+            <td>destination_id, note, created_at</td>
+            <td>User destination bookmarks</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5. CURRENT PROGRESS & MILESTONES -->
+  <h2 id="current-progress" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    5. Current Progress &amp; Milestones
+  </h2>
+
+  <div class="tpa-card">
+    <div class="tpa-card-header-styled">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      <h4>Sprint Status &amp; Deliverables Completed</h4>
+    </div>
+
+    <div class="tpa-table-responsive">
+      <table class="tpa-table">
+        <thead>
+          <tr>
+            <th>Module / Feature</th>
+            <th>Implementation Details</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Algorithmic Path Engine</strong></td>
+            <td>Bidirectional search supporting shortest, average, and scenic route styles</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Corridor Stays &amp; Dining</strong></td>
+            <td>Hotel and restaurant catalog populated with geo-corridor queries</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Interactive Itinerary Editor</strong></td>
+            <td>Stop reordering, custom dwell durations, and schedule recalculation</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Interactive Map View</strong></td>
+            <td>Dynamic Leaflet map integration displaying route polylines and markers</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>User Auth &amp; Saved Trips</strong></td>
+            <td>JWT authentication, user status approval, wishlist bookmarking</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Admin Dashboard</strong></td>
+            <td>User management (approve/reject) and destination CRUD administration</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Premium Subscriptions</strong></td>
+            <td>Subscription flow, tier management, and subscriber-only features</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Production Deployment</strong></td>
+            <td>Frontend deployed on Vercel; Backend &amp; DB on DigitalOcean VPS</td>
+            <td><span class="progress-pill progress-done">&check; Completed</span></td>
+          </tr>
+          <tr>
+            <td><strong>Public Transit Integration</strong></td>
+            <td>Sri Lanka Railway schedule overlay and multi-modal transit options</td>
+            <td><span class="progress-pill progress-planned">&bull; Planned (Sprint 4)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6. TESTING -->
+  <h2 id="testing" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+    6. Verification &amp; Testing
+  </h2>
+
+  <div class="tpa-card">
+    <p>
+      Testing prioritized both functional verification of graph heuristics and non-functional guarantees regarding API latency, session security, and data integrity:
+    </p>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="testing-card">
+          <div class="testing-card-title">
+            🔬 Algorithmic &amp; Graph Stress Testing
+          </div>
+          <p class="testing-card-desc">
+            Tested bidirectional expansion against 50+ origin-destination pairs. Validated frontier termination limits (max steps = 50), isolation of forward/backward visited sets, and verified that generated routes produce 0 disjoint sub-paths.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="testing-card">
+          <div class="testing-card-title">
+            🌐 External API Resilience &amp; Caching
+          </div>
+          <p class="testing-card-desc">
+            Benchmarked Google Distance Matrix API calls with fallback mock distance matrix. Enforced defensive timeouts and caching of repeated distance pairs in <code>nearby_destinations</code> table to minimize external quota consumption.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="testing-card">
+          <div class="testing-card-title">
+            🛡️ Security &amp; RBAC Validation
+          </div>
+          <p class="testing-card-desc">
+            Verified JWT signature expiration, bcrypt salt rounds (10), protected route guards in React Router, and strict role segregation between standard travelers and system administrators.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="testing-card">
+          <div class="testing-card-title">
+            ⚡ End-to-End Latency &amp; Zero Cold-Start
+          </div>
+          <p class="testing-card-desc">
+            Hosted on dedicated Ubuntu VPS to prevent serverless cold starts. Database query times for corridor queries maintained under <strong>35ms</strong>; full 3-style itinerary generation completed in <strong>&lt; 650ms</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. CONCLUSION -->
+  <h2 id="conclusion" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+    7. Conclusion &amp; Future Roadmap
+  </h2>
+
+  <div class="tpa-card">
+    <p>
+      The <strong>Travel Plan Assistant (MVP)</strong> successfully validates that graph-based bidirectional pathfinding combined with real-world geospatial intelligence can eliminate the friction of multi-stop travel planning. By unifying route optimization, dynamic scheduling, interactive stop modification, and corridor-based accommodation discovery into a cohesive platform, Team Phoenix has delivered a production-ready system with immediate practical value.
+    </p>
+
+    <h5 style="color: #0f172a; font-weight: 700; font-size: 0.98rem; margin-top: 1.25rem; margin-bottom: 0.5rem;">
+      Future Enhancements &amp; Roadmap:
+    </h5>
+    <ul style="color: #475569; font-size: 0.9rem; line-height: 1.7; padding-left: 1.2rem; margin-bottom: 0;">
+      <li><strong>Multi-Modal Transit Integration:</strong> Incorporating Sri Lanka train schedules (e.g., scenic Kandy-to-Ella railway) alongside private vehicular routing.</li>
+      <li><strong>Live Weather &amp; Monsoon Alerts:</strong> Dynamic route rerouting during adverse weather conditions.</li>
+      <li><strong>Collaborative Group Planning:</strong> Real-time shared itinerary editing via WebSockets.</li>
+      <li><strong>AI Personalization Engine:</strong> Preference-based ML ranking tailored to user travel history and budget sensitivity.</li>
+    </ul>
+  </div>
+
+  <!-- 8. LINKS -->
+  <h2 id="links" class="tpa-section-heading">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+    8. Links &amp; References
+  </h2>
+
+  <div class="tpa-card">
+    <div class="row">
+      <div class="col-md-6 mb-2">
+        <ul style="list-style: none; padding-left: 0; margin-bottom: 0; line-height: 2;">
+          <li>
+            🔗 <a href="https://github.com/cepdnaclk/e22-co2060-travel-plan-assistant" target="_blank" style="font-weight: 700; color: #0284c7; text-decoration: none;">Project GitHub Repository</a>
+          </li>
+          <li>
+            🌐 <a href="https://cepdnaclk.github.io/e22-co2060-travel-plan-assistant" target="_blank" style="font-weight: 700; color: #0284c7; text-decoration: none;">Project Documentation Page</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6 mb-2">
+        <ul style="list-style: none; padding-left: 0; margin-bottom: 0; line-height: 2;">
+          <li>
+            🏛️ <a href="http://www.ce.pdn.ac.lk/" target="_blank" style="font-weight: 700; color: #0284c7; text-decoration: none;">Department of Computer Engineering</a>
+          </li>
+          <li>
+            🎓 <a href="https://eng.pdn.ac.lk/" target="_blank" style="font-weight: 700; color: #0284c7; text-decoration: none;">Faculty of Engineering, University of Peradeniya</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -7,7 +7,7 @@ description: "AI-Powered Algorithmic Trip Planner & Smart Corridor Navigator | D
 markdown: kramdown
 
 kramdown:
-  parse_block_html: true
+  parse_block_html: false
   syntax_highlighter_opts:
     block:
       line_numbers: false
